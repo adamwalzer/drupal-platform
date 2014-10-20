@@ -1,0 +1,280 @@
+
+.main-nav {
+  height:53px;
+  position:absolute;
+  top:125px;
+  left:100px;
+}
+
+.main-nav ul.menu li {
+  height:53px;  
+  list-style-image:none;
+  list-style:none;
+  float:left;
+  margin:0;
+  padding:0;
+}
+.main-nav ul.menu li div.separator {
+  height:32px;
+  width:2px;
+  background:url(../img/sprite.png) left -4249px no-repeat;
+  margin:11px 0 0 0;
+  float:left;
+}
+.main-nav .megamenu ul.menu li div.separator {
+  height:0;
+  width:0;
+  background:none;
+  float:none;
+  margin:0;
+}
+.main-nav ul.menu li a {
+  color:#2cc4f4;
+  font-size:14px;
+  text-decoration:none;  
+  line-height:53px;
+  float:left;
+  vertical-align:middle;
+  height:53px;
+  cursor:pointer;
+  margin:0 0 0 2px;
+}
+.main-nav ul.menu li a:hover,
+.main-nav ul.menu li a.active,
+.main-nav ul.menu li a.active-trail {
+  color:#026a8f;
+}
+.main-nav ul.menu li a span {
+  margin:0 0 0 12px;
+  padding:0 14px 0 0;
+  height:53px;
+  float:left;
+}
+.main-nav ul.menu li.has-children a.hover,
+.main-nav ul.menu li.has-children a:hover {
+  background:url(../img/sprite.png) left -505px no-repeat;
+}
+.main-nav ul.menu li.has-children a.hover span,
+.main-nav ul.menu li.has-children a:hover span {
+  background:url(../img/sprite.png) right -547px no-repeat;
+}
+.main-nav ul.menu li a.active, .main-nav ul.menu li a.active-trail {
+  /*color:#f47321;*/
+}
+.main-nav .megamenu-wrap {
+  width:0;
+  height:0;
+  position:relative;
+  z-index:100;
+}
+.main-nav .megamenu {
+  cursor:default;
+  position:absolute;
+  display:none;
+  top:43px;
+  width:560px;
+  z-index:99;
+}
+.main-nav .megamenu .white {
+  background:#fff;
+  height:1px;
+  position:absolute;
+  z-index:100;
+}
+.main-nav .megamenu ul,
+.main-nav .megamenu ul li,
+.main-nav .megamenu ul li a,
+.main-nav .megamenu ul li a:hover,
+.main-nav .megamenu ul li a span,
+.main-nav .megamenu ul li a:hover span,
+.main-nav .megamenu ul ul li,
+.main-nav .megamenu ul ul li a,
+.main-nav .megamenu ul ul li a:hover,
+.main-nav .megamenu ul ul li a span,
+.main-nav .megamenu ul ul li a:hover span {
+  background:none;
+  height:auto;
+  float:none;
+  margin:0;
+  padding:0;
+  line-height:16px;
+  text-transform:none;
+  font-size:12px;
+  color:#6c6c6c;
+  font-weight:normal;
+}
+
+.main-nav .megamenu ul li a:hover,
+.main-nav .megamenu ul li a:hover span,
+.main-nav .megamenu ul ul li a:hover,
+.main-nav .megamenu ul ul li a:hover span,
+.main-nav .megamenu ul.menu .menu-mlid-1438 ul.menu li a:hover span,
+.main-nav .megamenu ul.menu .menu-mlid-1443 ul.menu li a:hover span,
+.main-nav .megamenu ul.menu .menu-mlid-1449 ul.menu li a:hover span {
+  color:#0191c4;
+}
+
+.main-nav .megamenu ul {
+  overflow:hidden;
+  zoom:1;
+}
+
+.main-nav .megamenu ul li {
+  float:left;
+  overflow:auto;
+  width:144px;
+  margin:0 24px 0 0;
+  padding:4px 0;
+  border-bottom:1px solid #dddbdb;
+}
+
+.main-nav .megamenu ul li a span,
+.main-nav .megamenu ul li a:hover span {
+  font-weight:bold;  
+}
+
+.main-nav .megamenu ul ul li {
+  float:none;
+  overflow:hidden;
+  font-weight:normal;
+  margin:0;
+}
+
+.main-nav .megamenu ul li.last,
+.main-nav .megamenu ul ul li {
+  border-bottom:none;
+}
+
+/* What's My Story */
+
+.parent-mlid-1478 {
+  width:534px;
+  width:144px;
+  padding:0 0 8px 0;
+}
+
+.main-nav .megamenu ul li.menu-mlid-2424 {
+  width:auto;
+  float:right;
+  margin:0;
+  border-bottom:none;
+}
+
+.main-nav .megamenu ul li.menu-mlid-2424 ul {
+  width:364px;
+}
+
+.main-nav .megamenu ul li.menu-mlid-2424 > a {
+  display:block;
+  width:144px;
+  border-bottom:4px solid #a1def4;
+  margin:0 0 8px 0;
+}
+
+.main-nav .megamenu ul li.menu-mlid-2424 li {
+  float:left;
+}
+
+.main-nav .megamenu ul li.menu-mlid-2424 li {
+  margin:0 12px 4px 0;
+  width:165px;
+  height:36px;
+  background:url(../img/sprite.png) -469px -77px no-repeat;
+}
+.main-nav .megamenu ul li.menu-mlid-2424 li a {
+  padding:0 0 0 12px;
+  width:160px;
+  height:36px;
+  line-height:36px;
+  display:block;
+}
+.main-nav .megamenu ul li.menu-mlid-2424 li a span {
+  color:#00A5E0;
+  font-weight:bold;
+}
+.main-nav .megamenu ul li.menu-mlid-2424 li a:hover span {
+  color:#026a8f;
+}
+
+/* Cassandra's Angel */
+
+.menu-mlid-446 .content,
+.menu-mlid-447 .content,
+.menu-mlid-448 .content {
+  height:180px;
+}
+
+.menu-mlid-446 .cassandras-angel {
+  float:right;
+  width:331px;
+  height:166px;
+  background:url(../img/menu-cassandras-angel.jpg) no-repeat;
+}
+
+.menu-mlid-447 .cool-videos {
+  float:right;
+  width:331px;
+  height:166px;
+  background:url(../img/menu-cool-videos.gif) no-repeat;
+}
+
+.menu-mlid-448 .ginas-corner {
+  float:right;
+  width:331px;
+  height:166px;
+  background:url(../img/menu-ginas-corner.gif) no-repeat;
+}
+.parent-mlid-446,
+.parent-mlid-447,
+.parent-mlid-448 {
+  float:left;
+}
+.parent-mlid-446 ul,
+.parent-mlid-447 ul,
+.parent-mlid-448 ul {
+  width:165px;
+}
+
+.parent-mlid-481 {
+  height:172px;
+  background:url(../img/sprite.png) -610px -320px no-repeat;
+}
+
+.main-nav .megamenu ul.menu .menu-mlid-1438,
+.main-nav .megamenu ul.menu .menu-mlid-1443,
+.main-nav .megamenu ul.menu .menu-mlid-1449 {
+  border-bottom:0;
+  margin:0 34px 0 0;
+}
+
+.main-nav .megamenu ul.menu > .last {
+  margin:0;
+}
+
+.parent-mlid-481 > ul > li > a {
+  display:block;
+  width:144px;
+  border-bottom:4px solid #a1def4;
+  margin:0 0 8px 0;
+  font-size:1
+}
+
+.main-nav .megamenu ul.menu .menu-mlid-1438 ul.menu li a span,
+.main-nav .megamenu ul.menu .menu-mlid-1443 ul.menu li a span,
+.main-nav .megamenu ul.menu .menu-mlid-1449 ul.menu li a span {
+  color:#00a5e0;
+  font-size:11px;
+  font-weight:bold;
+}
+/*
+.main-nav ul.menu li.menu-mlid-449 {
+  background:url(../img/sprite.png) -162px -52px no-repeat;
+}
+
+.main-nav ul.menu li.menu-mlid-449 a span {
+  padding-left:24px;
+}*/
+
+.main-nav ul.menu li.menu-mlid-481 {
+  display:none;
+}

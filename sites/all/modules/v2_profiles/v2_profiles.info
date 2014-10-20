@@ -1,0 +1,5 @@
+core = 6.x
+description = Custom profile functionality.
+name = Profiles
+package = v2
+version = 1.0

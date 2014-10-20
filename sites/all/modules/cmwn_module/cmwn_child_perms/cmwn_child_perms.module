@@ -1,0 +1,148 @@
+<?php
+
+function cmwn_child_perms_menu() {
+  $page_path = drupal_get_path('module', 'cmwn_child_perms').'/pages/';
+  $items = array();
+  $items['admin/settings/cmwn/child-permissions'] = array(
+    'title' => t('Child Permission Settings'),
+    'description' => t(''),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmwn_child_perms_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['user/%user/permissions'] = array(
+    'title' => t("Edit Child's Permissions"),
+    'description' => t(''),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmwn_module_child_permission_form', 1),
+    'access callback' => 'cmwn_child_permission_access',
+    'file path' => $page_path,
+    'file' => 'cmwn_module_child_permissions.inc',
+    'access arguments' => array("edit own childs permissions", 1),
+  );
+  return $items;
+}
+
+function cmwn_child_permission_access($string, $account = NULL, $reset = FALSE) {
+  global $user;
+  return
+    ChildUser::canHydrate($account)
+    &&
+    (
+      (
+        ParentUser::canHydrate($user)
+        && in_array(get_role_from_rid(variable_get('cmwn_module_verified_parent_role', '')), array_values(ParentUser::castAs($user)->roles))
+        && user_access($string, $user)
+        && in_array($account->uid, array_keys(ParentUser::castAs($user)->getChildren()))
+      )
+      || 
+      in_array('administrator', array_values($user->roles))
+    );
+}
+
+function cmwn_child_perms_admin_settings() {
+  $roles = user_roles();
+  $form = array(
+    'roles' => array(
+      '#type' => 'fieldset',
+      '#title' => 'Roles',
+      'cmwn_child_perms_roles_upload_video' => array(
+        '#type' => 'select',
+        '#title' => 'Upload Video Role',
+        '#options' => $roles,
+        '#default_value' => variable_get('cmwn_child_perms_roles_upload_video', '')
+      ),
+      'cmwn_child_perms_roles_upload_pictures' => array(
+        '#type' => 'select',
+        '#title' => 'Upload Pictures Role',
+        '#options' => $roles,
+        '#default_value' => variable_get('cmwn_child_perms_roles_upload_pictures', '')
+      ),
+      'cmwn_child_perms_roles_make_friends' => array(
+        '#type' => 'select',
+        '#title' => 'Make Friends Role',
+        '#options' => $roles,
+        '#default_value' => variable_get('cmwn_child_perms_roles_make_friends', '')
+      ),
+    )
+  );
+  return system_settings_form($form);
+}
+
+function cmwn_child_perms_perm() {
+  return array(
+    'upload images',
+    'upload videos',
+    'make friends'
+  );
+}
+
+function cmwn_child_perms_user($op, &$edit, &$account, $category = NULL) {
+  switch ($op) {
+    case 'load':
+      if (in_array(get_role_from_rid(variable_get('cmwn_module_child_role', '')), $account->roles)) {
+        $account = ChildUser::castAs($account);
+        /*$perms = $account->getParentDefinedPermissions();
+        foreach ($perms as $perm) {
+          $role = cmwn_child_perms_get_role_from_perm($perm);
+          if ($role) {
+            $account->roles[$role['rid']] = $role['name'];
+          }
+        }*/
+      } else if (in_array(get_role_from_rid(variable_get('cmwn_module_parent_role', '')), $account->roles)) {
+        $account = ParentUser::castAs($account);
+      } else if (in_array(get_role_from_rid(variable_get('cmwn_module_teacher_role', '')), $account->roles)) {
+        $account = TeacherUser::castAs($account);
+      } else {
+        $account = GenericUser::castAs($account);
+      }
+      break;
+  }
+}
+
+function cmwn_child_perms_init() {
+  global $user;
+  if (in_array(get_role_from_rid(variable_get('cmwn_module_child_role', '')), $user->roles)) {
+    /*$perms = ChildUser::castAs($user)->getParentDefinedPermissions();
+    foreach ($perms as $perm) {
+      $role = cmwn_child_perms_get_role_from_perm($perm);
+      if ($role) {
+        $user->roles[$role['rid']] = $role['name'];
+      }
+    }*/
+  }
+}
+
+function cmwn_child_perms_form_alter(&$form, &$form_state, $form_id) {
+  global $user;
+  switch ($form_id) {
+    case 'user_profile_form':
+      /*if (isset($form['account']['roles'])) {
+        $hide_roles = cmwn_child_perms_perm();
+        array_walk($hide_roles, '_cmwn_child_perms_transform_perm_array_walker');
+        $form['account']['roles']['#options'] = array_diff($form['account']['roles']['#options'], $hide_roles);
+      }*/
+      break;
+  }
+}
+
+function cmwn_child_perms_get_role_from_perm($perm) {
+  static $cache = array();
+  if (isset($cache[$perm])) {
+    return $cache[$perm];
+  } else {
+    $role = db_fetch_array(db_query("SELECT * FROM {role} WHERE name = '%s' LIMIT 1", _cmwn_child_perms_transform_perm($perm)));
+    $cache[$perm] = $role;
+    return $role;
+  }
+}
+
+function _cmwn_child_perms_transform_perm($perm) {
+  $perm = str_replace(' ', '_', $perm);
+  $perm = 'child_can_'.$perm;
+  return $perm;
+}
+
+function _cmwn_child_perms_transform_perm_array_walker(&$value, $key) {
+  $value = _cmwn_child_perms_transform_perm($value);
+}

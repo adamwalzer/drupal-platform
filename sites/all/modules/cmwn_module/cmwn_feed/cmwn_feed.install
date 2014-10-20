@@ -1,0 +1,41 @@
+<?php
+
+function cmwn_feed_schema() {
+  $schema = array();
+
+  $schema['cmwn_feed'] = array(
+    'description' => 'Stores user actions for display in the shine feed.',
+    'fields' => array(
+      'uid' => array(
+        'description' => 'User ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'message' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'description' => 'Description of action.',
+      ),
+      'timestamp' => array(
+        'description' => 'Timestamp of when the action took place.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('uid'),
+  );
+  return $schema;
+}
+
+function cmwn_feed_install() {
+  drupal_install_schema('cmwn_feed');
+  db_query("UPDATE {system} SET weight = -10 WHERE name = 'cmwn_feed'");
+}
+
+function cmwn_feed_uninstall() {
+  drupal_uninstall_schema('cmwn_feed');
+  db_query("DELETE FROM {variable} WHERE name LIKE 'cmwn_feed_%%'");
+}

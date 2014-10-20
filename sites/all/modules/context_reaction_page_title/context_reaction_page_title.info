@@ -1,0 +1,5 @@
+name = "Context Reaction: Page Title"
+description = "Adds a reaction to change the page title.  Depends on Context 3."
+package = "Context"
+dependencies[] = context
+core = "6.x"

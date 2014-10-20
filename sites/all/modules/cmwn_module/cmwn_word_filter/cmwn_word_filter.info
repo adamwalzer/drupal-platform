@@ -1,0 +1,6 @@
+name = "CMWN Word Filter"
+description = "Provides functionality to help filter inappropriate content."
+package = "CMWN"
+core = "6.x"
+dependencies[] = "cmwn_module"
+dependencies[] = "rules"

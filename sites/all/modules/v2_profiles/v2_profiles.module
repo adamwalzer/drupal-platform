@@ -1,0 +1,212 @@
+<?php
+
+	///
+
+	global $v2_profiles_menu_items;
+	global $v2_profiles_theme_items;
+
+	$v2_profiles_menu_items = array();
+	$v2_profiles_theme_items = array();
+
+	///
+
+	include_once(drupal_get_path('module','webform').'/includes/webform.submissions.inc');
+
+	require_once(drupal_get_path('module','v2_profiles').'/includes/account.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/avatars.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/children.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/feed.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/flips.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/friends.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/index.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/interests.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/links.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/name.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/news.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/notices.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/partners.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/register.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/school.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/videos.inc');
+	require_once(drupal_get_path('module','v2_profiles').'/includes/whiteboard.inc');
+
+	///
+
+	function v2_profiles_access($uid) {
+
+		global $user;
+
+		if ($user->uid == 0) drupal_goto('user/login');
+
+		$u = user_load($uid);
+
+		if ($user && $u && $user->uid === $u->uid) return true;
+
+		return false;
+
+	}
+
+	function v2_profiles_authenticated_access() {
+
+		global $user;
+
+		if ($user->uid > 0) return true;
+
+		return false;
+
+	}
+
+	function v2_profiles_menu() {
+
+		global $v2_profiles_menu_items;
+
+		return $v2_profiles_menu_items;
+
+	}
+
+	function v2_profiles_menu_alter(&$items) {
+
+		$items['user/%'] = array(	
+			'access arguments' => array(1),
+			'access callback' => 'v2_profiles_access',
+			'description' => '',
+			'page arguments' => array(1),
+			'page callback' => 'v2_profiles_index',
+			'title' => 'User',
+			'type' => MENU_CALLBACK,
+		);
+
+	}
+
+	function v2_profiles_theme() {
+
+		global $v2_profiles_theme_items;
+
+		return $v2_profiles_theme_items;
+
+	}
+
+	///
+
+	function render_description($item) { ?>
+
+	<div class="block modal flips description" id="flip-<?php print $item->id; ?>" style="display:none;">
+		<div class="content">
+			<div class="section cms">
+				<?php if ($item->large_src1 != '/' && $item->large_src2 != '/') { ?>
+					<div class="image">
+						<span class="n1"><img src="<?php print $item->large_src1; ?>" alt="<?php print $item->title; ?>" /></span>
+						<span class="n2" style="height:<?php print $item->progress; ?>%;"><img src="<?php print $item->large_src2; ?>" alt="<?php print $item->title; ?>" /></span>
+					</div>
+				<?php } ?>
+				<div class="title <?php print $item->color; ?>">
+					<strong><?php print $item->title; ?></strong>
+				</div>
+				<div class="description">
+					<?php print $item->description; ?>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<?php }
+
+/*	function v2_profiles_nodeapi(&$node,$action) {
+
+		switch ($action) {
+			
+			case 'insert' :
+
+				if ($node->type == 'project_submission') {
+					
+					// if user = child and status = 0
+				}
+
+				break;
+
+			case 'update' :
+
+//$args = func_get_args();
+//print_r($args);
+//exit();
+
+				break;
+
+		}
+
+	}*/
+
+/*	function v2_profiles_og($action,$gid,$uid,$arguments) {
+
+		switch ($action) {
+
+			case 'user insert' :
+
+				break;
+
+		}
+
+//$args = func_get_args();
+//print_r($args);
+//exit();
+
+	}*/
+
+	///
+
+	function v2_profiles_form_alter(&$form, &$form_state, $form_id) {
+
+		if (strpos($form_id, 'webform_client_form_') === 0 && $form['#id'] != 'node-form' && $form['#node']->type === 'action') {
+
+			if (is_array($form['submitted'])) {
+				foreach ($form['submitted'] as $key => $value) {
+					if (is_array($form['submitted'][$key])) {
+
+						$form['submitted'][$key]['#theme_wrappers'] = array();
+						$form['submitted'][$key]['#pre_render'] = array();
+						$form['submitted'][$key]['#post_render'] = array();
+
+					}
+				}
+			}
+
+			$form['actions']['submit']['#value'] = 'Save & Continue';
+			$form['#validate'] = array('v2_profiles_flips_validate');
+			$form['#submit'][] = 'v2_profiles_flips_submit';
+
+		}
+
+	}
+
+	///
+
+	function v2_profiles_flips_submit(&$form, &$form_state) {
+
+		drupal_set_message('Action item updated & saved!');
+
+		drupal_goto($_SESSION['v2_profiles_redirect']);
+
+	}
+
+	function v2_profiles_flips_validate(&$form, &$form_state) {
+
+		webform_client_form_validate($form,$form_state);
+
+		if (form_get_errors() && $_SESSION['v2_profiles_redirect']) {
+			drupal_goto($_SESSION['v2_profiles_redirect']);
+		}
+
+	}
+
+	function v2_profiles_form_user_admin_settings_alter(&$form, &$form_state) {
+
+		$form['email']['no_approval_required']['user_mail_register_no_approval_required_notify'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Notify user when account is created.'),
+			'#default_value' => variable_get('user_mail_register_no_approval_required_notify', true),
+			'#weight' => 999
+		);
+
+	}
+
+?>

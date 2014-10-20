@@ -1,0 +1,32 @@
+<?php
+
+
+function cmwn_store_menu() {
+  $items = array();
+  $items['store'] = array(
+    'title' => t('store'),
+    'description' => t(''),
+    'page callback' => 'cmwn_store_store',
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+function cmwn_store_store() {
+  require_once 'sites/all/libraries/printmojo/mojostore.php';
+  switch($_GET['_']) {
+    case 'view' :
+      return wrap_html(view_product($_SERVER['store_data'], $title_text ), $title_text);
+      break;
+    case 'basket' :
+      return wrap_html(basket($_SERVER['store_data']), 'Shopping Basket');
+      break;
+    case 'list_categories' :
+      return wrap_html(list_categories($_SERVER['store_data']), 'Browse Categories');
+      break;
+    default:
+      case 'list'   :
+      return wrap_html(list_products($_SERVER['store_data']), 'Browse Products');
+      break;
+  }
+}

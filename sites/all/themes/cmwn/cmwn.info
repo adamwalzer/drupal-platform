@@ -1,0 +1,62 @@
+name        = Change My World Now Skin
+description = Change My World Now Skin
+
+screenshot = misc/r2i-logo.png
+
+core    = 6.x
+engine  = phptemplate
+
+stylesheets[all][] = assets/css/skin.css
+stylesheets[all][] = assets/css/rounded.css
+stylesheets[all][] = assets/css/main-nav.css
+stylesheets[all][] = assets/css/modal.css
+
+stylesheets[all][] = assets/css/jquery.tipped.css
+stylesheets[all][] = assets/css/all.css
+
+scripts[] = assets/js/skin.js
+scripts[] = assets/js/modal.js
+scripts[] = assets/js/jquery.form.js
+
+scripts[] = assets/js/jquery.excanvas.js
+scripts[] = assets/js/jquery.isotope.min.js
+scripts[] = assets/js/jquery.jscrollpane.js
+scripts[] = assets/js/jquery.mousewheel.js
+scripts[] = assets/js/jquery.mousewheel.intent.js
+scripts[] = assets/js/jquery.simplemodal.js
+scripts[] = assets/js/jquery.spinners.js
+scripts[] = assets/js/jquery.tipped.js
+scripts[] = assets/js/all.js
+
+regions[utility_nav]    = Utility Nav
+regions[main_nav]       = Main Nav
+regions[int_nav]        = Interior Nav
+regions[content_top]    = Content top
+regions[content]        = Content
+regions[content_bottom] = Content bottom
+regions[bottom_content] = Bottom Content
+regions[sidebar]        = Sidebar
+regions[footer]         = Footer
+regions[page_closure]   = Page closure
+
+features[] = logo
+features[] = name
+features[] = slogan
+features[] = mission
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = search
+features[] = favicon
+features[] = primary_links
+features[] = secondary_links
+
+  ; Set the default settings to be used in theme-settings.php
+settings[zen_block_editing]        = 1
+settings[zen_breadcrumb]           = yes
+settings[zen_breadcrumb_separator] = ' › '
+settings[zen_breadcrumb_home]      = 1
+settings[zen_breadcrumb_trailing]  = 1
+settings[zen_breadcrumb_title]     = 0
+settings[zen_layout]               = zen-columns-liquid
+settings[zen_rebuild_registry]     = 0
+settings[zen_wireframes]           = 0

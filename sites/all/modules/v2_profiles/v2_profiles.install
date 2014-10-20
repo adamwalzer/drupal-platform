@@ -1,0 +1,15 @@
+<?php
+
+	function v2_profiles_install() {
+
+		drupal_set_message("Profiles module was sucessfully installed.");
+
+	} 
+
+	function v2_profiles_uninstall() {
+
+		drupal_set_message("Profiles module was sucessfully uninstalled.");
+
+	}
+
+?>

@@ -1,0 +1,8 @@
+<?php
+function cmwn_video_install() {
+  
+}
+
+function cmwn_video_uninstall() {
+  db_query("DELETE FROM {variable} WHERE name LIKE 'cmwn_video_%%'");
+}

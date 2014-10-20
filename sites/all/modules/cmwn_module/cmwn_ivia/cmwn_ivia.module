@@ -1,0 +1,402 @@
+<?php
+
+define('CMWN_IVIA_ERROR_MESSAGE', 'We apologize but we are unable to complete your registration. This may mean that our information processing system has detected inaccuracies within the information you have provided. Please click on the following link for assistance. <a href="http://www.lexisnexis.com/privacy/for-consumers/request-personal-information.aspx">http://www.lexisnexis.com/privacy/for-consumers/request-personal-information.aspx</a>');
+define('SKIP', false);
+
+//switch ($_SERVER['HTTP_HOST']) {
+  //case 'changemyworldnow.com':
+  //case 'www.changemyworldnow.com':
+  //case 'ginasink.prod.acquia-sites.com':
+   // define('CMWN_IVIA_UID', '9090');
+    define('CMWN_IVIA_UID', '8051');
+    define('CMWN_IVIA_PASS', 'Ginas2012');
+    define('CMWN_IVIA_CRIMINAL_USER', 'GINAINCXML');
+    define('CMWN_IVIA_CRIMINAL_PASS', 'Gink4973');
+    define('CMWN_IVIA_IVIA_URL', 'https://identitymanagement.lexisnexis.com/identity-service/services/identityServiceWS');
+    define('CMWN_IVIA_CRIMINAL_URL', 'https://wsonline.seisint.com/WsAccurint/CriminalSearch?User.GLBPurpose=1&User.DLPurpose=3');
+    define('CMWN_IVIA_SO_URL', 'https://wsonline.seisint.com/WsAccurint/SexualOffenderSearch?User.GLBPurpose=1&User.DLPurpose=3');
+    //break;
+  //case 'ginasinkstg.prod.acquia-sites.com':
+  //default:
+    //define('CMWN_IVIA_UID', '8051');
+    //define('CMWN_IVIA_PASS', 'Jonialbers2012');
+    //define('CMWN_IVIA_CRIMINAL_USER', 'GINAINCXML');
+    //define('CMWN_IVIA_CRIMINAL_PASS', 'Gink4973');
+    //define('CMWN_IVIA_IVIA_URL', 'https://staging.identitymanagement.lexisnexis.com/identity-service/services/identityServiceWS');
+    //define('CMWN_IVIA_CRIMINAL_URL', 'https://wsonline.seisint.com/WsAccurint/CriminalSearch?User.GLBPurpose=1&User.DLPurpose=3');
+    //define('CMWN_IVIA_SO_URL', 'https://wsonline.seisint.com/WsAccurint/SexualOffenderSearch?User.GLBPurpose=1&User.DLPurpose=3');
+    //break;
+//}
+
+function cmwn_ivia_menu() {
+  $items = array();
+  $items['user/%user/confirm-identity'] = array(
+    'title' => "Confirm Registration",
+    'access callback' => 'cmwn_ivia_access_confirm_user_identity',
+    'access arguments' => array(1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmwn_ivia_confirm_user_identity', 1),
+    'type' => MENU_CALLBACK
+  );
+  $items['user/%user/confirm-identity/error'] = array(
+    'title' => "Confirm Registration",
+    'access callback' => 'cmwn_ivia_access_confirm_user_identity',
+    'access arguments' => array(1),
+    'page callback' => 'node_access',
+    'page arguments' => array(1,2),
+    'type' => MENU_CALLBACK
+  );
+  return $items;
+}
+
+function cmwn_ivia_access_confirm_user_identity($account) {
+  global $user;
+  return (ParentUser::canHydrate($account) && $user->uid == $account->uid)/* || (TeacherUser::canHydrate($account) && $user->uid == $account->uid)*/ || in_array('administrator', $user->roles);
+}
+
+function cmwn_ivia_confirm_user_identity($form_state, $account) {
+  $form = array();
+  switch ($form_state['storage']['step']) {
+    case 'quiz':
+      $xml = $form_state['storage']['quiz'];
+      //var_dump($xml);die;
+      $xml = simplexml_load_string($xml);
+      $xml->registerXPathNamespace('ns', 'http://ns.lexisnexis.com/identity-service/1.0');
+      $xml = $xml->xpath('//ns:quiz');
+      _buildQuizForm($form, $xml);
+      break;
+    default:
+      $form_state['storage']['uid'] = $account->uid;
+      $account = user_load($form_state['storage']['uid']);
+  
+      if (count($form_state['post']) == 0) {
+        $time = microtime(true);
+        $tid = $time;
+        $nonce = sha1($time);
+        $response = _call_discovery(user_load($form_state['storage']['uid']), $nonce, $tid);
+        $_SESSION['cmwn_ivia'] = array(
+          'nonce' => sha1($time),
+          'tid' => $time,
+          'quiz' => $response
+        );
+      }
+      $xml = simplexml_load_string($_SESSION['cmwn_ivia']['quiz']);
+      $xml->registerXPathNamespace('ns', 'http://ns.lexisnexis.com/identity-service/1.0');
+      $status = $xml->xpath('//ns:statusList/ns:status');
+      $status = $status[0];
+      if ('fail' == strtolower((string)$status) && !SKIP) {
+        $code = $xml->xpath('//ns:orderResponse/ns:check/ns:code');
+        switch (strtolower((string)$code[0])) {
+          case 'quizvelocity':
+            watchdog('cmwn_ivia', 'IV/IA Failure: Quiz Velocity');
+            //form_set_error('', CMWN_IVIA_ERROR_MESSAGE);
+            drupal_goto('user/'.$form_state['storage']['uid'].'/confirm-identity/error');
+            break;
+          default:
+            watchdog('cmwn_ivia', 'IV/IA Failure: Unknown');
+            //form_set_error('', CMWN_IVIA_ERROR_MESSAGE);
+            drupal_goto('user/'.$form_state['storage']['uid'].'/confirm-identity/error');
+            break;
+        }
+      } else {
+        $form_state['storage']['nonce'] = $_SESSION['cmwn_ivia']['nonce'];
+        $form_state['storage']['tid'] = $_SESSION['cmwn_ivia']['tid'];
+        $form_state['storage']['step'] = 'quiz';
+        $form_state['storage']['quiz'] = $_SESSION['cmwn_ivia']['quiz'];
+        $xml = $xml->xpath('//ns:quiz');
+        _buildQuizForm($form, $xml);
+      }
+  }
+  return $form;
+}
+
+function _buildQuizForm(&$form, $xml) {
+  if (is_array($xml) && !SKIP) {
+    $quizId = $xml[0]->xpath('ns:id');
+    $quizId = (string)$quizId[0];
+    $form['quizId'] = array(
+      '#type' => 'value',
+      '#value' => $quizId
+    );
+    $questions = $xml[0]->xpath('ns:question');
+    foreach ($questions as $question) {
+      $questionId = $question->xpath('ns:id');
+      $questionId = (string)$questionId[0];
+      $questionText = $question->xpath('ns:localizedText');
+      $questionText = (string)$questionText[0];
+      $form['question-'.$questionId] = array(
+        '#type' => 'radios',
+        '#title' => $questionText,
+        '#options' => array(),
+        '#required' => true
+      );
+      $choices = $question->xpath('ns:choice');
+      //var_dump($choices);die;
+      foreach ($choices as $choice) {
+        $choiceId = $choice->xpath('ns:id');
+        $choiceId = (string)$choiceId[0];
+        $choiceText = $choice->xpath('ns:localizedText');
+        $choiceText = (string)$choiceText[0];
+        $form['question-'.$questionId]['#options'][$choiceId] = $choiceText;
+      }
+    }
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Submit')
+    );
+  } else {
+    $_SESSION['parent_child_perms_reminder'] = true;
+    global $user;
+    $account = user_load($user->uid);
+    $parent = ParentUser::castAs($account);
+    $index = variable_get('cmwn_module_verified_parent_role', '');
+    if ($index) {
+      $parent->roles[$index] = $roles[$index];
+      user_save($parent, array('roles' => $parent->roles));
+    }
+    header('Location: /node/11191');
+  }
+}
+
+function cmwn_ivia_confirm_user_identity_validate($form, &$form_state) {
+  switch ($form_state['storage']['step']) {
+    case 'quiz':
+      $response = _call_quiz(user_load($form_state['storage']['uid']), $form_state['values'], $form_state['values']['quizId'], $_SESSION['cmwn_ivia']['nonce'], $_SESSION['cmwn_ivia']['tid']);
+      $xml = simplexml_load_string($response);
+      $xml->registerXPathNamespace('ns', 'http://ns.lexisnexis.com/identity-service/1.0');
+      $status = $xml->xpath('//ns:statusList/ns:status');
+      $status = (string)$status[0];
+      if (strtolower($status) == 'pending') {
+      //var_dump($xml->asXML());die;
+        //drupal_set_message('Unable to determine identity, please answer one more question.', 'error');
+        $form_state['storage']['quiz'] = $xml->asXML();
+        //$form_state['rebuild'] = true;
+      } else if (strtolower($status) == 'fail') {
+        watchdog('cmwn_ivia', 'IV/IA Failure: Quiz Fail');
+        //form_set_error('', CMWN_IVIA_ERROR_MESSAGE);
+        drupal_goto('user/'.$form_state['storage']['uid'].'/confirm-identity/error');
+      } else {
+        $fail = false;
+        $account = user_load($form_state['storage']['uid']);
+        criminalSearch($account, $fail);
+        soSearch($account, $fail);
+        if ($fail) {
+          //form_set_error('', CMWN_IVIA_ERROR_MESSAGE);
+          drupal_goto('user/'.$form_state['storage']['uid'].'/confirm-identity/error');
+        } else {
+          watchdog('cmwn_ivia', 'IV/IA Pass, CS/SO Pass');
+          $roles = user_roles();
+          $index = variable_get('cmwn_module_approved_child_role', '');
+          $parent = ParentUser::castAs($account);
+          $children = $parent->getChildren();
+          foreach ($children as $child) {
+            if ($index) {
+              $child->roles[$index] = $roles[$index];
+              user_save($child, array('roles' => $child->roles));
+            }
+            
+          }
+          $form_state['storage']['step'] = 'complete';
+          $index = variable_get('cmwn_module_verified_parent_role', '');
+          if ($index) {
+            $parent->roles[$index] = $roles[$index];
+            user_save($parent, array('roles' => $parent->roles));
+          }
+        }
+      }
+      break;
+    default:
+      watchdog('cmwn_ivia', 'IV/IA Failure: Form State');
+      //form_set_error('', CMWN_IVIA_ERROR_MESSAGE);
+      drupal_goto('user/'.$form_state['storage']['uid'].'/confirm-identity/error');
+  }
+}
+
+function cmwn_ivia_confirm_user_identity_submit($form, &$form_state) {
+  switch ($form_state['storage']['step']) {
+    case 'complete':
+      unset($form_state['storage']);
+      //$_SESSION['parent_child_perms_reminder'] = true;
+      $form_state['redirect'] = '/node/11191';
+      break;
+  }
+}
+
+function _call_discovery($account, $nonce, $tid) {
+  $uid = CMWN_IVIA_UID;
+  $pass = CMWN_IVIA_PASS;
+  $parent = ParentUser::castAs($account);
+  $baseProfile = $parent->getBaseProfile();
+  $parentProfile = $parent->getParentProfile();
+  $dob = date('Y-m-d', strtotime($parentProfile->field_dob[0]['value']));
+  $date = gmdate('Y-m-d\TH:i:s\Z');
+  $path = drupal_get_path('module', 'cmwn_ivia');
+  $soap = <<<EOS
+<soapenv:Envelope xmlns:ns="http://ns.lexisnexis.com/identity-service/1.0" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.identityService.bls.risk.lexisnexis.com/">
+  <soapenv:Header>
+    <wsse:Security soapenv:mustUnderstand="1" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+      <wsse:UsernameToken wsu:Id="UsernameToken-49" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+        <wsse:Username>{$uid}/ginasink</wsse:Username>
+        <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">{$pass}</wsse:Password>
+        <wsse:Nonce EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary">{$nonce}</wsse:Nonce>
+        <wsu:Created>{$date}</wsu:Created>
+      </wsse:UsernameToken>
+    </wsse:Security>
+  </soapenv:Header>
+  <soapenv:Body>
+    <ws:invokeIdentityService>
+      <ns:identityRequest ns:customerReference="test123" ns:locale="en_US" ns:productAlias="ginasink_combo" ns:transactionID="{$tid}">
+        <ns:inputCriteria>
+          <ns:name>
+            <ns:firstName>{$baseProfile->field_first_name[0]['value']}</ns:firstName>
+            <ns:lastName>{$baseProfile->field_last_name[0]['value']}</ns:lastName>
+          </ns:name>
+          <ns:dateOfBirth>{$dob}</ns:dateOfBirth>
+          <ns:phone ns:phonePurpose="HOME">
+          	<ns:phoneNumber>{$parentProfile->field_phone[0]['value']}</ns:phoneNumber>
+          </ns:phone>
+          <ns:address ns:addressPurpose="PRIMARY_RESIDENCE">
+            <ns:addressLine1>{$parentProfile->field_address[0]['value']}</ns:addressLine1>
+            <ns:city>{$parentProfile->field_city[0]['value']}</ns:city>
+            <ns:stateCode>{$parentProfile->field_state[0]['value']}</ns:stateCode>
+            <ns:postalCode>{$parentProfile->field_zip[0]['value']}</ns:postalCode>
+          </ns:address>
+        </ns:inputCriteria>
+      </ns:identityRequest>
+    </ws:invokeIdentityService>
+  </soapenv:Body>
+</soapenv:Envelope>
+EOS;
+  $ch = curl_init(CMWN_IVIA_IVIA_URL);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_PORT, 443);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, $soap);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  
+  $response = curl_exec($ch);
+  watchdog('cmwn_ivia', 'Request:<br />@request<br />Response:<br />@response', array('@request' => $soap, '@response' => $response));
+  return $response;
+}
+
+
+function _call_quiz($account, $answers, $quizId, $nonce, $tid) {
+  $uid = CMWN_IVIA_UID;
+  $pass = CMWN_IVIA_PASS;
+  $parent = ParentUser::castAs($account);
+  $baseProfile = $parent->getBaseProfile();
+  $parentProfile = $parent->getParentProfile();
+  $dob = date('Y-m-d', strtotime($parentProfile->field_dob[0]['value']));
+  $time = microtime(true);
+  $date = gmdate('Y-m-d\TH:i:s\Z');
+  $path = drupal_get_path('module', 'cmwn_ivia');
+  //var_dump($answers);die;
+  $answersXML = '';
+  foreach ($answers as $key => $answer) {
+    if (strpos($key, 'question-') === 0) {
+      $questionId = str_replace('question-', '', $key);
+      $answersXML .= '<ns:answer><ns:questionId>'.$questionId.'</ns:questionId><ns:choiceId>'.$answer.'</ns:choiceId></ns:answer>';
+    }
+  }
+  //var_dump($answersXML);die;
+  $soap = <<<EOS
+<soapenv:Envelope xmlns:ns="http://ns.lexisnexis.com/identity-service/1.0" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.identityService.bls.risk.lexisnexis.com/">
+  <soapenv:Header>
+    <wsse:Security soapenv:mustUnderstand="1" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+      <wsse:UsernameToken wsu:Id="UsernameToken-49" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+        <wsse:Username>{$uid}/ginasink</wsse:Username>
+        <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">{$pass}</wsse:Password>
+        <wsse:Nonce EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary">{$nonce}</wsse:Nonce>
+        <wsu:Created>{$date}</wsu:Created>
+      </wsse:UsernameToken>
+    </wsse:Security>
+  </soapenv:Header>
+  <soapenv:Body>
+    <ws:invokeIdentityService>
+      <ns:identityRequest ns:customerReference="test123" ns:locale="en_US" ns:productAlias="ginasink_combo" ns:transactionID="{$tid}">
+        <ns:scoreRequest>
+          <ns:quizId>{$quizId}</ns:quizId>
+          {$answersXML}
+        </ns:scoreRequest>
+      </ns:identityRequest>
+    </ws:invokeIdentityService>
+  </soapenv:Body>
+</soapenv:Envelope>
+EOS;
+  $ch = curl_init(CMWN_IVIA_IVIA_URL);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_PORT, 443);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, $soap);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  
+  $response = curl_exec($ch);
+  watchdog('cmwn_ivia', 'Request:<br />@request<br />Response:<br />@response', array('@request' => $soap, '@response' => $response));
+  return $response;
+}
+
+function criminalSearch($account, &$fail) {
+  $parent = ParentUser::castAs($account);
+  $baseProfile = $parent->getBaseProfile();
+  $parentProfile = $parent->getParentProfile();
+  $year = date('Y', strtotime($parentProfile->field_dob[0]['value']));
+  $month = date('n', strtotime($parentProfile->field_dob[0]['value']));
+  $day = date('j', strtotime($parentProfile->field_dob[0]['value']));
+  $query = array(
+    'SearchBy.Name.Full' => $baseProfile->field_first_name[0]['value'].' '.$baseProfile->field_last_name[0]['value'],
+    'SearchBy.DOB.Year' => $year,
+    'SearchBy.DOB.Month' => $month,
+    'SearchBy.DOB.Day' => $day
+  );
+  $query = drupal_query_string_encode($query);
+  $ch = curl_init(CMWN_IVIA_CRIMINAL_URL.'&'.$query);
+  curl_setopt($ch, CURLOPT_USERPWD, CMWN_IVIA_CRIMINAL_USER.':'.CMWN_IVIA_CRIMINAL_PASS);
+  curl_setopt($ch, CURLOPT_PORT, 443);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  
+  $xml = curl_exec($ch);
+  $xml = simplexml_load_string($xml);
+  $numResults = $xml->xpath('//RecordCount');
+  $numResults = intval((string)$numResults[0]);
+  //var_dump($numResults);die;
+  if ($numResults > 0) {
+    $fail = true;
+    watchdog('cmwn_ivia', 'Adult failed registration process: criminal records found for user: !link', array('!link' => l($account->name, 'user/'.$account->uid)), WATCHDOG_ERROR);
+  }
+}
+
+function soSearch($account, &$fail) {
+  $parent = ParentUser::castAs($account);
+  $baseProfile = $parent->getBaseProfile();
+  $parentProfile = $parent->getParentProfile();
+  $year = date('Y', strtotime($parentProfile->field_dob[0]['value']));
+  $month = date('n', strtotime($parentProfile->field_dob[0]['value']));
+  $day = date('j', strtotime($parentProfile->field_dob[0]['value']));
+  $query = array(
+    'SearchBy.Name.Full' => $baseProfile->field_first_name[0]['value'].' '.$baseProfile->field_last_name[0]['value'],
+    'SearchBy.DOB.Year' => $year,
+    'SearchBy.DOB.Month' => $month,
+    'SearchBy.DOB.Day' => $day
+  );
+  $query = drupal_query_string_encode($query);
+  $ch = curl_init(CMWN_IVIA_SO_URL.'&'.$query);
+  curl_setopt($ch, CURLOPT_USERPWD, CMWN_IVIA_CRIMINAL_USER.':'.CMWN_IVIA_CRIMINAL_PASS);
+  curl_setopt($ch, CURLOPT_PORT, 443);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  
+  $xml = curl_exec($ch);
+  $xml = simplexml_load_string($xml);
+  $numResults = $xml->xpath('//RecordCount');
+  $numResults = intval((string)$numResults[0]);
+  //var_dump($numResults);die;
+  if ($numResults > 0) {
+    $fail = true;
+    watchdog('cmwn_ivia', 'Adult failed registration process: S.O. records found for user: !link', array('!link' => l($account->name, 'user/'.$account->uid)), WATCHDOG_ERROR);
+  }
+}

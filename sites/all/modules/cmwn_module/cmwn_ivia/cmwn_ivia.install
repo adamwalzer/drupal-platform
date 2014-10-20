@@ -1,0 +1,9 @@
+<?php
+
+function cmwn_ivia_install() {
+  db_query("UPDATE {system} SET weight = -10 WHERE name = 'cmwn_ivia'");
+}
+
+function cmwn_ivia_uninstall() {
+  db_query("DELETE FROM {variable} WHERE name LIKE 'cmwn_ivia_%%'");
+}

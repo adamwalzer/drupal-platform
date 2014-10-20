@@ -1,0 +1,16 @@
+Index: admin_menu.inc
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/admin_menu/admin_menu.inc,v
+retrieving revision 1.11.2.26
+diff -u -p -r1.11.2.26 admin_menu.inc
+--- admin_menu.inc	24 Dec 2009 15:45:50 -0000	1.11.2.26
++++ admin_menu.inc	29 Sep 2010 23:58:29 -0000
+@@ -50,7 +50,7 @@ function admin_menu_link_build($item) {
+   $item['menu_name'] = 'admin_menu';
+   $item += array(
+     'link_title' => $item['title'],
+-    'link_path' => $item['path'],
++    'link_path' => isset($item['path']) ? $item['path'] : '',
+     'hidden' => 0,
+     'options' => array(),
+   );
