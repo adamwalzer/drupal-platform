@@ -3,9 +3,9 @@ description = "Add validation rules to webforms"
 core = 6.x
 dependencies[] = webform
 package = Webform
-; Information added by drupal.org packaging script on 2011-11-30
-version = "6.x-1.5"
+; Information added by Drupal.org packaging script on 2014-02-11
+version = "6.x-1.6"
 core = "6.x"
 project = "webform_validation"
-datestamp = "1322683251"
+datestamp = "1392157409"
 

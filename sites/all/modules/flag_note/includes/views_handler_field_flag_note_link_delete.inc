@@ -1,5 +1,4 @@
 <?php
-// $Id: views_handler_field_flag_note_link_delete.inc,v 1.1.2.3 2009/11/16 23:19:57 gunzip Exp $
 /**
  * @file
  *

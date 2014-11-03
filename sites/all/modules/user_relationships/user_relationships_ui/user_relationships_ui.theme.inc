@@ -1,5 +1,4 @@
 <?php
-// $Id: user_relationships_ui.theme.inc,v 1.1.2.11 2010/02/23 22:45:38 alexk Exp $
 
 /**
  * @file
@@ -54,9 +53,11 @@ function theme_user_relationships_remove_link($uid, $rid) {
     t('Remove'),
     "user/{$uid}/relationships/{$rid}/remove",
     array(
-      'title' => array('title' => t('Remove')),
       'query' => drupal_get_destination(),
-      'attributes' => array('class' => 'user_relationships_popup_link'),
+      'attributes' => array(
+        'class' => 'user_relationships_popup_link',
+        'title' => t('Remove'),
+      ),
     )
   );
 }
@@ -69,9 +70,11 @@ function theme_user_relationships_pending_request_approve_link($uid, $rid) {
     t('Approve'),
     "user/{$uid}/relationships/requested/{$rid}/approve",
     array(
-      'title' => array('title' => t('Approve')),
       'query' => drupal_get_destination(),
-      'attributes' => array('class' => 'user_relationships_popup_link'),
+      'attributes' => array(
+        'class' => 'user_relationships_popup_link',
+        'title' => t('Approve'),
+      ),
     )
   );
 }
@@ -84,9 +87,11 @@ function theme_user_relationships_pending_request_disapprove_link($uid, $rid) {
     t('Disapprove'),
     "user/{$uid}/relationships/requested/{$rid}/disapprove",
     array(
-      'title' => array('title' => t('Disapprove')),
       'query' => drupal_get_destination(),
-      'attributes' => array('class' => 'user_relationships_popup_link'),
+      'attributes' => array(
+        'class' => 'user_relationships_popup_link',
+        'title' => t('Disapprove'),
+      ),
     )
   );
 }
@@ -99,9 +104,11 @@ function theme_user_relationships_pending_request_cancel_link($uid, $rid) {
     t('Cancel'),
     "user/{$uid}/relationships/requested/{$rid}/cancel",
     array(
-      'title' => array('title' => t('Cancel')),
       'query' => drupal_get_destination(),
-      'attributes' => array('class' => 'user_relationships_popup_link'),
+      'attributes' => array(
+        'class' => 'user_relationships_popup_link',
+        'title' => t('Cancel'),
+      ),
     )
   );
 }

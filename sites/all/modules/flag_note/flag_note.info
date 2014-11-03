@@ -1,4 +1,3 @@
-; $Id: flag_note.info,v 1.1.2.2 2009/07/05 19:18:27 gunzip Exp $ 
 name = Flag Note
 description = Allows users to add notes while flagging content with the Flag module
 core = 6.x
@@ -6,9 +5,16 @@ dependencies[] = flag
 dependencies[] = views
 package = Flags
 
-; Information added by drupal.org packaging script on 2010-03-02
-version = "6.x-1.1"
+; Information added by drupal.org packaging script on 2010-12-15
+version = "6.x-2.x-dev"
 core = "6.x"
 project = "flag_note"
-datestamp = "1267533011"
+datestamp = "1292371984"
+
+
+; Information added by drupal.org packaging script on 2013-09-30
+version = "6.x-2.x-dev"
+core = "6.x"
+project = "flag_note"
+datestamp = "1380579488"
 

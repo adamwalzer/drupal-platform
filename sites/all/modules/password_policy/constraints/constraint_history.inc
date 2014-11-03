@@ -25,29 +25,22 @@ function password_policy_constraint_history_error($constraint) {
  * Password validation.
  */
 function password_policy_constraint_history_validate($password, $constraint, $uid) {
-  return !in_array(md5($password), _password_policy_constraint_history_old_passwords($constraint, $uid));
-}
-
-/**
- * Javascript portion.
- */
-function password_policy_constraint_history_js($constraint, $uid) {
-  drupal_add_js(drupal_get_path('module', 'password_policy') .'/constraints/scripts/webtoolkit.md5.js');
-  $pass = _password_policy_constraint_history_old_passwords($constraint, $uid);
-  $s = '';
-  $s .= "  var num=0;\n";
-  $s .= "  var pass=new Array(\"". implode('","', $pass) ."\");\n";
-  $s .= "  var i;\n";
-  $s .= "  for (i=0;i<pass.length;i++) {\n";
-  $s .= "    if (pass[i] == MD5(value)) {\n";
-  $s .= "      num=1;\n";
-  $s .= "    }\n";
-  $s .= "  }\n";
-  $s .= "  if (num>0) {\n";
-  $s .= "    strength=\"low\";\n";
-  $s .= "    msg.push(translate.constraint_history);\n";
-  $s .= "  }\n";
-  return $s;
+  $old_hashes = _password_policy_constraint_history_old_passwords($constraint, $uid);
+  if (module_exists('phpass')) {
+    module_load_include('inc', 'phpass', 'password');
+    $account = new stdClass();
+    foreach ($old_hashes as $old_hash) {
+      $account->pass = $old_hash;
+      if (user_check_password($password, $account)) {
+        return FALSE;
+      }
+    }
+    return TRUE;
+  }
+  else {
+    $hash = md5($password);
+    return !in_array($hash, $old_hashes);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -59,12 +52,13 @@ function password_policy_constraint_history_js($constraint, $uid) {
 function _password_policy_constraint_history_old_passwords($constraint, $uid) {
   $pass = array();
   if (!empty($uid)) {
-    // note that we specify a limit of the window size, but may not get that if the history isn't there.
-    $result = db_query("SELECT pass FROM {password_policy_history} WHERE uid = %d ORDER BY created DESC LIMIT %d", $uid, $constraint);
+    // note that we specify a limit of the window size, but may not get that if
+    // the history isn't there.
+    $result = db_query("SELECT pass FROM {password_policy_history} WHERE uid =
+      %d ORDER BY created DESC LIMIT %d", $uid, $constraint);
     while ($row = db_fetch_array($result)) {
       $pass[] = $row['pass'];
     }
   }
   return $pass;
 }
-

@@ -1,4 +1,3 @@
-$Id: README.txt,v 1.1.2.6 2009/11/18 00:27:59 gunzip Exp $
 
 Description
 ===========
@@ -38,8 +37,11 @@ Notes and their history are listed through views (adding a "Flag Note" relations
 To list content associated notes ** YOU MUST CREATE A NEW VIEW **
 (there are no predefined ones) with a Flag Note relationship.
 
-You don't need to (and in fact, you should not) mix plain "Flag" relationships
-with "Flag Note" relationships in views.
+Eventually it is possible to select a predefined reason 
+(taken from a taxonomy vocabulary) along with the note text.
+
+** IMPORTANT ** you don't need to (and in fact, you should not) mix 
+plain "Flag" relationships with "Flag Note" relationships in views.
 
 Go to admin/user/permissions to assign 'delete / edit notes' permissions to users.
 By default only the admin can delete / edit flag notes.
@@ -49,11 +51,18 @@ By default only the admin can delete / edit flag notes.
 There's a new [flag-note] token when using this module with
 flag_action (or/and rules) and if the token module is active.
 
+Odds and ends
+=============
+
+d4rkngel provided a patch for Facebook status
+(http://drupal.org/project/fbstatus) module integration:
+
+http://drupal.org/node/875896
+
 Todo
 ====
 Someday, only if there'll be demand for these ones:
 
-  * provide default views ?
   * decouple history and notes
   * store notes when unflagging
 

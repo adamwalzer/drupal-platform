@@ -9,17 +9,29 @@
  * Password change form.
  */
 function password_policy_password_tab(&$form_state, $account) {
+  $form['_category'] = array('#type' => 'value', '#value' => 'account');
+  $form['_account'] = array('#type' => 'value', '#value' => $account);
+  $form['#uid'] = $account->uid;
+
   $form['account']['pass'] = array(
     '#type' => 'password_confirm',
     '#description' => t('To change the current user password, enter the new password in both fields.'),
     '#size' => 25,
+    '#required' => TRUE,
   );
-  $form['#uid'] = $account->uid;
-  $form['_account'] = array('#type' => 'value', '#value' => $account);
+
   $form['submit'] = array('#type' => 'submit', '#value' => t('Change'));
+
   $form['#validate'] = array('password_policy_password_tab_validate');
   $form['#submit'] = array('password_policy_password_tab_submit');
+
+  // Show password field added by Password Change module.
+  if (module_exists('password_change')) {
+    password_change_form_user_profile_form_alter($form, $form_state);
+  }
+
   password_policy_form_alter($form, array(), 'user_profile_form');
+
   return $form;
 }
 
@@ -49,4 +61,3 @@ function password_policy_password_tab_submit($form, &$form_state) {
     $form_state['redirect'] = array($redirect['path'], isset($redirect['query']) ? $redirect['query'] : NULL, isset($redirect['fragment']) ? $redirect['fragment'] : NULL);
   }
 }
-

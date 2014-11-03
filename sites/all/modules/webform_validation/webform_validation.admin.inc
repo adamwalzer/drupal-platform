@@ -209,7 +209,7 @@ function webform_validation_get_webform_components($node, $validator) {
   if ($components) {
     foreach ($components as $cid => $component) {
       if (in_array($component['type'], $valid_components)) {
-        $ret[$cid] = $component['name'];
+        $ret[$cid] = _webform_filter_xss($component['name']);
       }
     }
   }

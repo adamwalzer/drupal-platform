@@ -2,7 +2,8 @@
 
 /**
  * @file
- * Password policy constraint callback to set a minimum delay between password changes.
+ * Password policy constraint callback to set a minimum delay between password
+ * changes.
  *
  * @link http://drupal.org/node/316765
  * @author David Kent Norman (http://deekayen.net/)
@@ -29,6 +30,13 @@ function password_policy_constraint_delay_error($constraint) {
  * Password validation.
  */
 function password_policy_constraint_delay_validate($password, $constraint, $uid) {
+  $account = user_load($uid);
+  // bypass delay constraint, if account is marked "Force password change on
+  // next login."
+  if ($account->force_password_change) {
+    return TRUE;
+  }
+
   $last_change = db_result(db_query_range("SELECT MAX(created) FROM {password_policy_history} WHERE uid = %d", $uid, 0, 1));
   if (!empty($last_change)) {
     // Constraint is set in hours, so it gets converted to seconds with *60*60.

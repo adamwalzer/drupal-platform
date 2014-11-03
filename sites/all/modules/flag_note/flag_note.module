@@ -1,21 +1,24 @@
 <?php
-// $Id: flag_note.module,v 1.1.2.9 2010/03/02 12:21:23 gunzip Exp $
-
 /**
  * @file
  *
- * Flag note module uses a new flag_link_type 'Flag note form' to allow users to attached a note to flags
- *  defined to use this link_type.
+ * Flag note module uses a new flag_link_type 'Flag note form' to allow users
+ * to attached a note to flags defined to use this link_type.
  */
 
 /**
  * Implementation of hook_perm().
- *    We assume that 'create flag note' is handled by the 'create flag' permission
- *    'view any note' goes through views permissions.
+ *
+ * We assume that 'create flag note' is handled by the 'create flag' permission
+ * 'view any note' goes through views permissions.
  */
 function flag_note_perm() {
-  return array('delete own flag note', 'delete any flag note',
-    'edit own flag note', 'edit any flag note');
+  return array(
+    'delete own flag note',
+    'delete any flag note',
+    'edit own flag note',
+    'edit any flag note',
+  );
 }
 
 /**
@@ -24,7 +27,12 @@ function flag_note_perm() {
 function flag_note_preprocess_flag(&$vars) {
   if ($vars['flag']->link_type == 'flag_note_form') {
     $vars['flag_classes'] .= ' flag-note';
-    if ($vars['action'] == 'flag' and module_exists('popups')) {
+    if ($vars['action'] == 'flag' && module_exists('modalframe')) {
+      drupal_add_js(drupal_get_path('module', 'flag_note') .'/flagnote_modalframe.js');
+      modalframe_parent_js();
+      $vars['flag_classes'] .= ' modalframe-flagnote';
+    }
+    elseif ($vars['action'] == 'flag' && module_exists('popups')) {
       popups_add_popups();
       $vars['flag_classes'] .= ' popups-form';
     }
@@ -46,15 +54,15 @@ function flag_note_views_api() {
  */
 function flag_note_menu() {
   $items = array();
-  $items['flag/note'] = array(
-    'title' => t('Flag Note'),
+  $items['flagnote/action'] = array(
+    'title' => 'Flag Note',
     'page callback' => 'flag_note_page',
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
   $items['flagnote/%/delete'] = array(
-    'title' => t('Flag Note delete'),
+    'title' => 'Flag Note delete',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('flag_note_delete_confirm', 1),
     'access callback' => 'flag_note_has_access',
@@ -62,7 +70,7 @@ function flag_note_menu() {
     'type' => MENU_CALLBACK,
   );
   $items['flagnote/%/edit'] = array(
-    'title' => t('Flag Note edit'),
+    'title' => 'Flag Note edit',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('flag_note_edit_form', 1),
     'access callback' => 'flag_note_has_access',
@@ -75,6 +83,7 @@ function flag_note_menu() {
 /**
  * Global flags (uid = 0) can only be edited/deleted by users that have the
  * 'edit/delete any flag note' right.
+ *
  * @param type 'edit' or 'delete'
  */
 function flag_note_has_access($type, $fnid, $uid = NULL) {
@@ -97,6 +106,9 @@ function flag_note_has_access($type, $fnid, $uid = NULL) {
   return ($uid === $GLOBALS['user']->uid);
 }
 
+/**
+ * Form for confirming deletion of a note.
+ */
 function flag_note_delete_confirm(&$form_state, $fnid) {
   $form['fnid'] = array(
     '#type' => 'value',
@@ -108,8 +120,16 @@ function flag_note_delete_confirm(&$form_state, $fnid) {
   );
 }
 
+/**
+ * Submit handler for confirming deletion of a note.
+ */
 function flag_note_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
+    $flag_note = current(flag_note_get_notes(array('fnid' => $form_state['values']['fnid'])));
+    $flag = flag_get_flag(NULL, $flag_note['fid']);
+    if ($flag->flag_note_delete_unflags) {
+      $flag->flag('unflag', $flag_note['content_id'], user_load($flag_note['uid']));
+    }
     if (flag_note_remove_notes(array('fnid' => $form_state['values']['fnid']))) {
       drupal_set_message(t('Your note was successfully deleted.'));
     }
@@ -119,144 +139,206 @@ function flag_note_delete_confirm_submit($form, &$form_state) {
   }
 }
 
+/**
+ * Form for editing a note.
+ */
 function flag_note_edit_form(&$form_state, $fnid) {
   $flag_note = current(flag_note_get_notes(array('fnid' => $fnid)));
   if (empty($flag_note)) {
     return FALSE;
   }
-
   $flag = flag_get_flag(NULL, $flag_note['fid']);
-  if (empty($flag)) {
-    return FALSE;
-  }
-
-  $form = array();
-
-  $form['fnid'] = array(
-    '#type' => 'value',
-    '#value' => $flag_note['fnid']
-  );
-
-  $form['note'] = array(
-    '#type' => 'textarea',
-    '#title' => variable_get('flag_note_label_'. $flag->name, t('Flag note')),
-    '#cols' => 60,
-    '#rows' => 5,
-    '#description' => variable_get('flag_note_help_'. $flag->name, t('A descriptive reason.')),
-    '#weight' => -1,
-    '#required' => TRUE,
-    '#default_value' => $flag_note['note'],
-  );
-
-  $maxlen = variable_get('flag_note_maxlength_'. $flag->name, 0);
-  if ($maxlen > 0) {
-    $form['note']['#maxlength'] = $maxlen;
-  }
-
-  drupal_set_title(variable_get('flag_note_title_'. $flag->name, t('Flag note')));
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => $flag->get_label('flag_short'),
-  );
-
-  $form['cancel'] = array(
-      '#value' => l(t('Cancel'), $_GET['destination'])
-  );
-
+  $form = _flag_note_form($form_state, NULL, $flag->name, NULL, $flag_note);
+  $form['flag_note']['fnid'] = array('#type' => 'value', '#value' => $flag_note['fnid']);
+  $form['flag_note']['submit'] = array('#type' => 'submit', '#value' => t('Submit'));
+  $form['flag_note']['cancel'] = array('#value' => l(t('Cancel'), $_GET['destination']));
   return $form;
 }
 
+/**
+ * Submit handler for editing a note.
+ */
 function flag_note_edit_form_submit(&$form, $form_state) {
   $flag_note = current(flag_note_get_notes(array('fnid' => $form_state['values']['fnid'])));
-  $flag_note['note'] = $form_state['values']['note'];
-  if (flag_note_update_note($flag_note)) {
-    drupal_set_message('Changes were succesfully saved');
+  if (empty($flag_note)) {
+    return FALSE;
+  }
+  $record = array_merge($flag_note, array(
+          'note' => $form_state['values']['note'], 'tid' => $form_state['values']['tid']));
+  if (flag_note_update_note($record)) {
+    drupal_set_message(t('Changes were succesfully saved.'));
   }
 }
 
 /**
- * Add options to
- *  disable keeping old notes
- *  add a max length to a note
- *  change the flag note labels and help text
+ * Add options to the flag form.
  */
 function flag_note_form_flag_form_alter(&$form, $form_state) {
   drupal_add_js(drupal_get_path('module', 'flag_note') .'/flag_note.js');
 
-  $form['flag_note'] = array(
+  // Set default options
+  $link_types = flag_note_flag_link_types();
+  foreach ($link_types['flag_note_form']['options'] as $option => $value) {
+    if (!isset($form['#flag']->$option)) {
+      $form['#flag']->$option = $value;
+    }
+  }
+
+  $form['display']['link_options_flag_note_form'] = array(
     '#type' => 'fieldset',
     '#name' => t('Flag note options'),
-    '#tree' => TRUE,
     '#weight' => 100,
-    '#attributes' => array('id' => 'flag-note-options'),
+    '#attributes' => array('id' => 'link-options-flag_note_form'),
   );
 
-  $form['flag_note']['disable_history'] = array(
+  $form['display']['link_options_flag_note_form']['flag_note_history_disabled'] = array(
     '#type' => 'checkbox',
-    '#default_value' => variable_get('flag_note_history_disabled_'. $form['#flag']->name, 0),
+    '#default_value' => $form['#flag']->flag_note_history_disabled,
     '#title' => t('Disable flag history'),
     '#description' => t('If checked, user\'s former notes are deleted when unflagging so '.
-        'only the last one will be stored.<br />Beware: if checked and in case of a global flag, '.
-        'notes added by <em>other</em> users get deleted when unflagging.')
+      'only the last one will be stored.<br />Beware: if checked and in case of a global flag, '.
+      'notes added by <em>other</em> users get deleted when unflagging.'),
   );
 
-  $form['flag_note']['title'] = array(
+  $form['display']['link_options_flag_note_form']['flag_note_delete_unflags'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => $form['#flag']->flag_note_delete_unflags,
+    '#title' => t('Unflag item when deleting note'),
+    '#description' => t('If checked, items are unflagged when deleting flag note.'.
+      '<br />Beware: if checked and in case of a global flag, '.
+      'items flagged by <em>other</em> users get unflagged as well.'),
+  );
+
+  $form['display']['link_options_flag_note_form']['flag_note_title'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('flag_note_title_'. $form['#flag']->name, t('Flag note')),
+    '#default_value' => $form['#flag']->flag_note_title,
     '#title' => t('Flag note form title'),
   );
 
-  $form['flag_note']['label'] = array(
+  $form['display']['link_options_flag_note_form']['flag_note_fieldset'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('flag_note_label_'. $form['#flag']->name, t('Flag note')),
+    '#default_value' => $form['#flag']->flag_note_fieldset,
+    '#title' => t('Flag note fieldset legend'),
+  );
+
+  $form['display']['link_options_flag_note_form']['flag_note_label'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $form['#flag']->flag_note_label,
     '#title' => t('Flag note textarea label'),
   );
 
-  $form['flag_note']['help'] = array(
+  $form['display']['link_options_flag_note_form']['flag_note_help'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('flag_note_help_'. $form['#flag']->name, t('A descriptive reason.')),
+    '#default_value' => $form['#flag']->flag_note_help,
     '#title' => t('Flag note help text (behind textarea)'),
   );
 
-  $form['flag_note']['maxlength'] = array(
+  if (module_exists('taxonomy')) {
+    $form['display']['link_options_flag_note_form']['flag_note_vocab'] = array(
+      '#type' => 'select',
+      '#title' => t('Taxonomy vocabulary to use for predefined notes'),
+      '#default_value' => $form['#flag']->flag_note_vocab,
+      '#options' => _flag_note_get_vocabs(),
+      '#description' =>
+        t('Flaggers will be able to select one of the predefined notes (terms) along with the textarea.')
+    );
+
+    $form['display']['link_options_flag_note_form']['flag_note_vocab_label'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $form['#flag']->flag_note_vocab_label,
+      '#title' => t('Label for predefined notes'),
+    );
+
+    $form['display']['link_options_flag_note_form']['flag_note_vocab_help'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Help text for predefined notes'),
+      '#default_value' => $form['#flag']->flag_note_vocab_help,
+    );
+
+    $form['display']['link_options_flag_note_form']['flag_note_hide_text'] = array(
+      '#type' => 'checkbox',
+      '#default_value' => $form['#flag']->flag_note_hide_text,
+      '#title' => t('use only predefined terms and hide text input'),
+    );
+  }
+
+  $form['display']['link_options_flag_note_form']['flag_note_default_text'] = array(
+    '#type' => 'textarea',
+    '#default_value' => $form['#flag']->flag_note_default_text,
+    '#title' => t('Note default text'),
+  );
+
+  if (module_exists('token')) {
+    $form['display']['link_options_flag_note_form']['flag_note_token_help'] = array(
+      '#title' => t('Replacement patterns'),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['display']['link_options_flag_note_form']['flag_note_token_help']['help'] = array(
+      '#value' => theme('token_help', array('global',  $form['#flag']->content_type)),
+    );
+  }
+
+  $form['display']['link_options_flag_note_form']['flag_note_maxlength'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('flag_note_maxlength_'. $form['#flag']->name, 0),
+    '#default_value' => $form['#flag']->flag_note_maxlength,
     '#title' => t('Flag note max length'),
     '#description' => t('0 for unlimited'),
     '#length' => 8,
   );
 
-  $form['#submit'][] = 'flag_note_flag_form_submit';
+  $form['#validate'][] = 'flag_note_flag_form_validate';
 }
 
-function flag_note_flag_form_submit($form, &$form_state) {
-  variable_set('flag_note_title_'. $form['#flag']->name, $form_state['values']['flag_note']['title']);
-  variable_set('flag_note_label_'. $form['#flag']->name, $form_state['values']['flag_note']['label']);
-  variable_set('flag_note_help_'. $form['#flag']->name, $form_state['values']['flag_note']['help']);
-  variable_set('flag_note_history_disabled_'. $form['#flag']->name, $form_state['values']['flag_note']['disable_history']);
-  variable_set('flag_note_maxlength_'. $form['#flag']->name, $form_state['values']['flag_note']['maxlength']);
+function flag_note_flag_form_validate($form, &$form_state) {
+  if (empty($form_state['values']['flag_note_vocab'])
+      and !empty($form_state['values']['flag_note_hide_text'])) {
+    form_set_error('flag_note_vocab', t('To hide the flag note textarea you must select a vocabulary for predefined text'));
+  }
 }
 
-function _flag_note_history_disabled($flag_name) {
-  return variable_get('flag_note_history_disabled_'. $flag_name, 0);
+/**
+ * Implementation of hook_flag().
+ *
+ * Remove notes when content gets unflagged.
+ */
+function flag_note_flag($action, $flag, $content_id, $account) {
+  if ($action == 'unflag' and $flag->link_type == 'flag_note_form') {
+    if ($flag->flag_note_history_disabled) {
+      $search = array('fid' => $flag->fid, 'content_type' => $flag->content_type, 'content_id' => $content_id);
+      if (!$flag->global) {
+        $search['uid'] = $account->uid;
+      }
+      flag_note_remove_notes($search);
+    }
+  }
 }
 
 /**
  * Implementation of hook_nodeapi().
- *  Deletes notes once a node is deleted.
+ *
+ * Deletes notes once a node is deleted.
  */
 function flag_note_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'delete':
       flag_note_remove_notes(array('content_type' => 'node', 'content_id' => $node->nid));
     break;
+    case 'insert':
+    case 'update':
+      // Handles inline flag / note editing in node form
+      if (is_array($node->flag)) {
+        _flag_note_node_form_submit($node);
+      }
+    break;
   }
 }
 
 /**
  * Implementation of hook_user().
- *  Deletes notes once an user is deleted.
+ *
+ * Deletes notes once an user is deleted.
  */
 function flag_note_user($op, &$edit, &$account, $category = NULL) {
   switch ($op) {
@@ -268,7 +350,8 @@ function flag_note_user($op, &$edit, &$account, $category = NULL) {
 
 /**
  * Implementation of hook_comment().
- *  Deletes notes once a comment is deleted.
+ *
+ * Deletes notes once a comment is deleted.
  */
 function flag_note_comment(&$a1, $op) {
   switch ($op) {
@@ -280,11 +363,16 @@ function flag_note_comment(&$a1, $op) {
 
 /**
  * Implementation of hook_form_alter().
- *  Deletes notes once a flag is deleted.
+ *
+ * Deletes notes once a flag is deleted.
  */
 function flag_note_form_flag_delete_confirm_alter(&$form, $form_state) {
   $form['#submit'][] = 'flag_note_flag_delete_confirm_submit';
 }
+
+/**
+ * Additional submit handler added to the flag delete confirmation form.
+ */
 function flag_note_flag_delete_confirm_submit($form, &$form_state) {
   flag_note_remove_notes(array('fid' => $form_state['values']['fid']));
 }
@@ -293,118 +381,222 @@ function flag_note_flag_delete_confirm_submit($form, &$form_state) {
  * Called from the flag's link which is set up in hook_flag_link.
  */
 function flag_note_page($action, $flag_name, $content_id) {
+  $flag = flag_get_flag($flag_name);
   switch ($action) {
     case 'flag';
       return drupal_get_form('flag_note_form', $action, $flag_name, $content_id);
       break;
     case 'unflag':
-      //
-      // Delete old note if history is disabled
-      //
-      if (_flag_note_history_disabled($flag_name)) {
-        $flag = flag_get_flag($flag_name);
-        if ($flag->global) {
-          flag_note_remove_notes(array('content_type' => $flag->content_type, 'content_id' => $content_id
-              ));
-        }
-        else {
-          flag_note_remove_notes(array('content_type' => $flag->content_type, 'content_id' => $content_id,
-              'uid' => $GLOBALS['user']->uid));
-        }
-      }
-      flag_page($action, $flag_name, $content_id);
-      break;
     default:
-      return flag_page($action, $flag_name, $content_id);
+      return flag_page($action, $flag, $content_id);
       break;
   }
 }
 
-function flag_note_form(&$form_state, $action, $flag_name, $content_id) {
+/**
+ * Helper function shared between flag note edit and create form.
+ */
+function _flag_note_form(&$form_state, $action, $flag_name, $content_id,
+                          $flag_note = NULL, $nodeform = FALSE) {
   $form = array();
-  $form['action'] = array(
-    '#type' => 'value',
-    '#value' => 'flag',
-  );
-  $form['flag_name'] = array(
-    '#type' => 'value',
-    '#value' => $flag_name,
-  );
-  $form['content_id'] = array(
-    '#type' => 'value',
-    '#value' => $content_id,
-  );
-  $form['note'] = array(
-    '#type' => 'textarea',
-    '#title' => variable_get('flag_note_label_'. $flag_name, t('Flag note')),
-    '#cols' => 60,
-    '#rows' => 5,
-    '#description' => variable_get('flag_note_help_'. $flag_name, t('A descriptive reason.')),
-    '#weight' => -1,
-    '#required' => TRUE,
-  );
+  $flag = flag_get_flag($flag_name);
 
-  $maxlen = variable_get('flag_note_maxlength_'. $flag_name, 0);
-  if ($maxlen > 0) {
-    $form['note']['#maxlength'] = $maxlen;
+  if (!$nodeform) {
+    drupal_set_title($flag->flag_note_title);
   }
 
-  drupal_set_title(variable_get('flag_note_title_'. $flag_name, t('Flag note')));
-
-  $flag = flag_get_flag($flag_name);
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => $flag->get_label('flag_short'),
+  $form['flag_note'] = array(
+    '#type' => 'fieldset',
+    '#tree' => FALSE,
+    '#title' => filter_xss($flag->flag_note_fieldset),
   );
+
+  if (empty($flag_note)) {
+    $form['flag_note']['action'] = array(
+      '#type' => 'value',
+      '#value' => 'flag',
+    );
+    $form['flag_note']['flag_name'] = array(
+      '#type' => 'value',
+      '#value' => $flag_name,
+    );
+    $form['flag_note']['content_id'] = array(
+      '#type' => 'value',
+      '#value' => $content_id,
+    );
+  }
+
+  $vid = $flag->flag_note_vocab;
+  if (module_exists('taxonomy') and $vid) {
+    $vocabulary = taxonomy_vocabulary_load($vid);
+    $form['flag_note']['tid'] = array(
+      '#title' => filter_xss($flag->flag_note_vocab_label),
+      '#description' => filter_xss($flag->flag_note_vocab_help),
+      '#required' => $vocabulary->required,
+      '#weight' => -2,
+      '#default_value' => $flag_note['tid'],
+    );
+    if (module_exists('hs_taxonomy')
+            and variable_get('taxonomy_hierarchical_select_'. $vid, FALSE)) {
+      module_load_include('inc', 'hierarchical_select', 'includes/common');
+      $form['flag_note']['tid'] += array(
+        '#type' => 'hierarchical_select',
+        '#size' => 1,
+        '#config' => array(
+          'module' => 'hs_taxonomy',
+          'params' => array('vid' => $vid),
+        ) + hierarchical_select_common_config_get('taxonomy-'. $vid));
+    }
+    else {
+      $form['flag_note']['tid'] += taxonomy_form($vid);
+    }
+  }
+
+  $default_value = $flag->flag_note_default_text;
+  if (!empty($flag_note)) {
+    $default_value = $flag_note['note'];
+  }
+  elseif (is_numeric($content_id) and module_exists('token')) {
+    $default_value = $flag->replace_tokens($default_value,
+      array_flip($flag->get_labels_token_types()), $content_id);
+  }
+
+  if (!$flag->flag_note_hide_text) {
+    $form['flag_note']['note'] = array(
+      '#type' => 'textarea',
+      '#title' => filter_xss($flag->flag_note_label),
+      '#cols' => 60,
+      '#rows' => 5,
+      '#description' => filter_xss($flag->flag_note_help),
+      '#weight' => -1,
+      '#required' => !$nodeform,
+      '#default_value' => $default_value,
+    );
+
+    $maxlen = $flag->flag_note_maxlength;
+    if ($maxlen > 0) {
+      $form['flag_note']['note']['#maxlength'] = $maxlen;
+    }
+  }
+
+  if (is_numeric($content_id) and !$nodeform) {
+    $form['flag_note']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => $flag->get_label('flag_short', $content_id),
+    );
+  }
   return $form;
 }
 
+/**
+ * Form for entering a new note.
+ */
+function flag_note_form(&$form_state, $action, $flag_name, $content_id) {
+  if (module_exists('modalframe')) {
+    modalframe_child_js();
+  }
+  return _flag_note_form($form_state, $action, $flag_name, $content_id);
+}
+
+/**
+ * Submit handler for adding a new note.
+ */
 function flag_note_form_submit(&$form, &$form_state) {
   $flag = flag_get_flag($form_state['values']['flag_name']);
-  //
-  // Next line is compulsory to get the token later, I hope it won't break anything.
-  //
-  $flag->flag_note = $form_state['values']['note'];
+
+  // Add our info to the flag object to use in tokens when flagging.
+  if (module_exists('token')) {
+    $flag->flag_note['text'] = $form_state['values']['note'];
+    if (module_exists('taxonomy') and $form_state['values']['tid']) {
+      $term = taxonomy_get_term($form_state['values']['tid']);
+      if ($term) {
+        $flag->flag_note['term'] = $term->name;
+      }
+    }
+  }
+
   $result = $flag->flag($form_state['values']['action'], $form_state['values']['content_id']);
   if (empty($result)) {
     drupal_set_message(t('You are not allowed to flag, or unflag, this content.'));
   }
   else {
-    $userflag = flag_get_user_flags($flag->content_type,
-        $form_state['values']['content_id'], $GLOBALS['user']->uid);
-    $record = $userflag[$flag->name];
-    //
-    // Now uid = 0 if is a global flag. Anyway we want to store the note author so we change it
-    //
-    $record->uid  = $GLOBALS['user']->uid;
-    $record->note = $form_state['values']['note'];
-    flag_note_insert_note($record);
-    drupal_set_message($flag->get_label($form_state['values']['action'] .'_message', $content_id));
+    $userflag = flag_get_user_flags($flag->content_type, $form_state['values']['content_id'], $GLOBALS['user']->uid);
+    if ($userflag) {
+      $record = $userflag[$flag->name];
+
+      // Now uid = 0 if is a global flag. Anyway we want to store the note author
+      // so we change it.
+      $record->uid  = $GLOBALS['user']->uid;
+      $record->note = $form_state['values']['note'];
+      $record->tid = ($form_state['values']['tid'] > 0 ? $form_state['values']['tid'] : NULL);
+      flag_note_insert_note($record);
+      drupal_set_message($flag->get_label($form_state['values']['action'] .'_message', $form_state['values']['content_id']));
+    }
+  }
+
+  if (module_exists('modalframe')) {
+    $status_messages = array();
+    foreach (drupal_get_messages($display, FALSE) as $type => $messages) {
+      $status_messages = array_merge($status_messages, $messages);
+    }
+    modalframe_close_dialog(array(
+      'newLink' => $flag->theme('unflag', $form_state['values']['content_id'], TRUE),
+      'status'  => (count($status_messages) > 1 ? '- ' : '') . implode("\n- ", $status_messages),
+    ));
   }
 }
 
 /**
  * Implementation of hook_flag_link_types().
- *  Defines a link type that the admin can select when editting a flag
+ *
+ * Defines a link type that the admin can select when editting a flag.
  */
 function flag_note_flag_link_types() {
-  return array('flag_note_form' => t('Flag note form'));
+  return array('flag_note_form' => array(
+    'title' => t('Flag note form'),
+    'description' => t('The user will be able to relate a note to the flagging operation.'),
+    'options' => array(
+      'flag_note_title'             => t('Flag note'),
+      'flag_note_fieldset'          => t('Flag note'),
+      'flag_note_label'             => t('Flag note'),
+      'flag_note_help'              => t('A descriptive reason.'),
+      'flag_note_history_disabled'  => TRUE,
+      'flag_note_delete_unflags'    => TRUE,
+      'flag_note_default_text'      => '',
+      'flag_note_maxlength'         => 0,
+      'flag_note_vocab'             => FALSE,
+      'flag_note_vocab_label'       => t('Reason'),
+      'flag_note_vocab_help'        => t('Please select a reason.'),
+      'flag_note_hide_text'         => NULL,
+  )));
 }
 
 /**
  * Implementation of hook_flag_link().
- *  Build the callback link for flags
+ *
+ * Build the callback link for flags.
  */
-function flag_note_flag_link(&$flag, $action, $content_id) {
+function flag_note_flag_link($flag, $action, $content_id) {
+  global $user;
+  
   $token = flag_get_token($content_id);
+  $href = "flagnote/action/$action/$flag->name/$content_id";
+  
+  if (module_exists('flag_abuse') and user_access('reset abuse flags', $user)
+      and in_array($flag->name, array('abuse_node', 'abuse_comment', 'abuse_user')))
+  {
+    $href = "flag/$action/$flag->name/$content_id";
+  }
+  
   return array(
-    'href' => "flag/note/$action/$flag->name/$content_id",
+    'href' => $href,
     'query' => drupal_get_destination() .'&token='. $token,
   );
 }
 
-/*
- * Database interaction
+/**
+ * @defgroup Database interaction.
+ * @{
  */
 
 function flag_note_get_schema() {
@@ -422,6 +614,7 @@ function flag_note_insert_note($record) {
 }
 
 function flag_note_update_note($options) {
+  $options['note'] = filter_xss($options['note']);
   return drupal_write_record('flag_note', $options, 'fnid');
 }
 
@@ -447,12 +640,17 @@ function flag_note_get_notes($options) {
 }
 
 /**
+ * @}
+ */
+
+/**
  * Implementation of hook_token_list().
  */
 function flag_note_token_list($type = 'all') {
   $tokens = array();
   if ($type == 'flag') {
-    $tokens['flag note']['flag-note'] = t('The note associated with the flagging action.');
+    $tokens['flag note']['flag-note-text'] = t('The note associated with the flagging action.');
+    $tokens['flag note']['flag-note-term'] = t('The term associated with the flagging action.');
   }
   return $tokens;
 }
@@ -462,8 +660,95 @@ function flag_note_token_list($type = 'all') {
  */
 function flag_note_token_values($type, $object = NULL, $options = array()) {
   $values = array();
-  if ($type == 'flag' and !empty($object)) {
-    $values['flag-note'] = isset($object->flag_note) ? $object->flag_note : '';
+  if ($type == 'flag' and !empty($object->flag_note)) {
+    $values['flag-note']      = // Keep this for backward compatibility
+    $values['flag-note-text'] = check_plain($object->flag_note['text']);
+    $values['flag-note-term'] = check_plain($object->flag_note['term']);
   }
   return $values;
+}
+
+/**
+ * Get list of vocabs.
+ */
+function _flag_note_get_vocabs() {
+  $vocabs = taxonomy_get_vocabularies();
+  $options[0] = t("- none -");
+  foreach ($vocabs as $vid => $vocab) {
+    $options[$vid] = t($vocab->name);
+  }
+  return $options;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ *
+ *  Merge flag note fields into node edit form
+ */
+function flag_note_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['type']) and isset($form['#node']) and is_array($form['flag'])
+          and ($form_id == $form['type']['#value'] .'_node_form')) {
+    $weight = 0;
+    foreach ($form['flag'] as $name => $value) {
+      if ($form['flag'][$name]['#type'] == 'checkbox') {
+        $flag = flag_get_flag($name);
+        if ($flag->link_type != 'flag_note_form') {
+          continue ;
+        }
+        $form['flag'][$name]['#weight'] = $weight++;
+        // Gets current (last) flag note if exists
+        if ($form['#node']->nid) {
+          $userflag = (array) flag_get_user_flags($flag->content_type, $form['#node']->nid);
+          if ($userflag[$name]) {
+            $record = (array) $userflag[$name];
+            // If it's a global flag avoid searching by uid
+            if (empty($userflag[$name]->uid)) {
+              unset ($record['uid']);
+            }
+            $note = array_pop(flag_note_get_notes($record));
+          }
+        }
+        $form['flag']['flag_note_'. $name] = current(
+                _flag_note_form($form_state, 'flag', $name, $form['#node']->nid, $note, TRUE));
+        $form['flag']['flag_note_'. $name]['#weight'] = $weight++;
+        $form['flag']['flag_note_'. $name]['#tree'] = TRUE;
+      }
+    }
+  }
+}
+
+/**
+ *  Insert new notes or update new ones once the node form is submitted
+ *  (old notes are automatically removed when some content is unflagged).
+ */
+function _flag_note_node_form_submit($node) {
+  foreach (array_filter($node->flag, 'is_int') as $name => $state) {
+    if ($state and isset($node->flag['flag_note_'. $name])) {
+      $userflag = (array) flag_get_user_flags('node', $node->nid);
+      if ($userflag[$name]) {
+        $record = (array) $userflag[$name];
+        $record['uid'] = $GLOBALS['user']->uid;
+        $search = $record;
+        // If it's a global flag just overwrites old note
+        if (empty($userflag[$name]->uid)) {
+          unset ($search['uid']);
+        }
+        $note = array_pop(flag_note_get_notes($search));
+        $record['note'] = $node->flag['flag_note_'. $name]['note'];
+        if (!empty($node->nid) and module_exists('token')) {
+          $flag = flag_get_flag($name);
+          $record['note'] = $flag->replace_tokens($record['note'],
+            array_flip($flag->get_labels_token_types()), $node->nid);
+        }
+        $record['tid'] = $node->flag['flag_note_'. $name]['tid'];
+        if ($note) {
+          $record['fnid'] = $note['fnid'];
+          flag_note_update_note($record);
+        }
+        else {
+          flag_note_insert_note($record);
+        }
+      }
+    }
+  }
 }

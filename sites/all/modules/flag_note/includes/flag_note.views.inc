@@ -1,5 +1,4 @@
 <?php
-// $Id: flag_note.views.inc,v 1.1.2.5 2009/11/19 00:10:35 gunzip Exp $
 
 /**
  * @file
@@ -133,6 +132,19 @@ function flag_note_views_data() {
       'base' => 'users',
       'base field' => 'uid',
       'relationship field' => 'uid',
+    ),
+  );
+
+  // relationship (predefined notes)
+  $data['flag_note']['flag_note_predefined_rel'] = array(
+    'group' => $groupname,
+    'title' => t('Predefined note'),
+    'help' => t('Reason associated with the note.'),
+    'relationship' => array(
+      'label' => t('flag_note_tid'),
+      'base' => 'term_data',
+      'base field' => 'tid',
+      'relationship field' => 'tid',
     ),
   );
 
