@@ -11,23 +11,38 @@
 		<div class="columns">
 
 			<div class="column sidebar">
-
+        <?php if(function_exists('v2_profiles_name_index')):?>
 				<?php print v2_profiles_name_index($user->uid); ?>
+				<?php endif;?>
+				
+				<?php if(function_exists('v2_profiles_avatars_index')):?>
 				<?php print v2_profiles_avatars_index($user->uid); ?>
+				<?php endif;?>
+				
+        <?php if(function_exists('v2_profiles_links_index')):?>
 				<?php print v2_profiles_links_index($user->uid); ?>
+				<?php endif;?>
+				
+				<?php if(function_exists('v2_profiles_friends_index')):?>
 				<?php print v2_profiles_friends_index($user->uid); ?>
+				<?php endif;?>
 
 			</div>
 
 			<div class="column content">
-
+        <?php
+          //tabs were specifically removed from this user page template, however, the authorization tab is needed for our cmwn services oauth api
+          print $variables['tabs']; 
+        ?>
 				<?php print $content; ?>
 
 			</div>
 
 		</div>
 
+    <?php if(function_exists('v2_profiles_feed_index')):?>
 		<?php print v2_profiles_feed_index($user->uid); ?>
+		<?php endif;?>
 
 	</div>
 

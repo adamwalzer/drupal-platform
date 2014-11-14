@@ -1,0 +1,6 @@
+name = CMWN OAuth Services
+core = 6.x
+ 
+dependencies[] = oauth_common
+dependencies[] = http_client
+dependencies[] = http_client_oauth
