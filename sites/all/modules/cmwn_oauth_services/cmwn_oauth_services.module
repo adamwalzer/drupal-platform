@@ -67,7 +67,7 @@ function _cmwn_oauth_services_request($consumer_key) {//from args url
 }
  
 function _cmwn_oauth_services_authorize() {
-  global $base_url
+  global $base_url;
   $csid = db_result(db_query("select occ.csid from {oauth_common_consumer} occ inner join {oauth_common_token} oct on oct.csid = occ.csid where oct.token_key = '%s' order by oct.tid asc limit 1", $_SESSION['cmwn_oauth_services_request_key']));//ASC OR DESC?
   $consumer = DrupalOAuthConsumer::loadById($csid, TRUE);//true = load provider data
   $request_token = DrupalOAuthToken::loadByKey($_GET['oauth_token'], $consumer, OAUTH_COMMON_TOKEN_TYPE_REQUEST);
