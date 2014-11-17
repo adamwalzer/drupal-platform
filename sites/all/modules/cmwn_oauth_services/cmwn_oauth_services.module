@@ -41,44 +41,39 @@ function cmwn_oauth_services_menu() {
 }
  
 function _cmwn_oauth_services_request($consumer_key) {//from args url
+  global $base_url;
   $consumer = DrupalOAuthConsumer::load($consumer_key, FALSE);
   if (!$consumer) {
-    //get secret from db via database
-    //$secret = db_result(db_query("select secret from {oauth_common_consumer} where consumer_key ='%s'", $consumer_key));
     $csid = db_result(db_query("select csid from {oauth_common_consumer} where consumer_key ='%s' order by csid desc limit 1", $consumer_key));
     $consumer = DrupalOAuthConsumer::loadById($csid,FALSE);
-
-    //$consumer = new DrupalOAuthConsumer($consumer_key, $secret);
-    //$consumer->write();
   }
 
   $sig_method = DrupalOAuthClient::signatureMethod();
 
   $client = new DrupalOAuthClient($consumer, NULL, $sig_method);
-  //print_r($client);exit();
-  $request_token = $client->getRequestToken('http://local.cmwn.com:8888/oauth/request_token', array(
-    'callback' => 'http://local.cmwn.com:8888/cmwn_oauth_services/access',//this is not used right now
+  $request_token = $client->getRequestToken($base_url . '/oauth/request_token', array(
+    'callback' => $base_url . '/cmwn_oauth_services/access',//this is not used right now
   ));
   
   //$request_token->write();//this seems to create duplicate authorizations so we are commenting this out
    
   $_SESSION['cmwn_oauth_services_request_key'] = $request_token->key;
    
-  $auth_url = $client->getAuthorizationUrl('http://local.cmwn.com:8888/oauth/authorize', array(
-    'callback' => 'http://local.cmwn.com:8888/cmwn_oauth_services/access',//this is not used right now
+  $auth_url = $client->getAuthorizationUrl($base_url . '/oauth/authorize', array(
+    'callback' => $base_url . '/cmwn_oauth_services/access',//this is not used right now
   ));
-  //print_r($auth_url);exit();
+
   drupal_goto($auth_url);
 }
  
 function _cmwn_oauth_services_authorize() {
-
+  global $base_url
   $csid = db_result(db_query("select occ.csid from {oauth_common_consumer} occ inner join {oauth_common_token} oct on oct.csid = occ.csid where oct.token_key = '%s' order by oct.tid asc limit 1", $_SESSION['cmwn_oauth_services_request_key']));//ASC OR DESC?
   $consumer = DrupalOAuthConsumer::loadById($csid, TRUE);//true = load provider data
   $request_token = DrupalOAuthToken::loadByKey($_GET['oauth_token'], $consumer, OAUTH_COMMON_TOKEN_TYPE_REQUEST);
   $client = new DrupalOAuthClient($consumer, $request_token);
   $verifier = isset($_GET['oauth_verifier']) ? $_GET['oauth_verifier'] : NULL;
-  $access_token = $client->getAccessToken('http://local.cmwn.com:8888/oauth/access_token', array('verifier' => $verifier,'get'=>TRUE));
+  $access_token = $client->getAccessToken($base_url . '/oauth/access_token', array('verifier' => $verifier,'get'=>TRUE));
   $request_token->delete();
   //AT THIS POINT, THE TOKEN IS AUTHORIZED AND WILL SHOW UP IN THE AUTHORIZATIONS TABLE
 
@@ -86,12 +81,12 @@ function _cmwn_oauth_services_authorize() {
   $sig_method = DrupalOAuthClient::signatureMethod();
   module_load_include('inc','http_client','includes/HttpClientOAuth');
   $auth = new HttpClientOAuth($consumer, $access_token, $sig_method, TRUE, TRUE);
-  drupal_goto('http://local.cmwn.com:8888/oauth/authorized');
+  drupal_goto($base_url . '/oauth/authorized');
   exit;
 }
 
 function _cmwn_oauth_services_application() {
-  
+  global $base_url;
   //$consumer = DrupalOAuthConsumer::load($_GET['oauth_consumer_key'], FALSE);
   if (!$consumer) {
     $csid = db_result(db_query("select csid from {oauth_common_consumer} where consumer_key ='%s' order by csid desc limit 1", $_GET['oauth_consumer_key']));
@@ -101,7 +96,7 @@ function _cmwn_oauth_services_application() {
   $sig_method = DrupalOAuthClient::signatureMethod();
 
   $client = new DrupalOAuthClient($consumer, NULL, $sig_method);
-  $request_token = $client->getRequestToken('http://local.cmwn.com:8888/oauth/request_token', array());
+  $request_token = $client->getRequestToken($base_url . '/oauth/request_token', array());
   $request_token->write();
 
   //use request token key to get full consumer object
@@ -120,7 +115,7 @@ function _cmwn_oauth_services_application() {
   $request_token->type = 1;//what is this?
   $request_token->consumer = $consumer;
   $context = oauth_common_context_load(db_result(db_query("select context from {oauth_common_provider_consumer} pc where consumer_key ='%s'",$_GET['oauth_consumer_key'])));
-  //print_r($context);exit;
+
   $request_token->expires = time() + $context->authorization_options['access_token_lifetime'];
   $request_token->services = $context->authorization_options['default_authorization_levels'];//not sure if this is right handling of levels but we're not using them atm
   if (!$context) {
@@ -129,7 +124,7 @@ function _cmwn_oauth_services_application() {
   }
 
   // Add services
-  //lwd we're defaulting to not supporting levels at the moment
+  //lwd we're defaulting to not supporting context levels at the moment
   /*if (!empty($values['full_access'])) { // TODO: Full access should be a configurable auth level
     $token->services = array('*');
   }
@@ -163,22 +158,18 @@ function _cmwn_oauth_services_application() {
   
 }
 
-
-//
-//http://local.cmwn.com:8888/services/get_authorized_data?oauth_consumer_key=kRTvDhFXFtLRa8ZgGKsGBcG6FcccmzsC&oauth_token=MFpkTxttjVg9C9fzuYY8bpAtKzYA6evj&callback=callthisback, replace last param with key from authorizatoins
+//http://local.cmwn.com:8888/services/get_authorized_data?oauth_consumer_key=kRTvDhFXFtLRa8ZgGKsGBcG6FcccmzsC&oauth_token=MFpkTxttjVg9C9fzuYY8bpAtKzYA6evj&callback=callthisback, replace last param with key from authorizations
 
 function _cmwn_oauth_services_application_data(){//$key is consumer key from set up in user consumer tab, $auth_token is key from authorizations
   _cmwn_oauth_services_oauth_validate_request();//this will return unauthorized if it does not validate.
   $callback = $_GET['callback'];
   $node= node_load(279);
- // return 'test';//normal return if you want to see dsm() output to debug
   header('Content-Type: application/json; charset=utf8');
   $json = json_encode($node);
 
   //no call back
   if( ! isset($_GET['callback']))
     exit($json);
-  
   
   //valid callback, jsonp
   if(cmwn_json_is_valid_callback($_GET['callback']))
@@ -200,7 +191,6 @@ function _cmwn_oauth_services_oauth_validate_request($type="access token", $unsi
       throw new OAuthException('Missing consumer token');
     }else{
       //TODO: ideally the consumer object would already have these loaded and we wouldn't have to query them. 
-
       $csid = $consumer->csid;
       if($csid){
         //CHECK IP
@@ -214,7 +204,6 @@ function _cmwn_oauth_services_oauth_validate_request($type="access token", $unsi
         
         //CHECK IF TOKEN IS EXPIRED
         $expired = db_result(db_query("select expires from {oauth_common_token} c where token_key='%s' and token_key <> '' and expires > 0 and FROM_UNIXTIME(expires) < DATE(NOW())",$_GET['oauth_token']));
-        //print 'expired? ' . $expired;exit();
         if($expired){
           throw new OAuthException("The access token is expired.");
         }
