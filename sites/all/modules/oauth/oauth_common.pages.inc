@@ -328,13 +328,19 @@ function oauth_common_callback_request_token() {
   try {
     $req = DrupalOAuthRequest::from_request();
     $context = oauth_common_context_from_request($req);
+    watchdog('cmwn_context',print_r($context,true));
+      watchdog('cmwn_req',print_r($req, true));
     if (!$context) {
       throw new OAuthException('No OAuth context found');
     }
     $server = new DrupalOAuthServer($context);
+    watchdog('cmwn_server',print_r($server,true));
+    watchdog('cmwn_uri',$_SERVER['REQUEST_URI']);
     print $server->fetch_request_token($req);
+    
   }
   catch (OAuthException $e) {
+    watchdog('cmwn_error',print_r($e,true));
     drupal_set_header('HTTP/1.0 401 Unauthorized: ' . $e->getMessage());
     drupal_set_header(sprintf('WWW-Authenticate: OAuth realm="%s"', url('', array('absolute' => TRUE))));
   }

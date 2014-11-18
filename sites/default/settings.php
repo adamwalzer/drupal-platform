@@ -291,6 +291,9 @@ switch ($_SERVER['HTTP_HOST']) {
       require('/var/www/site-php/changemyworldnow/changemyworldnow-settings.inc');
     }
 		break;
+  case 'local.cmwn.com:8888':
+    $db_url = 'mysql://root:root@localhost/ginasink_drp';
+    break;
 	case 'localhost.site-name':
 	default:
 		$db_url = 'mysql://root@localhost/gi';
@@ -304,5 +307,21 @@ switch ($_SERVER['HTTP_HOST']) {
 
 // Make sure drush keeps working. Taken from function drush_verify_cli() but modified
 $cli = (php_sapi_name() == 'cli');
-
 // PASSWORD PROTECT NON-PRODUCTION SITES (i.e. staging/dev)
+
+
+
+
+if (isset($_SERVER['PANTHEON_ENVIRONMENT'])) {
+  switch ($_SERVER['PANTHEON_ENVIRONMENT']) {
+    case 'test':
+     $base_url = 'http://test-cmwn.gotpantheon.com/'; // NO trailing slash!
+     break;
+    case 'dev':
+      $base_url = 'http://dev-cmwn.gotpantheon.com'; // NO trailing slash!
+      break;
+    case 'live':
+      $base_url = 'http://live-cmwn.gotpantheon.com'; // NO trailing slash!
+      break;
+  }
+}

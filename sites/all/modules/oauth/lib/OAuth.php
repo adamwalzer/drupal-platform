@@ -8,6 +8,17 @@
  * OAuth PECL extension includes an OAuth Exception class, so we need to wrap
  * the definition of this class in order to avoid a PHP error.
  */
+
+// Modify server variables to be compatible with the OAuth.php library
+$_SERVER['SERVER_NAME'] = $_SERVER['HTTP_HOST'];
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on") {
+  $_SERVER['SERVER_PORT'] = 443;
+}
+else {
+  $_SERVER['SERVER_PORT'] = 80;
+}
+$_SERVER['QUERY_STRING'] = preg_replace("/&{0,1}q=[^&]*&{0,1}/i", "", $_SERVER['QUERY_STRING']);
+
 if (!class_exists('OAuthException')) {
   /*
    * Generic exception class
@@ -663,7 +674,11 @@ class OAuthServer {
    * all-in-one function to check the signature on a request
    * should guess the signature method appropriately
    */
-  private function check_signature($request, $consumer, $token) {
+    private function check_signature($request, $consumer, $token) {
+    watchdog('cmwn_request',print_r($request,true));
+    watchdog('cmwn_consumer',print_r($consumer,true));
+    watchdog('cmwn_token',print_r($token,true));
+    
     // this should probably be in a different method
     $timestamp = $request instanceof OAuthRequest
         ? $request->get_parameter('oauth_timestamp')

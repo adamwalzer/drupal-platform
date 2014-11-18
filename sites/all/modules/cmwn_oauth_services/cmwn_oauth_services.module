@@ -51,10 +51,11 @@ function _cmwn_oauth_services_request($consumer_key) {//from args url
   $sig_method = DrupalOAuthClient::signatureMethod();
 
   $client = new DrupalOAuthClient($consumer, NULL, $sig_method);
+  //dsm($consumer);
   $request_token = $client->getRequestToken($base_url . '/oauth/request_token', array(
     'callback' => $base_url . '/cmwn_oauth_services/access',//this is not used right now
   ));
-  
+  //print_r($request_token);exit();
   //$request_token->write();//this seems to create duplicate authorizations so we are commenting this out
    
   $_SESSION['cmwn_oauth_services_request_key'] = $request_token->key;
@@ -62,6 +63,7 @@ function _cmwn_oauth_services_request($consumer_key) {//from args url
   $auth_url = $client->getAuthorizationUrl($base_url . '/oauth/authorize', array(
     'callback' => $base_url . '/cmwn_oauth_services/access',//this is not used right now
   ));
+  //print $auth_url;exit();
 
   drupal_goto($auth_url);
 }
