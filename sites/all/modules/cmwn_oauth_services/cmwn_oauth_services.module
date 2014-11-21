@@ -236,11 +236,11 @@ function _cmwn_oauth_services_oauth_validate_request($type="access token", $unsi
 
 
 
-function _cmwn_oauth_services_user_contexts($username, $password){
+function _cmwn_oauth_services_user_contexts(){
   //****
   //comment these out when switching to post
-  $_POST['username'] = $username;
-  $_POST['password'] = $password;
+  //$_POST['username'] = $username;
+  //$_POST['password'] = $password;
   //****
   
   $username = $_POST['username'];
