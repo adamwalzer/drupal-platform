@@ -317,7 +317,7 @@ $(function(){
 		target.text('');
 		target.next().find('span').text('Add Photo/ Video');
 		if (source.val() != '') {
-			var allowed = ['gif','jpg','png','avi','flv','m4v','mov','mp4','mpg','wmv'];
+			var allowed = ['gif','jpg','jpeg','png','avi','flv','m4v','mov','mp4','mpg','wmv'];
 			var name = source.val().replace("C:\\fakepath\\", "");
 			var extension = name.split('.').pop();
 			if (jQuery.inArray(extension, allowed) != -1) {
@@ -437,3 +437,8 @@ Processing.resize = function() {
 	}
 
 }
+
+//disable deleting video links during video post.
+$('.whiteboard.index button[type=submit]').click(function(){
+  //Processing.show();
+});
