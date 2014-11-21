@@ -32,7 +32,11 @@
 			<div class="column content">
         <?php
           //tabs were specifically removed from this user page template, however, the authorization tab is needed for our cmwn services oauth api
-          print $variables['tabs']; 
+          global $user;
+          if($user->uid ==1){
+            print $variables['tabs'];
+          }
+          
         ?>
 				<?php print $content; ?>
 
