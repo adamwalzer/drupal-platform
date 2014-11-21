@@ -310,6 +310,16 @@ $(function(){
 
 	/* 1.4 whiteboard */
 
+
+  //disable deleting video links during video post.
+  $('.whiteboard.index button').click(function(){
+    $('a.delete').click(function(){
+      //$(this).hide
+      return false;
+    });
+    $('a.delete').fadeOut(500);
+  });
+
 	$('#v2 .whiteboard .create .form input[type="file"]').bind('change',function(){
 		var source = $(this);
 		var target = $('#v2 .whiteboard .create .form span.file');
@@ -437,8 +447,3 @@ Processing.resize = function() {
 	}
 
 }
-
-//disable deleting video links during video post.
-$('.whiteboard.index button[type=submit]').click(function(){
-  //Processing.show();
-});
