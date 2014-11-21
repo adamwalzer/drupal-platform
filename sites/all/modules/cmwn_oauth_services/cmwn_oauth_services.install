@@ -30,7 +30,14 @@ function cmwn_oauth_services_schema() {
 
 function cmwn_oauth_services_uninstall(){
   drupal_uninstall_schema('cmwn_oauth_user_context');  
+  db_drop_field($ret, 'oauth_common_provider_consumer','ip');
+  db_drop_field($ret, 'oauth_common_provider_consumer','domain');   
 }
+
+function cmwn_oauth_services_install(){
+  drupal_install_schema('cmwn_oauth_user_context');  
+}
+
 
 function cmwn_oauth_services_update_100() {
   $ret = array();
@@ -54,7 +61,6 @@ function cmwn_oauth_services_update_100() {
 }
 
 function cmwn_oauth_services_update_200() {
-  $ret = array();
   $ip = array(
     'type' => 'varchar',
     'description' => "Holds ip address request must come from",
@@ -79,11 +85,6 @@ function cmwn_oauth_services_update_200() {
   
   
   return $ret;
-}
-
-function cmwn_oauth_services_update_6300() {
-  drupal_install_schema('cmwn_oauth_services');  
-  return array();
 }
 
 function cmwn_oauth_services_update_6301() {
