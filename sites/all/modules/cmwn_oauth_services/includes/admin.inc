@@ -1,7 +1,9 @@
 <?php
   
   function cmwn_oauth_services_form_alter(&$form, &$form_state, $form_id) {
-
+    
+    //dsm($form_id);
+    
     switch($form_id){
       case 'oauth_common_form_consumer':
         $ip_default =db_result(db_query("select ip from {oauth_common_provider_consumer} where csid = '%d'",@$form['consumer_object']['#value']->csid));
@@ -25,7 +27,9 @@
         $form['#submit'] = array('cmwn_oauth_services_oauth_common_form_consumer_submit');//note we are replacing the submit function provided by oauth_common_consumers.inc, not adding a secondary submit function to run subsequent to the default submit function.
         
         break;
+ 
       default:
+      
         break;
     }
   }

@@ -1,5 +1,37 @@
 <?php
 
+function cmwn_oauth_services_schema() {
+  $schema = array();
+
+  $schema['cmwn_oauth_user_context'] = array(
+    'description' => t('Stores what contexts a user has access to.'),
+    'fields' => array(
+
+      'uid' => array(
+        'description' => t('User ID of the user'),
+        'type' => 'int',
+        'description' => "uid of user having access to this context",
+        'length' => 10,
+        'not null' => TRUE,
+      ),
+
+      'cid' => array(
+        'type' => 'int',
+        'description' => "CID Context ID from oAuth context module. References a context the user has access to.",
+        'length' => 11,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('csd_id'),
+  );
+
+  return $schema;
+}
+
+function cmwn_oauth_services_uninstall(){
+  drupal_uninstall_schema('cmwn_oauth_user_context');  
+}
+
 function cmwn_oauth_services_update_100() {
   $ret = array();
   $ip = array(
@@ -49,3 +81,13 @@ function cmwn_oauth_services_update_200() {
   return $ret;
 }
 
+function cmwn_oauth_services_update_6300() {
+  drupal_install_schema('cmwn_oauth_services');  
+  return array();
+}
+
+function cmwn_oauth_services_update_6301() {
+  $ret = array();
+  db_add_unique_key($ret, 'cmwn_oauth_user_context', 'uid_cid', array('uid', 'cid'));  
+  return $ret;
+}

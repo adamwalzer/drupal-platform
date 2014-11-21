@@ -1,7 +1,7 @@
 <?php
 module_load_include('inc','cmwn_oauth_services','includes/util');
 module_load_include('inc','cmwn_oauth_services','includes/admin');
-
+module_load_include('inc','cmwn_oauth_services','includes/user');
 
 function cmwn_oauth_services_menu() {
   
@@ -36,6 +36,11 @@ function cmwn_oauth_services_menu() {
     'page callback' => '_cmwn_oauth_services_application_data',
     'access arguments' => array('access content'),
   );  
+
+  $items['services/user/contexts'] = array(
+    'page callback' => '_cmwn_oauth_services_user_contexts',
+    'access arguments' => array('access content'),
+  );
   
   return $items;
 }
@@ -198,7 +203,7 @@ function _cmwn_oauth_services_oauth_validate_request($type="access token", $unsi
         //CHECK IP
         $ip =  db_result(db_query("select ip from {oauth_common_provider_consumer} pc where pc.csid = '%d'", $csid));        
         $client_ip = $_SERVER['REMOTE_ADDR'];
-        if($ip != $_SERVER['REMOTE_ADDR']){
+        if($ip && $ip != '' && $ip != $_SERVER['REMOTE_ADDR']){
           watchdog('cmwn_oauth_validate',t('the ip address was wrong: ' . $client_ip));
           throw new OAuthException("The ip address is wrong.");
         }
@@ -227,4 +232,125 @@ function _cmwn_oauth_services_oauth_validate_request($type="access token", $unsi
     exit;
   }
   //exit;
+}
+
+
+
+function _cmwn_oauth_services_user_contexts($username, $password){
+  //****
+  //comment these out when switching to post
+  $_POST['username'] = $username;
+  $_POST['password'] = $password;
+  //****
+  
+  $username = $_POST['username'];
+  $password = $_POST['password'];
+  
+  try{  
+    //test the credentials
+    if (isset($username)) {
+      if (user_is_blocked($username)) {
+        // blocked in user administration
+        $denied_msg =  t('The username %name has not been activated or is blocked.', array('%name' => $username));
+        throw new OAuthException($denied_msg);
+      }
+      else if (drupal_is_denied('user', $username)) {
+        // denied by access controls
+        $denied_msg = t('The name %name is a reserved username.', array('%name' => $username));
+        throw new OAuthException($denied_msg);
+        exit;     
+      }
+    }  
+    
+    //authenticate user/pass
+  
+    $account = user_load(array('name' => $username, 'pass' => trim($password), 'status' => 1));
+    if ($account && drupal_is_denied('mail', $account->mail)){
+      $denied_msg = t('The name %name is registered using a reserved e-mail address and therefore could not be logged in.', array('%name' => $account->name));
+      throw new OAuthException($denied_msg);
+    }
+  
+  
+  
+    if (!empty($username) && !empty($password) && $account) {
+      //this is a valid username and password
+      //return a valid token, screen name, and context(s)
+      $user_context = $account->cmwn_oauth_user_context;
+      //GENERATE TOKEN
+      global $base_url;
+ 
+      $csid = db_result(db_query("select csid from {oauth_common_consumer} where consumer_key ='%s' order by csid desc limit 1", $_GET['oauth_consumer_key']));
+      $consumer = DrupalOAuthConsumer::loadById($csid,FALSE);
+    
+
+    
+      $sig_method = DrupalOAuthClient::signatureMethod();
+    
+      $client = new DrupalOAuthClient($consumer, NULL, $sig_method);
+      $request_token = $client->getRequestToken($base_url . '/oauth/request_token', array());
+      $request_token->write();
+    
+      //use request token key to get full consumer object
+      $csid = db_result(db_query("select occ.csid from {oauth_common_consumer} occ inner join {oauth_common_token} oct on oct.csid = occ.csid where oct.token_key = '%s' order by oct.tid desc limit 1", $request_token->key));//ASC OR DESC?
+      $consumer = DrupalOAuthConsumer::loadById($csid, true);//true = load provider data  
+      
+      $request_token->uid = $account->uid;
+      $request_token->authorized = 1;
+      $request_token->type = 1;//what is this?
+      $request_token->consumer = $consumer;
+      $context = oauth_common_context_load(db_result(db_query("select context from {oauth_common_provider_consumer} pc where consumer_key ='%s'",$_GET['oauth_consumer_key'])));
+    
+      $request_token->expires = time() + $context->authorization_options['access_token_lifetime'];
+      $request_token->services = $context->authorization_options['default_authorization_levels'];
+      if (!$context) {
+        drupal_set_message(t("Can't find OAuth context, check the site's settings."), 'error');
+        return;
+      }
+    
+      $request_token->write();
+      db_query("DELETE  FROM {oauth_common_token} WHERE key_hash = '%s' AND csid = %d order by tid asc limit 1", sha1($request_token->key), $csid);
+    
+      $keys = array('oauth_consumer_key' => $_GET['oauth_consumer_key'], 'oauth_token' => $request_token->key);
+      $keys['cmwn_oauth_user_context'] = $user_context;
+      $keys['screen_name'] = $account->name;
+      $keys['user_context_valid'] = cmwn_oauth_services_user_has_context($consumer, $user_context);
+      //$keys['consumer'] =$consumer;
+
+      header('Content-Type: application/json; charset=utf8');
+      $json = json_encode($keys);
+    
+      //no call back
+      if( ! isset($_GET['callback']))
+        exit($json);
+      
+      //valid callback, jsonp
+      if(cmwn_json_is_valid_callback($_GET['callback']))
+        exit("{$_GET['callback']}($json)");
+    
+      //problem
+      header('status: 400 Bad Request', true, 400);    
+      }
+      else {
+        watchdog('_cmwn_oauth_services_user_contexts', 'Services authentication attempt failed for %user.', array('%user' => $username));
+        $denied_msg = t('Services authentication attempt failed for %user.', array('%user' => $username));
+        throw new OAuthException($denied_msg);
+      }
+   }   
+  catch (OAuthException $e) {
+    drupal_set_header('HTTP/1.0 401 Unauthorized: ' . $e->getMessage());
+    drupal_set_header(sprintf('WWW-Authenticate: OAuth realm="%s"', url('', array('absolute' => TRUE))));
+    exit; 
+  }  
+}
+
+
+function cmwn_oauth_services_user_has_context($consumer, $user_context){
+  $match = false;
+  foreach($user_context as $cid){
+    //TODO: maybe query {oauth_common_context} to be sure
+   if($consumer->context == $cid->name){
+    $match = true;
+   }
+  }
+  return $match;
 }
