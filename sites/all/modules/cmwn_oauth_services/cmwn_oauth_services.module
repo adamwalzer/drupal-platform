@@ -236,11 +236,12 @@ function _cmwn_oauth_services_oauth_validate_request($type="access token", $unsi
 
 
 
-function _cmwn_oauth_services_user_contexts(){
+function _cmwn_oauth_services_user_contexts($username = NULL, $password = NULL){
+  module_load_include('inc','v2_profiles','includes/avatars');
   //****
   //comment these out when switching to post
-  //$_POST['username'] = $username;
-  //$_POST['password'] = $password;
+  $_POST['username'] = $username;
+  $_POST['password'] = $password;
   //****
   
   $username = $_POST['username'];
@@ -276,6 +277,7 @@ function _cmwn_oauth_services_user_contexts(){
       //this is a valid username and password
       //return a valid token, screen name, and context(s)
       $user_context = $account->cmwn_oauth_user_context;
+      $avatar = v2_profiles_avatars_query($account->uid);
       //GENERATE TOKEN
       global $base_url;
  
@@ -313,9 +315,13 @@ function _cmwn_oauth_services_user_contexts(){
       $keys = array('oauth_consumer_key' => $_GET['oauth_consumer_key'], 'oauth_token' => $request_token->key);
       $keys['cmwn_oauth_user_context'] = $user_context;
       $keys['screen_name'] = $account->name;
+      $keys['avatar'] = $avatar ? $base_url . $avatar:null;
       $keys['user_context_valid'] = cmwn_oauth_services_user_has_context($consumer, $user_context);
-      //$keys['consumer'] =$consumer;
 
+      //dsm($avatar);return 'test';
+      //$keys['consumer'] =$consumer;
+      //dsm($account);exit();
+      
       header('Content-Type: application/json; charset=utf8');
       $json = json_encode($keys);
     
