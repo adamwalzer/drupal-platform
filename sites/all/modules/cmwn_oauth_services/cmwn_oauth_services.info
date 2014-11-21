@@ -1,4 +1,5 @@
 name = CMWN OAuth Services
+description = "Provides integration with oAuth and CMWN as a provider."
 core = 6.x
  
 dependencies[] = oauth_common

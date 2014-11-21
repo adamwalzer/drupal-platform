@@ -22,7 +22,6 @@ function cmwn_oauth_services_schema() {
         'not null' => TRUE,
       ),
     ),
-    'primary key' => array('csd_id'),
   );
 
   return $schema;
@@ -39,28 +38,9 @@ function cmwn_oauth_services_install(){
 }
 
 
-function cmwn_oauth_services_update_100() {
-  $ret = array();
-  $ip = array(
-    'type' => 'varchar',
-    'description' => "Holds ip address request must come from",
-    'length' => 30,
-    'not null' => FALSE,
-  ); 
-  
-  $domain = array(
-    'type' => 'varchar',
-    'description' => "Hold domain request must come from",
-    'length' => 50,
-    'not null' => FALSE,
-  );   
-  
-  db_add_field($ret, 'oauth_common_consumer', 'ip', $ip);//modifying oauth table to hold ip
-  db_add_field($ret, 'oauth_common_consumer', 'domain', $ip);//modifying oauth table to hold domain
-  return $ret;
-}
 
-function cmwn_oauth_services_update_200() {
+function cmwn_oauth_services_update_6001() {
+  
   $ip = array(
     'type' => 'varchar',
     'description' => "Holds ip address request must come from",
@@ -75,19 +55,15 @@ function cmwn_oauth_services_update_200() {
     'not null' => FALSE,
   );   
   
+  $ret = array();
+
   db_add_field($ret, 'oauth_common_provider_consumer', 'ip', $ip);//modifying oauth table to hold ip
   db_add_field($ret, 'oauth_common_provider_consumer', 'domain', $ip);//modifying oauth table to hold domain
-  
-  //remove from other table
-  $ret = array();
-  db_drop_field($ret, 'oauth_common_consumer','ip');
-  db_drop_field($ret, 'oauth_common_consumer','domain');  
-  
-  
+
   return $ret;
 }
 
-function cmwn_oauth_services_update_6301() {
+function cmwn_oauth_services_update_6002() {
   $ret = array();
   db_add_unique_key($ret, 'cmwn_oauth_user_context', 'uid_cid', array('uid', 'cid'));  
   return $ret;
