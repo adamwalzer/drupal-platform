@@ -63,7 +63,7 @@
 
 		$user = user_load($uid);
 
-		$extensions = array('image'=>array('gif','jpg','jpeg','png'));
+		$extensions = array('image'=>array('gif','jpg','JPG','jpeg','png'));
 		$images = array();
 
 		if (sizeof($_FILES) > 0) {

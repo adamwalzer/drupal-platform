@@ -101,7 +101,7 @@
 			drupal_goto('user');
 		}
 
-		$extensions = array('image'=>array('gif','jpg','jpeg','png'),'video'=>array('avi','flv','m4v','mov','mp4','mpg','wmv'));
+		$extensions = array('image'=>array('gif','jpg','JPG','jpeg','png'),'video'=>array('avi','flv','m4v','mov','mp4','mpg','wmv'));
 		$images = array();
 		$videos = array();
 
