@@ -24,14 +24,6 @@
           <li><a href="/events">Where in the World is Gina?</a></li>
         </ul>
       </div>
-      <div style="float:left;width:200px;margin:20px 60px 20px 60px">
-        <a style="float:left;margin:6px 0 0 0;" href="/bus-tour"><img src="<?php print $theme_path; ?>/assets/img/new-hp/saw-bustour.png" /></a>
-        <div style="float:left;margin:20px 0 0 0;width:200px;">
-          <img src="<?php print $theme_path; ?>/assets/img/new-hp/cassandras-angel.png" />
-          <p style="margin:10px 0 0 0">Cassandra’s Angel is about the negative stories that Cassandra – and all of us – are told our entire lives. It’s about who people think we are. Luckily, Cassandra discovers that she is not alone. Come follow Cassandra on a journey that just might change your life.</p>
-          <p style="margin:0 0 20px 0"><a style="font-weight:bold;color:#848077;" href="http://www.barnesandnoble.com/w/cassandras-angel-gina-otto/1100276059">Purchase the Book</a></p>
-        </div>
-      </div>
       <div style="float:left;width:206px;margin:40px 0 20px 60px;">
         <img src="<?php print $theme_path; ?>/assets/img/new-hp/partners.png" />
         <div style="position:relative;">
