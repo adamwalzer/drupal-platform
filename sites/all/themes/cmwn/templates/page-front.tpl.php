@@ -19,17 +19,19 @@
         <a class="next browse right"></a>
       </div>
     </div>
-    <?php if ($user->uid == 0) : ?>
-      <img style="position:absolute;top:30px;left:748px;" src="<?php print $theme_path; ?>/assets/img/new-hp/ready-to-change.png" />
-      <a href="/register-choose"><img style="position:absolute;top:120px;left:742px;" rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/start-now_off.png" /></a>
-      <img style="position:absolute;top:196px;left:748px;" src="<?php print $theme_path; ?>/assets/img/new-hp/already-changing.png" />
-    <?php echo drupal_get_form('user_login'); ?>
-    <?php else : ?>
-      <img style="position:absolute;top:30px;left:748px;" src="<?php print $theme_path; ?>/assets/img/new-hp/youre-logged-in.png" />
-      <a href="/user"><img style="position:absolute;top:103px;left:742px;" rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/return-to-profile_off.png" /></a>
-      <img style="position:absolute;top:248px;left:748px;" src="<?php print $theme_path; ?>/assets/img/new-hp/see-you-again.png" />
-      <a href="/logout"><img style="position:absolute;top:196px;left:748px;" rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/logout_off.png" /></a>
-    <?php endif; ?>
+    <div class="homepage-user">
+      <?php if ($user->uid == 0) : ?>
+        <img style="position:absolute;top:30px;left:748px;" src="<?php print $theme_path; ?>/assets/img/new-hp/ready-to-change.png" />
+        <a href="/register-choose"><img style="position:absolute;top:120px;left:742px;" rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/start-now_off.png" /></a>
+        <img style="position:absolute;top:196px;left:748px;" src="<?php print $theme_path; ?>/assets/img/new-hp/already-changing.png" />
+      <?php echo drupal_get_form('user_login'); ?>
+      <?php else : ?>
+        <img style="position:absolute;top:30px;left:748px;" src="<?php print $theme_path; ?>/assets/img/new-hp/youre-logged-in.png" />
+        <a href="/user"><img style="position:absolute;top:103px;left:742px;" rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/return-to-profile_off.png" /></a>
+        <img style="position:absolute;top:248px;left:748px;" src="<?php print $theme_path; ?>/assets/img/new-hp/see-you-again.png" />
+        <a href="/logout"><img style="position:absolute;top:196px;left:748px;" rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/logout_off.png" /></a>
+      <?php endif; ?>
+    </div>
   </div>
   <div class="skin-wrap <?php print $skin_class; ?>">
     <div class="section-wrap">

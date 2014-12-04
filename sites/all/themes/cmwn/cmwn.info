@@ -14,6 +14,8 @@ stylesheets[all][] = assets/css/modal.css
 stylesheets[all][] = assets/css/jquery.tipped.css
 stylesheets[all][] = assets/css/all.css
 
+stylesheets[all][] = assets/css/responsive.css
+
 scripts[] = assets/js/skin.js
 scripts[] = assets/js/modal.js
 scripts[] = assets/js/jquery.form.js

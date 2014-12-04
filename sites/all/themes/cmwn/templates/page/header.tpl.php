@@ -17,6 +17,7 @@
 <head>
   <title><?php print $head_title; ?></title>
   <?php print $head; ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <?php print $styles; ?>
   <?php print $scripts; ?>
 </head>
@@ -26,16 +27,24 @@
       <div class="outer-wrap">
         <div class="inner-wrap">
           <div class="logo"><a href="/"></a></div>
-          <a class="buy-the-book" href="http://www.barnesandnoble.com/w/cassandras-angel-gina-otto/1100276059"><img rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/buy-the-book_off.png" /></a>
-          <?php if ($user->uid == 0) : ?>
-			   <?php if ($allow_registrations) : ?>
-              <a class="join-now" href="/register-choose"><img rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/join-now_off.png" /></a>
-			   <?php endif; ?>
-            <a class="login" href="/user">Login</a>
-          <?php endif; ?>
-          <div class="utility-nav">
-            <?php print $secondary_links; ?>
+          <div class="top-tabs">
+            <div class="graphic-tab-wrapper">
+              <a class="buy-the-book" href="http://www.barnesandnoble.com/w/cassandras-angel-gina-otto/1100276059"><img rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/buy-the-book_off.png" /></a>
+              <?php if ($user->uid == 0) : ?>
+                <?php if ($allow_registrations) : ?>
+                  <a class="join-now" href="/register-choose"><img rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/join-now_off.png" /></a>
+                  <a class="login" href="/user">Login</a>
+                <?php endif; ?>                
+    			   <?php endif; ?>
+            </div>
+  			  
+          <div class="right-nav-wrap">
+            <div class="utility-nav">
+              <?php print $secondary_links; ?>
+            </div>
+            <?php echo theme('cmwn_module_social'); ?>  			   
           </div>
+          
           <?php if ($user->uid == 0) : ?>
             <a class="pt" href="/node/11"><img rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/pt_off.png" /></a>
           <?php else : ?>
@@ -45,7 +54,13 @@
               <a class="pt" href="/user"><img rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/pt_profile_off.png" /></a>
             <?php } ?>
           <?php endif; ?>
-          <?php echo theme('cmwn_module_social'); ?>
+
+  			   
+  			   
+  			   
+          </div>
+
+          
           <div class="main-nav">
             <?php print $primary_links; ?>
           </div>
