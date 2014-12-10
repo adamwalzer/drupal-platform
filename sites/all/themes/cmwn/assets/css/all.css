@@ -601,9 +601,13 @@ body {
 					}
 
 			#v2 .block.feed.index .content .section .items .scroll {
-				height:162px;
-				overflow:hidden;
+        overflow-y: scroll;
+        margin: 20px 0px;				
 			}
+      
+      #v2 .block.feed.index .content .section .items .scroll ul.pager{
+        display: none;
+      }
 
 				#v2 .block.feed.index .content .section .items .scroll .jspContainer {}
 

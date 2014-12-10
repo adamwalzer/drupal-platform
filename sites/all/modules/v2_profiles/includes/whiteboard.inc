@@ -248,7 +248,7 @@
 		db_query($query);
 
 		if ($user->uid == $uid) {
-			$excerpt = '<a href="/user/' . $user->uid . '">' . $user->name . '</a> replied to thier post.';
+			$excerpt = '<a href="/user/' . $user->uid . '">' . $user->name . '</a> replied to their post.';
 		} else {
 			$friend = user_load($uid);
 			$excerpt = '<a href="/user/' . $user->uid . '">' . $user->name . '</a> replied to <a href="/user/' . $friend->uid . '">' . $friend->name . '\'s</a> post.';

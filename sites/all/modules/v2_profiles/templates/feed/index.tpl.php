@@ -52,7 +52,9 @@
 
 				<div class="section friend-feed">
 					<div class="items">
-						<div class="scroll">
+						<div class="scroll jscrolldiv">
+  						
+  						<?php /*
 							<?php foreach ($data->items->group2 as $item) { ?>
 								<div class="item">
 									<span class="image">
@@ -68,6 +70,8 @@
 									</span>
 								</div>
 							<?php } ?>
+							
+							<?php */?>
 						</div>
 					</div>
 

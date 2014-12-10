@@ -82,7 +82,7 @@
 				`n`.`created` DESC;
 		";
 
-		$results = db_query($query,$uid);
+		$results = db_query($query,$uid);//TODO - I don't think this $uid is even filtering anything in drupal 6.x api :(
 
 		while ($result = db_fetch_object($results)) {
 			$item = new stdClass();

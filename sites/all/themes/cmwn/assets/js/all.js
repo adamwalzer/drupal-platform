@@ -71,14 +71,29 @@ $(function(){
 	/* 1.4 feed */
 
     
-	//$('#v2 .block.feed.index .content .section .items .scroll').jScrollPane({'verticalGutter':6});
 
-    var ffh = 0;//friend feed height
+    $('.section.friend-feed .scroll').load('/cmwn_feed/friend', function(){
+      console.log('loaded ff');
+      //set height
+      var ffh = 0;//friend feed height
+      $('.section.friend-feed .scroll .item:lt(5)').each(function() {//set to height of first 12 items
+         ffh += $(this).height() + 12;//top and bottom padding factored in.
+      });	
+      $('.section.friend-feed .items .scroll').height(ffh+30);//make room for pager 
+
+      //institute scrolling thingy
+      //$('#v2 .block.feed.index .content .section .items .scroll').jScrollPane({'verticalGutter':6});
+
+      //start lazy loader
+
+      $('div.jscrolldiv').jscroll({
+        loadingHtml: '<img src="loading.gif" alt="Loading" /> Loading...',
+        nextSelector: 'li.pager-next a',
+        padding: 50,
+        callback:function(){},
+      });
+    });
     
-    $('.section.friend-feed .scroll .item:lt(12)').each(function() {//set to height of first 12 items
-       ffh += $(this).height() + 12;
-    });	
-    $('.section.friend-feed .items .scroll').height(ffh);
 
 	/* 1.4 flips */
 

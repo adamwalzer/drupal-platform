@@ -1,5 +1,7 @@
 <?php
 
+
+
 function cmwn_feed_init() {
   
 }
@@ -11,3 +13,66 @@ function cmwn_feed_form_alter(&$form, &$form_state, $form_id) {
       break;
   }
 }
+
+
+
+
+
+function cmwn_feed_menu() {
+  $items['cmwn_feed/friend'] = array(
+    'page callback' => 'cmwn_friend_feed',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc in v2 profile
+    
+		$items = array();
+
+		$user = user_load($uid);
+
+		if (!$user) return $items;
+
+		$query = "SELECT n.nid, n.uid, td.tid, ctf.field_excerpt_value AS excerpt FROM {node} AS n JOIN {term_node} AS tn ON n.nid = tn.nid JOIN {term_data} AS td ON tn.tid = td.tid JOIN {content_type_feed} AS ctf ON n.nid = ctf.nid WHERE n.type = 'feed' AND n.status = 1 ORDER BY n.created DESC";
+    
+    $count_query = "SELECT COUNT(*) FROM (" . $query . ") AS count_query";
+
+		$results = pager_query($query, 12, 0, $count_query);
+
+		while ($result = db_fetch_object($results)) {
+			$item = new stdClass();
+			$item->excerpt = $result->excerpt;
+			$item->nid = $result->nid;
+			$item->tid = $result->tid;
+			$item->uid = $result->uid;
+  		$item->href = url('node/' . $item->nid);
+  		$item->src = v2_profiles_avatars_query($item->uid);			
+			$items[] = $item;
+		}
+
+		?>
+		
+    <?php foreach ($items as $item) { ?>
+      <?php if($item->tid == 88):?>
+      	<div class="item">
+      		<span class="image">
+      			<img height="42" src="<?php print $item->src; ?>" width="42" />
+      		</span>
+      		<?php
+      			$_excerpt = $item->excerpt;
+      			$_excerpt = str_replace('/user/'.$user->uid, '/user', $_excerpt);
+      			$_excerpt = preg_replace('/("\/user\/)([0-9]+)(")/i', '/user/'.$user->uid.'/friends/$2/', $_excerpt);
+      		?>
+      		<span class="message">
+      			<?php print $_excerpt; ?>
+      		</span>
+      	</div>
+      	<?php endif; ?>
+    <?php } ?>		
+    <?php
+      print theme('pager', NULL, 10, 0);
+      exit;
+}
+
