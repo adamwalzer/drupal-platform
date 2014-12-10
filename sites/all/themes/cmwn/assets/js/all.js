@@ -69,14 +69,16 @@ $(function(){
 	}
 
 	/* 1.4 feed */
+
+    
+	//$('#v2 .block.feed.index .content .section .items .scroll').jScrollPane({'verticalGutter':6});
+
     var ffh = 0;//friend feed height
     
-    $('li:lt(12)').each(function() {//set to height of first 12 items
-       ffh += $(this).height();
+    $('.section.friend-feed .scroll .item:lt(12)').each(function() {//set to height of first 12 items
+       ffh += $(this).height() + 12;
     });	
     $('.section.friend-feed .items .scroll').height(ffh);
-    
-	$('#v2 .block.feed.index .content .section .items .scroll').jScrollPane({'verticalGutter':12});
 
 	/* 1.4 flips */
 
