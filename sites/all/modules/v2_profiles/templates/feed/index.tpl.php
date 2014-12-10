@@ -50,7 +50,7 @@
 
 			<div class="content">
 
-				<div class="section">
+				<div class="section friend-feed">
 					<div class="items">
 						<div class="scroll">
 							<?php foreach ($data->items->group2 as $item) { ?>
