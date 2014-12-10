@@ -15,9 +15,7 @@
       </div>
     </div>*/ ?>
     <div class="bottom-content">
-      <div style="float:left;margin:40px 60px 40px 60px;">
-        <img src="<?php print $theme_path; ?>/assets/img/new-hp/extras.png" />
-      </div>
+
       <div style="float:left;width:206px;margin:40px 0 20px 60px;">
         <img src="<?php print $theme_path; ?>/assets/img/new-hp/partners.png" />
         <div style="position:relative;">

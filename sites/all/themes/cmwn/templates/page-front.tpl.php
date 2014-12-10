@@ -37,9 +37,7 @@
     <div class="section-wrap">
       <div class="left">
         <div class="left">
-          <img src="<?php print $theme_path; ?>/assets/img/new-hp/extras.png" />
           
-
           <img src="<?php print $theme_path; ?>/assets/img/new-hp/partners.png" />
           <div style="position:relative;">
           <?php echo views_embed_view('sponsors', 'default'); ?>
