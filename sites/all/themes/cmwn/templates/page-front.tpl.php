@@ -38,12 +38,7 @@
       <div class="left">
         <div class="left">
           <img src="<?php print $theme_path; ?>/assets/img/new-hp/extras.png" />
-          <ul class="menu">
-            <li><a href="/ginas-corner/our-vision">Our Vision</a></li>
-            <li><a href="/ginas-corner/ginas-ink">Gina's Ink</a></li>
-            <li><a href="/node/2561">Letter to Parents</a></li>
-            <li><a href="/events">Where in the World is Gina?</a></li>
-          </ul>
+          
 
           <img src="<?php print $theme_path; ?>/assets/img/new-hp/partners.png" />
           <div style="position:relative;">
