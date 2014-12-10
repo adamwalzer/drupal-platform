@@ -76,10 +76,10 @@ $(function(){
       console.log('loaded ff');
       //set height
       var ffh = 0;//friend feed height
-      $('.section.friend-feed .scroll .item:lt(5)').each(function() {//set to height of first 12 items
+      $('.section.friend-feed .scroll .item:lt(12)').each(function() {//set to height of first 12 items
          ffh += $(this).height() + 12;//top and bottom padding factored in.
       });	
-      $('.section.friend-feed .items .scroll').height(ffh+30);//make room for pager 
+      $('.section.friend-feed .items .scroll').height(ffh);//make room for pager 
 
       //institute scrolling thingy
       //$('#v2 .block.feed.index .content .section .items .scroll').jScrollPane({'verticalGutter':6});

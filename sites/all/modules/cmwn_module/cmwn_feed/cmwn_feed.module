@@ -26,7 +26,7 @@ function cmwn_feed_menu() {
   );
   return $items;
 }
-
+//TODO: This has no security, no user checks etc.
 function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc in v2 profile
     
 		$items = array();
@@ -39,7 +39,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
     
     $count_query = "SELECT COUNT(*) FROM (" . $query . ") AS count_query";
 
-		$results = pager_query($query, 12, 0, $count_query);
+		$results = pager_query($query, 13, 0, $count_query);
 
 		while ($result = db_fetch_object($results)) {
 			$item = new stdClass();
