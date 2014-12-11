@@ -94,16 +94,10 @@
 
 		global $user;
 
-		$content = isset($_POST['content'])? $_POST['content'] : '';
-
-		if (empty($content)) {
-			drupal_set_message('Please enter a message before posting.','error');
-			drupal_goto('user');
-		}
-
 		$extensions = array('image'=>array('gif','jpg','JPG','jpeg','png'),'video'=>array('avi','flv','m4v','mov','mp4','mpg','wmv'));
 		$images = array();
 		$videos = array();
+		$is_file = false;
 
 		if (sizeof($_FILES) > 0) {
 			foreach ($_FILES['files']['name'] as $key => $value) {
@@ -115,8 +109,10 @@
 					$path = pathinfo($value);
 					if (in_array($path['extension'],$extensions['image'])) {
 						$images[] = $file;
+						$is_file = true;
 					} elseif (in_array($path['extension'],$extensions['video'])) {
 						$videos[] = $file;
+						$is_file = true;
 					}
 				}
 			}
@@ -153,7 +149,16 @@
 			node_submit($node);
 			node_save($node);
 			$video_reference = $node->nid;
+			$is_file = true;
 		}
+
+		$content = isset($_POST['content'])? $_POST['content'] : '';
+		if (empty($content) && !$is_file) {
+			drupal_set_message('Please enter a message before posting.','error');
+			drupal_goto('user');
+		}
+
+
 
 		$node = new stdClass();
 		$node->body = $content;
