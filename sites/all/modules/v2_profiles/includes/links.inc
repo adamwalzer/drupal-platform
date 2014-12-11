@@ -68,7 +68,7 @@
 				$items[] = (object)array('title' => 'My School', 'href' => '/user/'.$user->uid.'/school');
 			}
 
-			$items[] = (object)array('title' => 'My News', 'href' => '/user/'.$user->uid.'/news');
+			//$items[] = (object)array('title' => 'My News', 'href' => '/user/'.$user->uid.'/news');
 
 			if (in_array('can_upload_media', $user->roles)) {
 				$items[] = (object)array('title' => 'My Videos', 'href' => '/user/'.$user->uid.'/videos');
