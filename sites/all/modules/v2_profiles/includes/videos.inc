@@ -99,7 +99,7 @@
 			WHERE
 				`n`.`uid` = 1 AND
 				`cfs`.`field_school_nid` IS NULL AND
-				`n`.`status` = 1;
+				`n`.`status` = 1 order by RAND();
 		";
 
 		$results = db_query($query);

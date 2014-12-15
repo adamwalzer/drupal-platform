@@ -24,7 +24,7 @@
 				<li class="n2" data-n="2"><a href="#">My Videos</a></li>
 				<li class="n3" data-n="3"><a href="#">Change My World Now</a></li>
 				<li class="n4" data-n="4"><a href="#">My Friends</a></li>
-				<li class="n5" data-n="5"><a href="#">My School</a></li>
+				<?php //<li class="n5" data-n="5"><a href="#">My School</a></li> ?> 
 			</ul>
 		</div>
 

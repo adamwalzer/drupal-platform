@@ -29,7 +29,6 @@
           <div class="logo"><a href="/"></a></div>
           <div class="top-tabs">
             <div class="graphic-tab-wrapper">
-              
               <?php if ($user->uid == 0) : ?>
                 <?php if ($allow_registrations) : ?>
                   <a class="join-now" href="/register-choose"><img rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/join-now_off.png" /></a>
