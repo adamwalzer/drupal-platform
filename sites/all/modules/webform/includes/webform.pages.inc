@@ -16,13 +16,6 @@ function webform_configure_form(&$form_state, $node) {
   drupal_add_css(drupal_get_path('module', 'webform') . '/css/webform-admin.css', 'theme', 'all', FALSE);
   drupal_add_js(drupal_get_path('module', 'webform') . '/js/webform-admin.js', 'module', 'header', FALSE, TRUE, FALSE);
 
-  $form['#node'] = $node;
-
-  $form['#submit'] = array(
-    'webform_configure_form_submit',
-    'webform_configure_form_submit_save',
-  );
-
   $form['nid'] = array(
     '#type' => 'value',
     '#value' => $node->nid,
@@ -87,48 +80,16 @@ function webform_configure_form(&$form_state, $node) {
     '#maxlength' => 255,
   );
 
-  // Submission limit settings for all submissions.
-  $form['submission']['total_submit_limit'] = array(
-    '#type' => 'item',
-    '#title' => t('Total submissions limit'),
-    '#theme' => 'webform_advanced_total_submit_limit_form',
-    '#description' => t('Limit the total number of allowed submissions.'),
-  );
-  $form['submission']['total_submit_limit']['enforce_total_limit'] = array(
-    '#type' => 'radios',
-    '#options' => array('no' => t('Unlimited'), 'yes' => 'Limit to !count total submission(s) !timespan'),
-    '#default_value' => $node->webform['total_submit_limit'] == -1 ? 'no' : 'yes',
-    '#parents' => array('enforce_total_limit'),
-  );
-  $form['submission']['total_submit_limit']['total_submit_limit'] = array(
-    '#type' => 'textfield',
-    '#maxlength' => 8,
-    '#size' => 8,
-    '#default_value' => $node->webform['total_submit_limit'] != -1 ? $node->webform['total_submit_limit'] : '',
-    '#parents' => array('total_submit_limit'),
-  );
-  $form['submission']['total_submit_limit']['total_submit_interval'] = array(
-    '#type' => 'select',
-    '#options' => array(
-      '-1' => t('ever'),
-      '3600' => t('every hour'),
-      '86400' => t('every day'),
-      '604800' => t('every week'),
-    ),
-    '#default_value' => $node->webform['total_submit_interval'],
-    '#parents' => array('total_submit_interval'),
-  );
-
-  // Submission limit per user settings.
+  // Submission limit settings.
   $form['submission']['submit_limit'] = array(
     '#type' => 'item',
-    '#title' => t('Per user submission limit'),
+    '#title' => t('Submission limit'),
     '#theme' => 'webform_advanced_submit_limit_form',
     '#description' => t('Limit the number of submissions <em>per user</em>. A user is identified by their user login if logged-in, or by their IP Address and Cookie if anonymous. Use of cookies may be modified in the global <a href="!url">Webform settings</a>.', array('!url' => url('admin/settings/webform'))),
   );
   $form['submission']['submit_limit']['enforce_limit'] = array(
     '#type' => 'radios',
-    '#options' => array('no' => t('Unlimited'), 'yes' => 'Limit each user to !count submission(s) !timespan'),
+    '#options' => array('no' => t('Unlimited'), 'yes' => 'Limit to !count submission(s) !timespan'),
     '#default_value' => $node->webform['submit_limit'] == -1 ? 'no' : 'yes',
     '#parents' => array('enforce_limit'),
   );
@@ -234,14 +195,10 @@ function webform_configure_form(&$form_state, $node) {
   );
   /* End Advanced Settings Form */
 
-  $form['actions'] = array(
-    '#type' => 'markup',
-    '#weight' => 300,
-  );
-
-  $form['actions']['submit'] = array(
+  $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
+    '#weight' => 300,
   );
 
   return $form;
@@ -287,8 +244,7 @@ function webform_configure_form_validate($form, &$form_state) {
  * Submit handler for webform_configure_form().
  */
 function webform_configure_form_submit($form, &$form_state) {
-  // Edit the node by reference just to shorten it up.
-  $node = &$form['#node'];
+  $node = node_load($form_state['values']['nid']);
 
   // Save the confirmation.
   $node->webform['confirmation'] = $form_state['values']['confirmation'];
@@ -325,31 +281,14 @@ function webform_configure_form_submit($form, &$form_state) {
     $node->webform['submit_interval'] = $form_state['values']['submit_interval'];
   }
 
-  // Set the total submit limit to -1 if set to unlimited.
-  if ($form_state['values']['enforce_total_limit'] == 'no') {
-    $node->webform['total_submit_limit'] = -1;
-    $node->webform['total_submit_interval'] = -1;
-  }
-  else {
-    $node->webform['total_submit_limit'] = $form_state['values']['total_submit_limit'];
-    $node->webform['total_submit_interval'] = $form_state['values']['total_submit_interval'];
-  }
-
   // Set submit notice.
   $node->webform['submit_notice'] = $form_state['values']['submit_notice'];
 
   // Set submit button text.
   $node->webform['submit_text'] = $form_state['values']['submit_text'];
-}
 
-/**
- * Submit handler for webform_configure_form() that saves the node.
- *
- * This is separate from webform_configure_form_submit() to allow other modules
- * to add properties if needed into the $form['#node'] object before save.
- */
-function webform_configure_form_submit_save($form, &$form_state) {
-  node_save($form['#node']);
+  node_save($node);
+
   drupal_set_message(t('The form settings have been updated.'));
 }
 
@@ -364,22 +303,7 @@ function theme_webform_advanced_submit_limit_form($form) {
     '!count' => preg_replace('/(<div[^>]*>)(.*?)(<\/div>)/s', '$2', drupal_render($form['submit_limit'])),
     '!timespan' =>  preg_replace('/(<div[^>]*>)(.*?)(<\/div>)/s', '$2', drupal_render($form['submit_interval'])),
   );
-  $form['enforce_limit']['yes']['#title'] = t('Limit each user to !count submission(s) !timespan', $replacements);
-  return drupal_render($form);
-}
-
-/**
- * Theme the total submit limit fieldset on the webform node form.
- */
-function theme_webform_advanced_total_submit_limit_form($form) {
-  $form['total_submit_limit']['#attributes']['class'] = 'webform-set-active';
-  $form['total_submit_interval']['#attributes']['class'] = 'webform-set-active';
-  // Remove div wrappers around limit options.
-  $replacements = array(
-    '!count' => preg_replace('/(<div[^>]*>)(.*?)(<\/div>)/s', '$2', drupal_render($form['total_submit_limit'])),
-    '!timespan' =>  preg_replace('/(<div[^>]*>)(.*?)(<\/div>)/s', '$2', drupal_render($form['total_submit_interval'])),
-  );
-  $form['enforce_total_limit']['yes']['#title'] = t('Limit to !count total submission(s) !timespan', $replacements);
+  $form['enforce_limit']['yes']['#title'] = t('Limit to !count submission(s) !timespan', $replacements);
   return drupal_render($form);
 }
 

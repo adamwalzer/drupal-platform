@@ -38,6 +38,9 @@ function _webform_edit_markup($component) {
   // Add the filter form.
   $form['markup']['format'] = filter_form($component['extra']['format'], 0, array('extra', 'format'));
 
+  $form['extra']['description'] = array(); // No description for markup.
+  $form['display'] = array('#type' => 'markup'); // Hide the display options.
+
   return $form;
 }
 
@@ -45,17 +48,15 @@ function _webform_edit_markup($component) {
  * Implements _webform_render_component().
  */
 function _webform_render_markup($component, $value = NULL, $filter = TRUE) {
-  $node = isset($component['nid']) ? node_load($component['nid']) : NULL;
-
   $element = array(
     '#type' => 'markup',
     '#title' => $filter ? NULL : $component['name'],
     '#weight' => $component['weight'],
-    '#markup' => $filter ? _webform_filter_values(check_markup($component['value'], $component['extra']['format'], FALSE), $node, NULL, NULL, FALSE) : $component['value'],
+    '#markup' => $filter ? _webform_filter_values(check_markup($component['value'], $component['extra']['format'], FALSE), NULL, NULL, NULL, FALSE) : $component['value'],
     '#format' => $component['extra']['format'],
     '#theme_wrappers' => array('webform_element_wrapper'),
     '#post_render' => array('webform_element_wrapper'),
-    '#translatable' => array('title', 'markup'),
+    '#webform_component' => $component,
   );
 
   // TODO: Remove when #markup becomes available in D7.
