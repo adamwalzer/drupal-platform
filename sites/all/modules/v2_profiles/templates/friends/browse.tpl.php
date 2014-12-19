@@ -66,7 +66,7 @@
 								<div class="actions">
 									<a class="button view" href="/user/<?php print $data->user->uid; ?>/friends/<?php print $item->uid; ?>">View Profile</a>
 									<a class="button green approve" href="/user/<?php print $data->user->uid; ?>/friends/<?php print $item->uid; ?>/approve">Add Friend</a>
-									<a class="button red ignore" href="/user/<?php print $data->user->uid; ?>/friends/<?php print $item->uid; ?>/ignore">Ignore</a>
+									<a class="button red ignore" href="/user/<?php print $data->user->uid; ?>/friends/<?php print $item->uid; ?>/ignore">Remind Me</a>
 								</div>
 							</div>
 						<?php } ?>
