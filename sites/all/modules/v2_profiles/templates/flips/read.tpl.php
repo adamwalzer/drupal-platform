@@ -10,7 +10,7 @@ if($data->user->user_type=='parent') {
 	<div class="message-modal-underlay" id="message-modal-underlay">
 		<div class="message-modal">
 			<a href="#" class="close-message-modal x-close"></a>
-			<div class="heading">This Action Item<br />is already complete!</div>
+			<div class="heading">Thank you for<br />Changing the World!</div>
 			<a href="/user/" class="button"><span>Return to Profile</span></a>
 		</div> <!-- /.message-modal -->
 	</div> <!-- /.message-modal-underlay -->
