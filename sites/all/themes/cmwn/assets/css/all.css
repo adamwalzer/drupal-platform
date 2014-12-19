@@ -93,6 +93,13 @@ body {
 	text-transform:uppercase;
 }
 
+#v2 p.started .button,
+#v2 p.started .button:hover{
+  background:gray !important;
+  cursor: default !important;
+  color: white !important;
+}
+
 #v2 .button:hover,
 #v2 .form-submit:hover {
 	background:#ffffff;

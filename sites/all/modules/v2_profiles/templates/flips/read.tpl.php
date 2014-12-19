@@ -61,8 +61,19 @@ if($data->user->user_type=='parent') {
 						}
 					}
 				?>
-
-				<p class="start"><a class="button" href="#">I'm Ready To Start</a></p>
+        <?php
+          $already_started = false;
+          foreach ($data->node->items as $key => $item){
+            if($item->completed == 1){
+              $already_started = true;
+            }
+          }
+        ?>
+        <?php if(!$already_started):?>
+  				<p class="start"><a class="button" href="#">I'm Ready To Start</a></p>
+				<?php else:?>
+	  			<p class="start started"><a class="button" href="#">Completed</a></p>				
+				<?php endif;?>
 
 			</div>
 		</div>
