@@ -27,6 +27,26 @@ function cmwn_feed_schema() {
     ),
     'primary key' => array('uid'),
   );
+  
+  $schema['cmwn_feed_term_weight'] = array(
+    'description' => 'Stores values for weighting terms in feed sorting.',
+    'fields' => array(
+      'tid' => array(
+        'description' => 'Term ID',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'weight' => array(
+        'description' => 'Weight, i.e. .7, 1, 1.8...affects weight of feed items in friend feed etc sorts.',
+        'type' => 'float',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+    ),
+    'primary key' => array('tid'),
+  );  
+  
   return $schema;
 }
 
@@ -38,4 +58,15 @@ function cmwn_feed_install() {
 function cmwn_feed_uninstall() {
   drupal_uninstall_schema('cmwn_feed');
   db_query("DELETE FROM {variable} WHERE name LIKE 'cmwn_feed_%%'");
+}
+
+
+function cmwn_feed_update_6001() {
+  
+  $schema = cmwn_feed_schema();
+  
+  $ret = array();
+
+  db_create_table($ret, 'cmwn_feed_term_weight', $schema['cmwn_feed_term_weight']);
+  return $ret;
 }

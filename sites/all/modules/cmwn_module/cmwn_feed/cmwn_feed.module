@@ -1,6 +1,77 @@
 <?php
 
+function cmwn_feed_admin(){
+  $form = array();
 
+  
+  //get options for taxonomy terms for categories vocabulary
+  $options = array();
+  
+  $terms = taxonomy_get_tree(5);//5 is vid for feed categories
+  
+  if(is_array($terms)){
+    
+    $result = db_query("SELECT tid, weight FROM {cmwn_feed_term_weight} cftw", $type);
+
+    $weights = array();
+
+    while ($row = db_fetch_object($result)) {
+      $weights[$row->tid] = $row->weight;
+    }
+    //dsm($weights);
+    
+    foreach($terms as $term){
+      $form['cmwn_feed_weight_' . $term->tid] = array(
+        '#type' => 'textfield',
+        '#title' => t('Set sort priority for friend feed categories'),
+        '#default_value' => $weights[$term->tid]?$weights[$term->tid]:1,
+        '#size' => 3,
+        '#maxlength' => 3,
+        '#description' => t("Specify the weight of feed items by category here. This will affect how items appear in user friend feeds."),
+        '#required' => TRUE,
+      );      
+    }
+  }
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('submit'),
+  );
+  
+  $form['#submit'][] = 'cmwn_feed_settings_submit';
+
+  return ($form);  
+}
+
+function cmwn_feed_settings_submit($form, &$form_state){
+  $terms = taxonomy_get_tree(5);//5 is vid for feed categories
+  if(is_array($terms)){
+    //dsm($form_state);
+    $result = db_query("SELECT tid, weight FROM {cmwn_feed_term_weight} cftw", $type);
+    $weights = array();
+    while ($row = db_fetch_object($result)) {
+      $weights[$row->tid] = $row->weight;
+    }    
+    
+    foreach($terms as $term){
+      $weight = false;
+      @$weight = $weights[$term->tid];
+      if($weight){
+        $object = array();
+        $object['tid'] = $term->tid;
+        $object['weight']  = $form_state['values']['cmwn_feed_weight_' . $term->tid];
+        $res = drupal_write_record('cmwn_feed_term_weight', $object, array('tid')); 
+      }else{
+        $object = array();
+        $object['tid'] = $term->tid;
+        $object['weight']  = $form_state['values']['cmwn_feed_weight_' . $term->tid];        
+        dsm($object);
+        $res = drupal_write_record('cmwn_feed_term_weight', $object);  
+        dsm($res);
+      }
+    }
+  }
+}
 
 function cmwn_feed_init() {
   
@@ -14,18 +85,26 @@ function cmwn_feed_form_alter(&$form, &$form_state, $form_id) {
   }
 }
 
-
-
-
-
 function cmwn_feed_menu() {
+  
   $items['cmwn_feed/friend'] = array(
     'page callback' => 'cmwn_friend_feed',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
+  
+  $items['admin/settings/cmwn_feed'] = array(
+    'title' => 'Administer Feed Settings',
+    'description' => 'Description of your On this date settings page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmwn_feed_admin'),
+    'access arguments' => array('administer cmwn_feed settings'),
+    'type' => MENU_NORMAL_ITEM,
+   );  
+   
   return $items;
 }
+
 //TODO: This has no security, no user checks etc.
 function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc in v2 profile
     
@@ -35,7 +114,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
 
 		if (!$user) return $items;
 
-		$query = "SELECT n.nid, n.uid, td.tid, ctf.field_excerpt_value AS excerpt FROM {node} AS n JOIN {term_node} AS tn ON n.nid = tn.nid JOIN {term_data} AS td ON tn.tid = td.tid JOIN {content_type_feed} AS ctf ON n.nid = ctf.nid WHERE n.type = 'feed' AND n.status = 1 ORDER BY n.created DESC";
+		$query = "SELECT n.nid, n.uid, td.tid, ctf.field_excerpt_value AS excerpt FROM {node} AS n JOIN {term_node} AS tn ON n.nid = tn.nid JOIN {term_data} AS td ON tn.tid = td.tid JOIN {content_type_feed} AS ctf ON n.nid = ctf.nid JOIN {cwmwn_feed_term_weight} cftw on cftw.tid = td.tid WHERE n.type = 'feed' AND n.status = 1 ORDER BY (cftw.weight * n.created) DESC";
     
     $count_query = "SELECT COUNT(*) FROM (" . $query . ") AS count_query";
 
