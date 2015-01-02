@@ -23,7 +23,7 @@ function cmwn_feed_admin(){
     foreach($terms as $term){
       $form['cmwn_feed_weight_' . $term->tid] = array(
         '#type' => 'textfield',
-        '#title' => t('Set sort priority for friend feed categories'),
+        '#title' => $term->name . ' ' . t('Weight'),
         '#default_value' => $weights[$term->tid]?$weights[$term->tid]:1,
         '#size' => 3,
         '#maxlength' => 3,
