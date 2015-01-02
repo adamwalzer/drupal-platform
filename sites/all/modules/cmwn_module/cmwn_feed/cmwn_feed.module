@@ -39,8 +39,20 @@ function cmwn_feed_admin(){
   );
   
   $form['#submit'][] = 'cmwn_feed_settings_submit';
+  $form['#validate'][] = 'cmwn_feed_settings_validate';
 
   return ($form);  
+}
+
+function cmwn_feed_settings_validate($form, &$form_state){
+  $terms = taxonomy_get_tree(5);//5 is vid for feed categories
+  if(is_array($terms)){  
+    foreach($terms as $term){  
+      if(!is_numeric($form_state['values']['cmwn_feed_weight_' . $term->tid]) && $form_state['values']['cmwn_feed_weight_' . $term->tid] != '0'){
+        form_set_error('cmwn_feed_weight_' . $term->tid,t('This must be a non-zero integer or decimal number.'));
+      }
+    }
+  }
 }
 
 function cmwn_feed_settings_submit($form, &$form_state){
@@ -50,9 +62,9 @@ function cmwn_feed_settings_submit($form, &$form_state){
     $result = db_query("SELECT tid, weight FROM {cmwn_feed_term_weight} cftw", $type);
     $weights = array();
     while ($row = db_fetch_object($result)) {
-      $weights[$row->tid] = $row->weight;
+      $weights[$row->tid] = (float)$row->weight;
     }    
-    
+    dsm($weights);
     foreach($terms as $term){
       $weight = false;
       @$weight = $weights[$term->tid];
@@ -60,18 +72,17 @@ function cmwn_feed_settings_submit($form, &$form_state){
         $object = array();
         $object['tid'] = $term->tid;
         $object['weight']  = $form_state['values']['cmwn_feed_weight_' . $term->tid];
-        $res = drupal_write_record('cmwn_feed_term_weight', $object, array('tid')); 
+        $res = drupal_write_record('cmwn_feed_term_weight', $object, array('tid'));
       }else{
         $object = array();
         $object['tid'] = $term->tid;
         $object['weight']  = $form_state['values']['cmwn_feed_weight_' . $term->tid];        
-        //dsm($object);
         $res = drupal_write_record('cmwn_feed_term_weight', $object);  
-        //dsm($res);
       }
     }
   }
 }
+
 
 function cmwn_feed_init() {
   
