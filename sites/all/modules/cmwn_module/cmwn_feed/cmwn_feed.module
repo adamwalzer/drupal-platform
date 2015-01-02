@@ -125,7 +125,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
 
 		if (!$user) return $items;
 
-		$query = "SELECT n.nid, n.uid, td.tid, ctf.field_excerpt_value AS excerpt FROM {node} AS n JOIN {term_node} AS tn ON n.nid = tn.nid JOIN {term_data} AS td ON tn.tid = td.tid JOIN {content_type_feed} AS ctf ON n.nid = ctf.nid JOIN {cwmwn_feed_term_weight} cftw on cftw.tid = td.tid WHERE n.type = 'feed' AND n.status = 1 ORDER BY (cftw.weight * n.created) DESC"; // this weight factor does not really come into play at this point because all these have the same category.
+		$query = "SELECT n.nid, n.uid, td.tid, ctf.field_excerpt_value AS excerpt FROM {node} AS n JOIN {term_node} AS tn ON n.nid = tn.nid JOIN {term_data} AS td ON tn.tid = td.tid JOIN {content_type_feed} AS ctf ON n.nid = ctf.nid JOIN {cmwn_feed_term_weight} cftw on cftw.tid = td.tid WHERE n.type = 'feed' AND n.status = 1 ORDER BY (cftw.weight * n.created) DESC"; // this weight factor does not really come into play at this point because all these have the same category.
     
     $count_query = "SELECT COUNT(*) FROM (" . $query . ") AS count_query";
 
