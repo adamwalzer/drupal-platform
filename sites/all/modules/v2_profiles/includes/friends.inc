@@ -136,9 +136,12 @@
 		$relationship = array_pop($relationship);
 
 		if ($relationship) {
+  		v2_profiles_feed_insert($u1->uid,88,95,'Feed ' . time(),'','<a href="/user/' . $u1->uid . '">' . $u1->name . '</a> has added <a href="/user/' . $u2->uid . '">' . $u2->name . '</a> as a friend.');
+  		v2_profiles_feed_insert($u2->uid,88,95,'Feed ' . time(),'','<a href="/user/' . $u2->uid . '">' . $u2->name . '</a> has added <a href="/user/' . $u1->uid . '">' . $u1->name . '</a> as a friend.');
+  		
 			user_relationships_save_relationship($relationship,'approve');
 		}
-
+    
 		drupal_set_message('You have confirmed this user as your friend.');
 		drupal_goto('user/'.$u1->uid.'/friends/browse');
 
