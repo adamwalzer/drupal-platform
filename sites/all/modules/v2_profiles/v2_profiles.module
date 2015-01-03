@@ -187,13 +187,25 @@
     //insert feed
     //print_r($form_state);exit;
     $uid = $form_state['values']['details']['uid'];
+    $action_nid = $form_state['values']['details']['nid'];
+    $flip_nid = $form_state['values']['src_nid'];
     $account = user_load($uid);
-    $n = node_load($form_state['values']['src_nid']);
+    $n = node_load($flip_nid);
     
-    if($n){
-      v2_profiles_feed_insert($uid,88,96,'Feed ' . time(),'', '<a href="/user/' . $account->uid . '">' . $account->name . '</a> has completed an action item for "<em>' . $n->title . '</em>"!');      
-    }else{
-      v2_profiles_feed_insert($uid,88,96,'Feed ' . time(),'', '<a href="/user/' . $account->uid . '">' . $account->name . '</a> has completed an action item!');    
+    //determine if this is the first step in the flip
+    if($n->field_actions[0]['nid'] == $action_nid){//first action item, insert feed that they just started!
+      if($n){
+        v2_profiles_feed_insert($uid,88,97,'Feed ' . time(),'', '<a href="/user/' . $account->uid . '">' . $account->name . '</a> has signed up for the flip "<em>' . $n->title . '</em>"!');      
+      }else{
+        v2_profiles_feed_insert($uid,88,97,'Feed ' . time(),'', '<a href="/user/' . $account->uid . '">' . $account->name . '</a> has signed up for a new flip!');    
+      }      
+    }else{//subsequent action item
+      if($n){
+        v2_profiles_feed_insert($uid,88,96,'Feed ' . time(),'', '<a href="/user/' . $account->uid . '">' . $account->name . '</a> has completed an action item for "<em>' . $n->title . '</em>"!');      
+      }else{
+        v2_profiles_feed_insert($uid,88,96,'Feed ' . time(),'', '<a href="/user/' . $account->uid . '">' . $account->name . '</a> has completed an action item!');    
+      }
+      
     }
 
     //redirect
