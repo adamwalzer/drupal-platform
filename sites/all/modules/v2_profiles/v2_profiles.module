@@ -198,7 +198,9 @@
         v2_profiles_feed_insert($uid,88,97,'Feed ' . time(),'', '<a href="/user/' . $account->uid . '">' . $account->name . '</a> has signed up for the flip "<em>' . $n->title . '</em>"!');      
       }else{
         v2_profiles_feed_insert($uid,88,97,'Feed ' . time(),'', '<a href="/user/' . $account->uid . '">' . $account->name . '</a> has signed up for a new flip!');    
-      }      
+      }   
+    elseif($n->field_actions[count($n->field_actions)-1]['nid'] == $action_nid){//finished flip
+        v2_profiles_feed_insert($uid,88,98,'Feed ' . time(),'', '<a href="/user/' . $account->uid . '">' . $account->name . '</a> has completed the flip "<em>' . $n->title . '</em>"!');          
     }else{//subsequent action item
       if($n){
         v2_profiles_feed_insert($uid,88,96,'Feed ' . time(),'', '<a href="/user/' . $account->uid . '">' . $account->name . '</a> has completed an action item for "<em>' . $n->title . '</em>"!');      
