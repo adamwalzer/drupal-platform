@@ -185,17 +185,20 @@
 		node_validate($node);
 		node_submit($node);
 		node_save($node);
-
+    $tid_feed_type = false;
 		if ($user->uid == $uid) {
 			$excerpt = '<a href="/user/' . $user->uid . '">' . $user->name . '</a> posted on his/her whiteboard.';
+			$tid_feed_type = 90;
 		} else {
 			$friend = user_load($uid);
 			$excerpt = '<a href="/user/' . $user->uid . '">' . $user->name . '</a> posted on <a href="/user/' . $friend->uid . '">' . $friend->name . '\'s</a> whiteboard.';
+			$tid_feed_type = 91;			
 		}
 
 		v2_profiles_feed_insert(
 			$user->uid,
 			88,
+			$tid_feed_type,
 			'Feed ' . time(),
 			'',
 			$excerpt
@@ -254,14 +257,17 @@
 
 		if ($user->uid == $uid) {
 			$excerpt = '<a href="/user/' . $user->uid . '">' . $user->name . '</a> replied to their post.';
+			$tid_feed_type = 92;
 		} else {
 			$friend = user_load($uid);
 			$excerpt = '<a href="/user/' . $user->uid . '">' . $user->name . '</a> replied to <a href="/user/' . $friend->uid . '">' . $friend->name . '\'s</a> post.';
+			$tid_feed_type = 93;			
 		}
 
 		v2_profiles_feed_insert(
 			$user->uid,
 			88,
+			$tid_feed_type,
 			'Feed ' . time(),
 			'',
 			$excerpt

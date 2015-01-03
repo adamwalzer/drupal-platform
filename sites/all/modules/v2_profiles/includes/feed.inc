@@ -40,13 +40,14 @@
 
 	}
 
-	function v2_profiles_feed_insert($uid,$tid,$title,$content,$excerpt) {
+	function v2_profiles_feed_insert($uid,$tid,$tid_feed_type,$title,$content,$excerpt) {
 
 		$node = new stdClass();
 		$node->body = $content;
 		$node->field_excerpt[0]['value'] = $excerpt;
 		$node->status = 1;
 		$node->taxonomy[0]['tid'] = $tid;
+		$node->taxonomy[1]['tid'] = $tid_feed_type;
 		$node->title = $title;
 		$node->type = 'feed';
 		$node->uid = $uid;
