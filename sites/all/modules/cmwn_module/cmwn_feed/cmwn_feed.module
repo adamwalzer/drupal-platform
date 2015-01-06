@@ -138,18 +138,18 @@ function cmwn_feed_menu() {
 
 //TODO: This has no security, no user checks etc.
 function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc in v2 profile
-    
+
 		$items = array();
 
 		$user = user_load($uid);
 
 		if (!$user) return $items;
 
-		$query = "SELECT n.nid, n.uid, td.tid, ctf.field_excerpt_value AS excerpt FROM {node} AS n JOIN {term_node} AS tn ON n.nid = tn.nid JOIN {term_data} AS td ON tn.tid = td.tid and td.vid = 5 JOIN {content_type_feed} AS ctf ON n.nid = ctf.nid JOIN {cmwn_feed_term_weight} cftw on cftw.tid = (select tdd.tid from {term_data} tdd JOIN {term_node} tnn on tnn.tid = tdd.tid AND tdd.vid = 6 where tnn.nid = n.nid limit 1) WHERE n.type = 'feed' AND n.status = 1 ORDER BY (cftw.weight * n.created) DESC"; //5 is feed category, 6 is vid of feed type (post on own, post on friends, comment on own, commend on friend)
-
+		$query = "SELECT n.nid, n.uid, td.tid, ctf.field_excerpt_value AS excerpt FROM {node} AS n JOIN {term_node} AS tn ON n.nid = tn.nid JOIN {term_data} AS td ON tn.tid = td.tid and td.vid = 5 JOIN {content_type_feed} AS ctf ON n.nid = ctf.nid JOIN {cmwn_feed_term_weight} cftw on cftw.tid = (select tdd.tid from {term_data} tdd JOIN {term_node} tnn on tnn.tid = tdd.tid AND tdd.vid = 6 where tnn.nid = n.nid limit 1) WHERE n.type = 'feed' AND n.status = 1 and (n.uid in (SELECT requestee_id FROM user_relationships WHERE (requester_id = %d OR requestee_id = %d) and approved = 1 and rtid = 4) OR n.uid = %d) and td.tid=88 ORDER BY (cftw.weight * n.created) DESC";
+		
     $count_query = "SELECT COUNT(*) FROM (" . $query . ") AS count_query";
 
-		$results = pager_query($query, 13, 0, $count_query);
+		$results = pager_query($query, 13, 0, $count_query, $uid, $uid, $uid);
 
 		while ($result = db_fetch_object($results)) {
 			$item = new stdClass();
@@ -165,7 +165,6 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
 		?>
 		
     <?php foreach ($items as $item) { ?>
-      <?php if($item->tid == 88):?>
       	<div class="item">
       		<span class="image">
       			<img height="42" src="<?php print $item->src; ?>" width="42" />
@@ -179,7 +178,6 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
       			<?php print $_excerpt; ?>
       		</span>
       	</div>
-      	<?php endif; ?>
     <?php } ?>		
     <?php
       print theme('pager', NULL, 10, 0);

@@ -72,7 +72,7 @@ $(function(){
 
     
 
-    $('.section.friend-feed .scroll').load('/cmwn_feed/friend', function(){
+    $('.section.friend-feed .scroll').load('/cmwn_feed/friend/' + $('.section.friend-feed .scroll').attr('u'), function(){
       console.log('loaded ff');
       //set height
       var ffh = 0;//friend feed height

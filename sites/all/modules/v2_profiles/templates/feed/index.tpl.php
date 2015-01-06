@@ -52,7 +52,7 @@
 
 				<div class="section friend-feed">
 					<div class="items">
-						<div class="scroll jscrolldiv">
+						<div class="scroll jscrolldiv" u="<?php print $user->uid;?>">
   						
   						<?php /*
 							<?php foreach ($data->items->group2 as $item) { ?>
