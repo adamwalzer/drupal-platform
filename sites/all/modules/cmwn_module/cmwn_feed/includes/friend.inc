@@ -14,6 +14,7 @@ function cmwn_friend_feed_queries_list(){
     'signs up flip',
     'completes flip'
   );  
+  return $feed_queries;
 }
   
 function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc in v2 profile
@@ -39,6 +40,9 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
 		while ($result = db_fetch_object($results)) {
       $friends[] = $result->friend_uid;
 		}
+		
+		//add our uid!
+		$friends[] = $uid;
     
     $friend_uid_placeholders = db_placeholders($friends);
 		
