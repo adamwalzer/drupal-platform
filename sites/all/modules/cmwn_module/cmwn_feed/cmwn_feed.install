@@ -47,6 +47,24 @@ function cmwn_feed_schema() {
     'primary key' => array('tid'),
   );  
   
+  
+  $schema['cmwn_feed_weight'] = array(
+    'description' => 'Stores values for weighting queries in feed sorting.',
+    'fields' => array(
+      'query_name' => array(
+        'type' => 'varchar',
+        'length' => '50',
+        'description' => 'Description of query.',
+      ),
+      'weight' => array(
+        'description' => 'Weight, i.e. .7, 1, 1.8...affects weight of feed items in feed etc sorts.',
+        'type' => 'float',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+    ),
+    'primary key' => array('query_name'),
+  );  
   return $schema;
 }
 
@@ -68,5 +86,17 @@ function cmwn_feed_update_6001() {
   $ret = array();
 
   db_create_table($ret, 'cmwn_feed_term_weight', $schema['cmwn_feed_term_weight']);
+  return $ret;
+}
+
+
+function cmwn_feed_update_6002() {
+  
+  $schema = cmwn_feed_schema();
+  
+  $ret = array();
+
+  db_drop_table($ret, 'cmwn_feed_term_weight');
+  db_create_table($ret, 'cmwn_feed_weight', $schema['cmwn_feed_weight']);  
   return $ret;
 }

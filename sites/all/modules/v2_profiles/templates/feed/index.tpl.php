@@ -83,7 +83,7 @@
 
 	<?php } ?>
 
-	<?php if (in_array('can_receive_notices', $user->roles) && sizeof($data->items->group1 ) > 0) { ?>
+	<?php if (in_array('can_receive_notices', $user->roles)) { ?>
 
 		<div class="header">
 
@@ -95,9 +95,10 @@
 
 		<div class="content">
 
-				<div class="section">
+				<div class="section flip-feed">
 					<div class="items">
-						<div class="scroll">
+						<div class="scroll jscrolldiv">
+  						<?php /*
 							<?php foreach ($data->items->group3 as $item) { ?>
 								<div class="item">
 									<span class="image">
@@ -108,6 +109,7 @@
 									</span>
 								</div>
 							<?php } ?>
+							<?php */ ?>
 						</div>
 					</div>
 

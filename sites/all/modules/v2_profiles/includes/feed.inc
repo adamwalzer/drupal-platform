@@ -40,7 +40,7 @@
 
 	}
 
-	function v2_profiles_feed_insert($uid,$tid,$tid_feed_type,$title,$content,$excerpt) {
+	function v2_profiles_feed_insert($uid,$tid,$tid_feed_type,$title,$content,$excerpt,$brand_nid = null) {
 
 		$node = new stdClass();
 		$node->body = $content;
@@ -51,6 +51,9 @@
 		$node->title = $title;
 		$node->type = 'feed';
 		$node->uid = $uid;
+		if($brand_nid && is_numeric($brand_nid)){
+  		$node->field_brand_partner[0]['nid']  = $brand_nid;
+		}
 		node_validate($node);
 		node_submit($node);
 		node_save($node);

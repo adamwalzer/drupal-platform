@@ -1,46 +1,39 @@
 <?php
+	$cmwn_feed_menu_items = array();
+
+	require_once(drupal_get_path('module','cmwn_feed').'/includes/friend.inc');  
+	require_once(drupal_get_path('module','cmwn_feed').'/includes/flip.inc');  	
+  
+  
 function cmwn_feed_vids(){
   return array(6);
 }
 
 function cmwn_feed_admin(){
+  
+  $feed_queries = cmwn_friend_feed_queries_list();
+  
   $form = array();
-  
-  $vocabularies  = cmwn_feed_vids();
-  
-  //get options for taxonomy terms for categories vocabulary
-  $options = array();
-  
-  //vocabularies to collect sort weights for
-  
-  foreach($vocabularies as $vid){
-    $terms = taxonomy_get_tree($vid);//5 is vid for feed categories
-    
-    if(is_array($terms)){
-      
-      $result = db_query("SELECT tid, weight FROM {cmwn_feed_term_weight} cftw", $type);
-  
-      $weights = array();
-  
-      while ($row = db_fetch_object($result)) {
-        $weights[$row->tid] = $row->weight;
-      }
-      //dsm($weights);
-      
-      foreach($terms as $term){
-        $form['cmwn_feed_weight_' . $term->tid] = array(
-          '#type' => 'textfield',
-          '#title' => $term->name . ' ' . t('Weight'),
-          '#default_value' => $weights[$term->tid]?$weights[$term->tid]:1,
-          '#size' => 3,
-          '#maxlength' => 3,
-          '#description' => t("Specify the weight of feed items by category here. This will affect how items appear in user friend feeds."),
-          '#required' => TRUE,
-        );      
-      }
-    }    
-  }
 
+  $options = array();
+
+  $result = db_query("SELECT query_name, weight FROM {cmwn_feed_weight} cfw");
+  $weights = array();
+  while ($row = db_fetch_object($result)) {
+    $weights[$row->query_name] = (float)$row->weight;
+  }      
+  
+  foreach($feed_queries as $type){
+    $form['cmwn_feed_weight_' . str_replace(' ', '_', $type)] = array(
+      '#type' => 'textfield',
+      '#title' => $type . ' ' . t('weight'),
+      '#default_value' => $weights[$type]?$weights[$type]:1,
+      '#size' => 3,
+      '#maxlength' => 5,
+      '#description' => t("Specify the weight of feed items by type here. This will affect how items appear in user friend feeds."),
+      '#required' => TRUE,
+    );      
+  }
   
   $form['submit'] = array(
     '#type' => 'submit',
@@ -55,50 +48,40 @@ function cmwn_feed_admin(){
 
 function cmwn_feed_settings_validate($form, &$form_state){
 
-  $vocabularies  = cmwn_feed_vids();  
+  $feed_queries = cmwn_friend_feed_queries_list();
   
-  foreach($vocabularies as $vid){
-    $terms = taxonomy_get_tree($vid);
-    if(is_array($terms)){  
-      foreach($terms as $term){  
-        if(!is_numeric($form_state['values']['cmwn_feed_weight_' . $term->tid]) && $form_state['values']['cmwn_feed_weight_' . $term->tid] != '0'){
-          form_set_error('cmwn_feed_weight_' . $term->tid,t('This must be a non-zero integer or decimal number.'));
-        }
-      }
-    }    
+  foreach($feed_queries as $type){
+    if(!is_numeric($form_state['values']['cmwn_feed_weight_' . str_replace(' ', '_', $type)]) && $form_state['values']['cmwn_feed_weight_' . str_replace(' ', '_', $type)] != '0'){
+      form_set_error('cmwn_feed_weight_' . str_replace(' ', '_', $type),t('This must be a non-zero integer or decimal number.'));
+    }
   }
   
 }
 
 function cmwn_feed_settings_submit($form, &$form_state){
-  $vocabularies  = cmwn_feed_vids();  
+  $feed_queries = cmwn_friend_feed_queries_list();
   
-  foreach($vocabularies as $vid){
-    $terms = taxonomy_get_tree($vid);
-    if(is_array($terms)){
-      //dsm($form_state);
-      $result = db_query("SELECT tid, weight FROM {cmwn_feed_term_weight} cftw", $type);
-      $weights = array();
-      while ($row = db_fetch_object($result)) {
-        $weights[$row->tid] = (float)$row->weight;
-      }    
-
-      foreach($terms as $term){
-        $weight = false;
-        @$weight = $weights[$term->tid];
-
-        if($weight){
-          $object = array();
-          $object['tid'] = $term->tid;
-          $object['weight']  = $form_state['values']['cmwn_feed_weight_' . $term->tid];
-          $res = drupal_write_record('cmwn_feed_term_weight', $object, array('tid'));
-        }else{
-          $object = array();
-          $object['tid'] = $term->tid;
-          $object['weight']  = $form_state['values']['cmwn_feed_weight_' . $term->tid];        
-          $res = drupal_write_record('cmwn_feed_term_weight', $object);  
-        }
-      }
+  //dsm($form_state);
+  $result = db_query("SELECT query_name, weight FROM {cmwn_feed_weight} cfw");
+  $weights = array();
+  while ($row = db_fetch_object($result)) {
+    $weights[$row->query_name] = (float)$row->weight;
+  }    
+  
+  foreach($feed_queries as $type){
+    $weight = false;
+    @$weight = $weights[$type];
+  
+    if($weight){
+      $object = array();
+      $object['query_name'] = $type;
+      $object['weight']  = $form_state['values']['cmwn_feed_weight_' . str_replace(' ', '_', $type)];
+      $res = drupal_write_record('cmwn_feed_weight', $object, array('query_name'));
+    }else{
+      $object = array();
+      $object['query_name'] = $type;
+      $object['weight']  = $form_state['values']['cmwn_feed_weight_' . str_replace(' ', '_', $type)];        
+      $res = drupal_write_record('cmwn_feed_weight', $object);  
     }
   }
 }
@@ -117,14 +100,9 @@ function cmwn_feed_form_alter(&$form, &$form_state, $form_id) {
 }
 
 function cmwn_feed_menu() {
+  global $cmwn_feed_menu_items;
   
-  $items['cmwn_feed/friend'] = array(
-    'page callback' => 'cmwn_friend_feed',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
-  
-  $items['admin/settings/cmwn_feed'] = array(
+  $cmwn_feed_menu_items['admin/settings/cmwn_feed'] = array(
     'title' => 'Administer Feed Settings',
     'description' => 'Description of your On this date settings page',
     'page callback' => 'drupal_get_form',
@@ -133,58 +111,21 @@ function cmwn_feed_menu() {
     'type' => MENU_NORMAL_ITEM,
    );  
    
-  return $items;
+  return $cmwn_feed_menu_items;
 }
 
-//TODO: This has no security, no user checks etc.
-function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc in v2 profile
-    
-		$items = array();
-    global $user;
-    
-		$friend_feed_user = user_load($uid);
-
-		if (!$friend_feed_user || $user->uid != $uid){
-  		print '';
-  		exit();
-		} 
-
-		$query = "SELECT n.nid, n.uid, td.tid, ctf.field_excerpt_value AS excerpt FROM {node} AS n JOIN {term_node} AS tn ON n.nid = tn.nid JOIN {term_data} AS td ON tn.tid = td.tid and td.vid = 5 JOIN {content_type_feed} AS ctf ON n.nid = ctf.nid JOIN {cmwn_feed_term_weight} cftw on cftw.tid = (select tdd.tid from {term_data} tdd JOIN {term_node} tnn on tnn.tid = tdd.tid AND tdd.vid = 6 where tnn.nid = n.nid limit 1) WHERE n.type = 'feed' AND n.status = 1 and (n.uid in (SELECT requestee_id FROM user_relationships WHERE (requester_id = %d OR requestee_id = %d) and approved = 1 and rtid = 4) OR n.uid = %d) and td.tid=88 ORDER BY (cftw.weight * n.created) DESC";
-		
-    $count_query = "SELECT COUNT(*) FROM (" . $query . ") AS count_query";
-
-		$results = pager_query($query, 13, 0, $count_query, $uid, $uid, $uid);
-
-		while ($result = db_fetch_object($results)) {
-			$item = new stdClass();
-			$item->excerpt = $result->excerpt;
-			$item->nid = $result->nid;
-			$item->tid = $result->tid;
-			$item->uid = $result->uid;
-  		$item->href = url('node/' . $item->nid);
-  		$item->src = v2_profiles_avatars_query($item->uid);			
-			$items[] = $item;
-		}
-
-		?>
-		
-    <?php foreach ($items as $item) { ?>
-      	<div class="item">
-      		<span class="image">
-      			<img height="42" src="<?php print $item->src; ?>" width="42" />
-      		</span>
-      		<?php
-      			$_excerpt = $item->excerpt;
-      			$_excerpt = str_replace('/user/'.$user->uid, '/user', $_excerpt);
-      			$_excerpt = preg_replace('/("\/user\/)([0-9]+)(")/i', '/user/'.$friend_feed_user->uid.'/friends/$2/', $_excerpt);
-      		?>
-      		<span class="message">
-      			<?php print $_excerpt; ?>
-      		</span>
-      	</div>
-    <?php } ?>		
-    <?php
-      print theme('pager', NULL, 10, 0);
-      exit;
+function cmwn_feed_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'presave':
+      break;
+    case 'insert':
+      if($node->type == 'flip'){
+        $sponsor = node_load($node->field_brand_partner[0]['nid']);
+        v2_profiles_feed_insert(1, 89, 98, 'Feed ' . time(),'', $sponsor->title . ' has released a new action item.', $sponsor->nid);//uid, tid, tid
+      }
+    case 'update':
+      break;
+    case 'view':
+      break;
+  }
 }
-

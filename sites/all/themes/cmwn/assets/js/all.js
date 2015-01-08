@@ -71,7 +71,7 @@ $(function(){
 	/* 1.4 feed */
 
     
-
+    //friend feed
     $('.section.friend-feed .scroll').load('/cmwn_feed/friend/' + $('.section.friend-feed .scroll').attr('u'), function(){
       console.log('loaded ff');
       //set height
@@ -86,7 +86,7 @@ $(function(){
 
       //start lazy loader
 
-      $('div.jscrolldiv').jscroll({
+      $('.section.friend-feed div.jscrolldiv').jscroll({
         loadingHtml: '<img src="loading.gif" alt="Loading" /> Loading...',
         nextSelector: 'li.pager-next a',
         padding: 50,
@@ -94,6 +94,27 @@ $(function(){
       });
     });
     
+    // flip feed
+    $('.section.flip-feed .scroll').load('/cmwn_feed/flip', function(){
+      //set height
+      var ffh = 0;//friend feed height
+      $('.section.flip-feed .scroll .item:lt(12)').each(function() {//set to height of first 12 items
+         ffh += $(this).height() + 12;//top and bottom padding factored in.
+      });	
+      $('.section.flip-feed .items .scroll').height(ffh);//make room for pager 
+
+      //institute scrolling thingy
+      //$('#v2 .block.feed.index .content .section .items .scroll').jScrollPane({'verticalGutter':6});
+
+      //start lazy loader
+
+      $('.section.flip-feed div.jscrolldiv').jscroll({
+        loadingHtml: '<img src="loading.gif" alt="Loading" /> Loading...',
+        nextSelector: 'li.pager-next a',
+        padding: 50,
+        callback:function(){},
+      });
+    });    
 
 	/* 1.4 flips */
 
