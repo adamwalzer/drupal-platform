@@ -2726,3 +2726,8 @@ body {
 #v2 .add-child-overlay a.button {
 	float: right;
 }
+
+.feed-time{
+  font-size: 11px !important;
+  font-style: italic;
+}

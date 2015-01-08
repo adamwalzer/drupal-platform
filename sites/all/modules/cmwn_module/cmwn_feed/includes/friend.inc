@@ -1,6 +1,6 @@
 <?php
   
-  
+global $cmwn_feed_menu_items;
 $cmwn_feed_menu_items['cmwn_feed/friend'] = array(
   'page callback' => 'cmwn_friend_feed',
   'access arguments' => array('access content'),
@@ -50,7 +50,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
         CASE 
           WHEN FROM_UNIXTIME(updated_at) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(updated_at))), ' minutes ago')
           WHEN datediff(now(), FROM_UNIXTIME(updated_at)) = 1 THEN 'Yesterday'
-          WHEN FROM_UNIXTIME(updated_at) between date_sub(now(), INTERVAL 24 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(updated_at))), ' hours ago')
+          WHEN FROM_UNIXTIME(updated_at) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(updated_at))), ' hours ago')
         ELSE date_format(FROM_UNIXTIME(updated_at), '%a, %m/%%d/%y')
         END      	as time_ago
       	
@@ -79,7 +79,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
         CASE 
           WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(ws.submitted))), ' minutes ago')
           WHEN datediff(now(), FROM_UNIXTIME(ws.submitted)) = 1 THEN 'Yesterday'
-          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 24 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(ws.submitted))), ' hours ago')
+          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(ws.submitted))), ' hours ago')
         ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y')
         END      	as time_ago
 
@@ -94,7 +94,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
         CASE 
           WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(ws.submitted))), ' minutes ago')
           WHEN datediff(now(), FROM_UNIXTIME(ws.submitted)) = 1 THEN 'Yesterday'
-          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 24 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(ws.submitted))), ' hours ago')
+          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(ws.submitted))), ' hours ago')
         ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y')
         END      	as time_ago
 
@@ -135,9 +135,9 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
       			<img height="42" src="<?php print $item->src; ?>" width="42" />
       		</span>
       		<?php
-      			$_excerpt = $item->excerpt  . ' ' .  $item->time_ago;
-      			//$_excerpt = str_replace('/user/'.$user->uid, '/user', $_excerpt);
-      			//$_excerpt = preg_replace('/("\/user\/)([0-9]+)(")/i', '/user/'.$friend_feed_user->uid.'/friends/$2/', $_excerpt);
+      			$_excerpt = $item->excerpt  . ' <em class="feed-time">' .  $item->time_ago . '</em>';
+      			$_excerpt = str_replace('/user/'.$user->uid, '/user', $_excerpt);
+      			$_excerpt = preg_replace('/("\/user\/)([0-9]+)(")/i', '"/user/'.$user->uid.'/friends/$2/"', $_excerpt);
       		?>
       		<span class="message">
       			<?php print $_excerpt; ?>

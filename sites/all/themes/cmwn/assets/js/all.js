@@ -109,7 +109,7 @@ $(function(){
       //start lazy loader
 
       $('.section.flip-feed div.jscrolldiv').jscroll({
-        loadingHtml: '<img src="loading.gif" alt="Loading" /> Loading...',
+        loadingHtml: 'Loading...',
         nextSelector: 'li.pager-next a',
         padding: 50,
         callback:function(){},
