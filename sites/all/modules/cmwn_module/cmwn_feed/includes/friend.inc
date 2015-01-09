@@ -15,7 +15,9 @@ function cmwn_feed_friend_queries_list(){
     'completes flip',
     'post on own whiteboard',
     'post on other whiteboard', 
-    'joins special edition flip',   
+    'joins special edition flip', 
+    'reply to own post', 
+    'reply to other post', 
   );  
   return $feed_queries;
 }
@@ -33,7 +35,16 @@ function cmwn_feed_friend_query_weights(){
   return $weights;
 
 }
-  
+
+function cmwn_feed_get_timeago($field){
+  return "CASE 
+            WHEN FROM_UNIXTIME(" . $field . ") between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(" . $field . "))), ' minute(s) ago')
+            WHEN datediff(now(), FROM_UNIXTIME(" . $field . ")) = 1 THEN 'Yesterday'
+            WHEN FROM_UNIXTIME(" . $field . ") between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(" . $field . "))), ' hour(s) ago')
+          ELSE date_format(FROM_UNIXTIME(" . $field . "), '%a, %m/%%d/%y %h:%%i%p')
+          END      	as time_ago
+          ";
+}  
 function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc in v2 profile
     
 		$items = array();
@@ -66,12 +77,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
     $feed_queries['friend request'] = array(
       	'query' => "(SELECT CONCAT('<a href=\"/user/', user_a.uid,'\">',user_a.name,'</a> has become friends with <a href=\"/user/',user_b.uid, '\">', user_b.name, '</a>') as excerpt, user_a.uid as uid, updated_at as stamp, (updated_at*".$weights['friend request'].") as s,
         
-        CASE 
-          WHEN FROM_UNIXTIME(updated_at) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(updated_at))), ' minutes ago')
-          WHEN datediff(now(), FROM_UNIXTIME(updated_at)) = 1 THEN 'Yesterday'
-          WHEN FROM_UNIXTIME(updated_at) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(updated_at))), ' hours ago')
-        ELSE date_format(FROM_UNIXTIME(updated_at), '%a, %m/%%d/%y %h:%%i%p')
-        END      	as time_ago
+        ".cmwn_feed_get_timeago('updated_at')."
       	
  FROM {user_relationships} ur join {users} user_a on ur.requester_id = user_a.uid join {users} user_b on user_b.uid = ur.requestee_id WHERE requester_id in($friend_uid_placeholders) and approved = 1) UNION ALL ",
       );
@@ -79,38 +85,23 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
       $feed_queries['completes flip milestone'] = array(
       	'query' => "(SELECT CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item milestone \"<em>', n.title ,'</em>.\"') as excerpt, ws.uid as uid, submitted as stamp, (submitted*".$weights['completes flip milestone'].") as s,
       
-        CASE 
-          WHEN FROM_UNIXTIME(submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(submitted))), ' minutes ago')
-          WHEN datediff(now(), FROM_UNIXTIME(submitted)) = 1 THEN 'Yesterday'
-          WHEN FROM_UNIXTIME(submitted) between date_sub(now(), INTERVAL 24 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(submitted))), ' hours ago')
-        ELSE date_format(FROM_UNIXTIME(submitted), '%a, %m/%%d/%y %h:%%i%p')
-        END      	as time_ago
-
+        ".cmwn_feed_get_timeago('submitted')."
+        
         FROM {webform_submissions} ws JOIN {node} n on n.nid = ws.nid join {users} u on u.uid = ws.uid and n.type='action' WHERE ws.uid in($friend_uid_placeholders)) UNION ALL ",
       );
       
       $feed_queries['signs up flip'] = array(
       	'query' => "(select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has begun the action item \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp, (ws.submitted*".$weights['signs up flip'].") as s,
       
-        CASE 
-          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(ws.submitted))), ' minutes ago')
-          WHEN datediff(now(), FROM_UNIXTIME(ws.submitted)) = 1 THEN 'Yesterday'
-          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(ws.submitted))), ' hours ago')
-        ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y %h:%%i%p')
-        END      	as time_ago
-
+          ".cmwn_feed_get_timeago('ws.submitted')."
+          
          from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on u.uid = ws.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select min(delta) from {content_field_actions} cfai where cfai.nid = nf.nid))  UNION ALL ",
       );
 
       $feed_queries['joins special edition flip'] = array(
       	'query' => "(select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has begun has joined special edition flip \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp, (ws.submitted*".$weights['joins special edition flip'].") as s,
       
-        CASE 
-          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(ws.submitted))), ' minutes ago')
-          WHEN datediff(now(), FROM_UNIXTIME(ws.submitted)) = 1 THEN 'Yesterday'
-          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(ws.submitted))), ' hours ago')
-        ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y %h:%%i%p')
-        END      	as time_ago
+        ".cmwn_feed_get_timeago('ws.submitted')."
 
          from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on u.uid = ws.uid join {content_field_special_edition} cfse on cfse.nid = nf.nid and cfse.field_special_edition_value='Yes' where ws.uid in($friend_uid_placeholders) and cfa.delta = (select min(delta) from {content_field_actions} cfai where cfai.nid = nf.nid))  UNION ALL ",
       );
@@ -119,48 +110,71 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
       $feed_queries['completes flip'] = array(
       	'query' => "(select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp, (ws.submitted*".$weights['completes flip'].") as s,
       	
-        CASE 
-          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(ws.submitted))), ' minutes ago')
-          WHEN datediff(now(), FROM_UNIXTIME(ws.submitted)) = 1 THEN 'Yesterday'
-          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(ws.submitted))), ' hours ago')
-        ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y %h:%%i%p')
-        END      	as time_ago
+        ".cmwn_feed_get_timeago('ws.submitted')."
         
       	 from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on ws.uid = u.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select max(delta) from {content_field_actions} cfai where cfai.nid = nf.nid)) UNION ALL ",
       );  
-		
-		
-      $feed_queries['post on own whiteboard'] = array(
+
+      $feed_queries['reply to own post'] = array(
+      	'query' => "(select CONCAT('<a href=\"/user/', c.uid,'\">', u.name, '</a> has commented on their own post.') as excerpt, 
+      	c.uid as uid,
+      	  timestamp as stamp, 
+      	  (timestamp*".$weights['reply to own post'].") as s,
+      	
+        ".cmwn_feed_get_timeago('timestamp')."
+
+      	 from {comments} c join {node} n on n.type = 'whiteboard' and n.nid = c.nid join 
+      	 
+      	  {content_type_whiteboard} ctw on ctw.nid = n.nid and ctw.field_user_reference_uid = c.uid
+      	 
+          JOIN {users} u on u.uid = c.uid
+      	 
+      	  where c.uid in ($friend_uid_placeholders) and c.status = 1) UNION ALL ",
+      );
+      
+      
+      $feed_queries['reply to other post'] = array(
+      	'query' => "(select CONCAT('<a href=\"/user/', c.uid,'\">', u.name, '</a> has commented on <a href=\"/user/', u2.uid,'\">' , u2.name , '\\'s</a> post.') as excerpt, 
+      	c.uid as uid,
+      	  timestamp as stamp, 
+      	  (timestamp*".$weights['reply to other post'].") as s,
+      	
+        ".cmwn_feed_get_timeago('timestamp')."
+
+      	 from {comments} c join {node} n on n.type = 'whiteboard' and n.nid = c.nid join 
+      	 
+      	  {content_type_whiteboard} ctw on ctw.nid = n.nid and ctw.field_user_reference_uid <> c.uid
+      	 
+          JOIN {users} u on u.uid = c.uid
+          
+          JOIN {users} u2 on u2.uid = n.uid
+      	 
+      	  where c.uid in ($friend_uid_placeholders) and c.status =1) UNION ALL ",
+      );
+      
+
+      $feed_queries['post on own whiteboard'] = array(//carefully note - the field_user_reference on this websites determines who actually made the post. node.uid is not the actual author but whose whiteboard the post appears on.
       	'query' => "(select CONCAT('<a href=\"/user/', n.uid,'\">', u.name, '</a> has posted on their own whiteboard.') as excerpt, 
       	n.uid as uid,
       	  n.created as stamp, 
       	  (n.created*".$weights['post on own whiteboard'].") as s,
       	
-        CASE 
-          WHEN FROM_UNIXTIME(n.created) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(n.created))), ' minutes ago')
-          WHEN datediff(now(), FROM_UNIXTIME(n.created)) = 1 THEN 'Yesterday'
-          WHEN FROM_UNIXTIME(n.created) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(n.created))), ' hours ago')
-        ELSE date_format(FROM_UNIXTIME(n.created), '%a, %m/%%d/%y %h:%%i%p')
-        END      	as time_ago
+        ".cmwn_feed_get_timeago('n.created')."
 
-      	 from {node} n join {users} u on u.uid = n.uid join {content_type_whiteboard} ctw on ctw.nid = n.nid and ctw.field_user_reference_uid = n.uid where n.type='whiteboard' and n.uid='" . $user->uid . "') UNION ALL ",
+      	 from {node} n join {users} u on u.uid = n.uid join {content_type_whiteboard} ctw on ctw.nid = n.nid and ctw.field_user_reference_uid = n.uid where n.type='whiteboard' and
+      	 ctw.field_user_reference_uid in ($friend_uid_placeholders) and n.status = 1) UNION ALL ",
       );		
 
 
       $feed_queries['post on other whiteboard'] = array(
-      	'query' => "(select CONCAT('<a href=\"/user/', n.uid,'\">', u.name, '</a> has posted on <a href=\"/user/', u2.uid,'\">', u2.name ,'\'s</a> whiteboard.') as excerpt, 
+      	'query' => "(select CONCAT('<a href=\"/user/', u2.uid, '\">', u2.name, '</a> has posted on <a href=\"/user/', u.uid,'\">', u.name ,'s</a> whiteboard.') as excerpt, 
       	n.uid as uid,
       	  n.created as stamp, 
       	  (n.created*".$weights['post on other whiteboard'].") as s,
       	
-        CASE 
-          WHEN FROM_UNIXTIME(n.created) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(n.created))), ' minutes ago')
-          WHEN datediff(now(), FROM_UNIXTIME(n.created)) = 1 THEN 'Yesterday'
-          WHEN FROM_UNIXTIME(n.created) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(n.created))), ' hours ago')
-        ELSE date_format(FROM_UNIXTIME(n.created), '%a, %m/%%d/%y %h:%%i%p')
-        END      	as time_ago
+        ".cmwn_feed_get_timeago('n.created')."
 
-      	 from {node} n join {users} u on u.uid = n.uid join {content_type_whiteboard} ctw on ctw.nid = n.nid join {users} u2 on u2.uid = ctw.field_user_reference_uid where ctw.field_user_reference_uid <> n.uid and n.type='whiteboard' and n.uid='" . $user->uid . "') ",
+      	 from {node} n join {users} u on u.uid = n.uid join {content_type_whiteboard} ctw on ctw.nid = n.nid join {users} u2 on u2.uid = ctw.field_user_reference_uid where ctw.field_user_reference_uid <> n.uid and n.type='whiteboard' and n.status = 1 and ctw.field_user_reference_uid in ($friend_uid_placeholders)) ",
       );
       
     
