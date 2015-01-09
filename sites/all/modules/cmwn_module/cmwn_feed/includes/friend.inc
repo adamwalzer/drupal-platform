@@ -12,7 +12,8 @@ function cmwn_feed_friend_queries_list(){
     'friend request',
     'completes flip milestone',
     'signs up flip',
-    'completes flip'
+    'completes flip',
+    'post on own whiteboard',
   );  
   return $feed_queries;
 }
@@ -70,14 +71,12 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
         ELSE date_format(FROM_UNIXTIME(updated_at), '%a, %m/%%d/%y %h:%%i%p')
         END      	as time_ago
       	
-      	
  FROM {user_relationships} ur join {users} user_a on ur.requester_id = user_a.uid join {users} user_b on user_b.uid = ur.requestee_id WHERE requester_id in($friend_uid_placeholders) and approved = 1) UNION ALL ",
       );
       
       $feed_queries['completes flip milestone'] = array(
       	'query' => "(SELECT CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item milestone \"<em>', n.title ,'</em>.\"') as excerpt, ws.uid as uid, submitted as stamp, (submitted*".$weights['completes flip milestone'].") as s,
       
-        
         CASE 
           WHEN FROM_UNIXTIME(submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(submitted))), ' minutes ago')
           WHEN datediff(now(), FROM_UNIXTIME(submitted)) = 1 THEN 'Yesterday'
@@ -85,7 +84,6 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
         ELSE date_format(FROM_UNIXTIME(submitted), '%a, %m/%%d/%y %h:%%i%p')
         END      	as time_ago
 
-        
         FROM {webform_submissions} ws JOIN {node} n on n.nid = ws.nid join {users} u on u.uid = ws.uid and n.type='action' WHERE ws.uid in($friend_uid_placeholders)) UNION ALL ",
       );
       
@@ -99,25 +97,38 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
         ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y %h:%%i%p')
         END      	as time_ago
 
-        
          from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on u.uid = ws.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select min(delta) from {content_field_actions} cfai where cfai.nid = nf.nid))  UNION ALL ",
       );
       
       $feed_queries['completes flip'] = array(
       	'query' => "(select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp, (ws.submitted*".$weights['completes flip'].") as s,
       	
-        
         CASE 
           WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(ws.submitted))), ' minutes ago')
           WHEN datediff(now(), FROM_UNIXTIME(ws.submitted)) = 1 THEN 'Yesterday'
           WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(ws.submitted))), ' hours ago')
         ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y %h:%%i%p')
         END      	as time_ago
-
         
-      	 from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on ws.uid = u.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select max(delta) from {content_field_actions} cfai where cfai.nid = nf.nid)) order by s desc",
+      	 from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on ws.uid = u.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select max(delta) from {content_field_actions} cfai where cfai.nid = nf.nid)) UNION ALL ",
       );  
 		
+		
+      $feed_queries['post on own whiteboard'] = array(
+      	'query' => "(select CONCAT('<a href=\"/user/', n.uid,'\">', u.name, '</a> has posted on their own whiteboard.') as excerpt, 
+      	n.uid as uid,
+      	  n.created as stamp, 
+      	  (n.created*".$weights['post on own whiteboard'].") as s,
+      	
+        CASE 
+          WHEN FROM_UNIXTIME(n.created) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(n.created))), ' minutes ago')
+          WHEN datediff(now(), FROM_UNIXTIME(n.created)) = 1 THEN 'Yesterday'
+          WHEN FROM_UNIXTIME(n.created) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(n.created))), ' hours ago')
+        ELSE date_format(FROM_UNIXTIME(n.created), '%a, %m/%%d/%y %h:%%i%p')
+        END      	as time_ago
+
+      	 from {node} n join {users} u on u.uid = n.uid join {content_type_whiteboard} ctw on ctw.nid = n.nid and ctw.field_user_reference_uid = n.uid where n.type='whiteboard' and n.uid='" . $user->uid . "') ",
+      );		
 
 		$args = array();
     foreach($feed_queries as $type => $query){
@@ -125,6 +136,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
       $args = array_merge($args,$friends);
     }
 
+    $query_union = $query_union . '  order by s desc';
 
     $count_query = "SELECT COUNT(*) FROM (" . $query_union . ") AS count_query";
     
