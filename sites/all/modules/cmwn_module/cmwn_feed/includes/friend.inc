@@ -7,7 +7,7 @@ $cmwn_feed_menu_items['cmwn_feed/friend'] = array(
   'type' => MENU_CALLBACK,
 );
   
-function cmwn_friend_feed_queries_list(){
+function cmwn_feed_friend_queries_list(){
   $feed_queries = array(
     'friend request',
     'completes flip milestone',
@@ -16,13 +16,27 @@ function cmwn_friend_feed_queries_list(){
   );  
   return $feed_queries;
 }
+
+function cmwn_feed_friend_query_weights(){
+  
+  $result = db_query("SELECT query_name, weight FROM {cmwn_feed_weight} cfw");
+  
+  $weights = array();
+  
+  while ($row = db_fetch_object($result)) {
+    $weights[$row->query_name] = (float)$row->weight;
+  }     
+  
+  return $weights;
+
+}
   
 function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc in v2 profile
     
 		$items = array();
     global $user;
     global $feed_queries;
-    
+    $weights = cmwn_feed_friend_query_weights();
 		$friend_feed_user = user_load($uid);
 
 		if (!$friend_feed_user || $user->uid != $uid){
@@ -46,82 +60,77 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
     
     $friend_uid_placeholders = db_placeholders($friends);
 		
-		$query_union = '';
-		
     $feed_queries['friend request'] = array(
-      	'query' => "SELECT CONCAT('<a href=\"/user/', user_a.uid,'\">',user_a.name,'</a> has become friends with <a href=\"/user/',user_b.uid, '\">', user_b.name, '</a>') as excerpt, user_a.uid as uid, updated_at as stamp,
+      	'query' => "(SELECT CONCAT('<a href=\"/user/', user_a.uid,'\">',user_a.name,'</a> has become friends with <a href=\"/user/',user_b.uid, '\">', user_b.name, '</a>') as excerpt, user_a.uid as uid, updated_at as stamp, (updated_at*".$weights['friend request'].") as s,
         
         CASE 
           WHEN FROM_UNIXTIME(updated_at) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(updated_at))), ' minutes ago')
           WHEN datediff(now(), FROM_UNIXTIME(updated_at)) = 1 THEN 'Yesterday'
           WHEN FROM_UNIXTIME(updated_at) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(updated_at))), ' hours ago')
-        ELSE date_format(FROM_UNIXTIME(updated_at), '%a, %m/%%d/%y')
+        ELSE date_format(FROM_UNIXTIME(updated_at), '%a, %m/%%d/%y %h:%%i%p')
         END      	as time_ago
       	
       	
- FROM {user_relationships} ur join {users} user_a on ur.requester_id = user_a.uid join {users} user_b on user_b.uid = ur.requestee_id WHERE requester_id in($friend_uid_placeholders) and approved = 1 UNION ALL ",
+ FROM {user_relationships} ur join {users} user_a on ur.requester_id = user_a.uid join {users} user_b on user_b.uid = ur.requestee_id WHERE requester_id in($friend_uid_placeholders) and approved = 1) UNION ALL ",
       );
       
       $feed_queries['completes flip milestone'] = array(
-      	'query' => "SELECT CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item milestone \"<em>', n.title ,'</em>.\"') as excerpt, ws.uid as uid, submitted as stamp,
+      	'query' => "(SELECT CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item milestone \"<em>', n.title ,'</em>.\"') as excerpt, ws.uid as uid, submitted as stamp, (submitted*".$weights['completes flip milestone'].") as s,
       
         
         CASE 
           WHEN FROM_UNIXTIME(submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(submitted))), ' minutes ago')
           WHEN datediff(now(), FROM_UNIXTIME(submitted)) = 1 THEN 'Yesterday'
           WHEN FROM_UNIXTIME(submitted) between date_sub(now(), INTERVAL 24 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(submitted))), ' hours ago')
-        ELSE date_format(FROM_UNIXTIME(submitted), '%a, %m/%%d/%y')
+        ELSE date_format(FROM_UNIXTIME(submitted), '%a, %m/%%d/%y %h:%%i%p')
         END      	as time_ago
 
         
-        FROM {webform_submissions} ws JOIN {node} n on n.nid = ws.nid join {users} u on u.uid = ws.uid and n.type='action' WHERE ws.uid in($friend_uid_placeholders) UNION ALL ",
+        FROM {webform_submissions} ws JOIN {node} n on n.nid = ws.nid join {users} u on u.uid = ws.uid and n.type='action' WHERE ws.uid in($friend_uid_placeholders)) UNION ALL ",
       );
       
       $feed_queries['signs up flip'] = array(
-      	'query' => "select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has begun the action item \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp,
+      	'query' => "(select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has begun the action item \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp, (ws.submitted*".$weights['signs up flip'].") as s,
       
         CASE 
           WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(ws.submitted))), ' minutes ago')
           WHEN datediff(now(), FROM_UNIXTIME(ws.submitted)) = 1 THEN 'Yesterday'
           WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(ws.submitted))), ' hours ago')
-        ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y')
+        ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y %h:%%i%p')
         END      	as time_ago
 
         
-         from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on u.uid = ws.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select min(delta) from {content_field_actions} cfai where cfai.nid = nf.nid)  UNION ALL ",
+         from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on u.uid = ws.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select min(delta) from {content_field_actions} cfai where cfai.nid = nf.nid))  UNION ALL ",
       );
       
       $feed_queries['completes flip'] = array(
-      	'query' => "select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp,
+      	'query' => "(select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp, (ws.submitted*".$weights['completes flip'].") as s,
       	
         
         CASE 
           WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(ws.submitted))), ' minutes ago')
           WHEN datediff(now(), FROM_UNIXTIME(ws.submitted)) = 1 THEN 'Yesterday'
           WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(ws.submitted))), ' hours ago')
-        ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y')
+        ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y %h:%%i%p')
         END      	as time_ago
 
         
-      	 from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on ws.uid = u.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select max(delta) from {content_field_actions} cfai where cfai.nid = nf.nid) order by stamp desc",
+      	 from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on ws.uid = u.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select max(delta) from {content_field_actions} cfai where cfai.nid = nf.nid)) order by s desc",
       );  
 		
-		
+
 		$args = array();
     foreach($feed_queries as $type => $query){
       $query_union .= $query['query'];
-      $args = array_merge($args,$friends);//needs all repeating friend uids in one array apparently :(
+      $args = array_merge($args,$friends);
     }
-    
-    
-    
-    
-    
-    
+
+
     $count_query = "SELECT COUNT(*) FROM (" . $query_union . ") AS count_query";
     
-    $feed_items = pager_query($query_union, 13, 0, $count_query, $args);//careful here, $args must work for count query and main query or this wont work.
 
+    
+    $feed_items = pager_query($query_union, 13, 0, $count_query, $args);//careful here, $args must work for count query and main query or this wont work.
 
     while($f = db_fetch_object($feed_items)){
       $item = new stdClass();
