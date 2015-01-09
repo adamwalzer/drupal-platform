@@ -10,6 +10,7 @@ $cmwn_feed_menu_items['cmwn_feed/flip'] = array(
 function cmwn_feed_flip_queries_list(){
   $feed_queries = array(
     'brand partner released new flip',
+    'new brand partner',
 
   );  
   return $feed_queries;
@@ -55,7 +56,19 @@ function cmwn_flip_feed() {
             JOIN {content_field_brand_partner} cfbp ON cfbp.nid = fn.nid AND cfbp.vid = fn.vid 
             JOIN {node} bpn on bpn.nid = cfbp.field_brand_partner_nid
             JOIN {content_field_icon} cfi on bpn.nid =  cfi.nid and bpn.vid = cfi.vid
-            JOIN {files} f on f.fid = cfi.field_icon_fid)";
+            JOIN {files} f on f.fid = cfi.field_icon_fid
+            WHERE fn.type='flip')";
+
+    $feed_queries['new brand partner'] =  "(SELECT 
+      	    CONCAT('<strong>Change My World Now</strong> is celebrating <a href=\"/node/', bpn.nid,'\">', bpn.title,'</a> as a new brand partner.') as excerpt, 
+      	    f.filepath as src,       
+            (bpn.created*".$weights['new brand partner'].") as s,
+            ".cmwn_feed_get_timeago('bpn.created')."
+            
+            FROM {node} bpn
+            JOIN {content_field_icon} cfi on bpn.nid =  cfi.nid and bpn.vid = cfi.vid
+            JOIN {files} f on f.fid = cfi.field_icon_fid
+            WHERE bpn.type = 'brand_partner')";
       
             
     
