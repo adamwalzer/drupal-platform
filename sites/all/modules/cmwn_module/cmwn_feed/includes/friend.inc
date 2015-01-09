@@ -14,6 +14,7 @@ function cmwn_feed_friend_queries_list(){
     'signs up flip',
     'completes flip',
     'post on own whiteboard',
+    'post on other whiteboard',    
   );  
   return $feed_queries;
 }
@@ -127,9 +128,25 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
         ELSE date_format(FROM_UNIXTIME(n.created), '%a, %m/%%d/%y %h:%%i%p')
         END      	as time_ago
 
-      	 from {node} n join {users} u on u.uid = n.uid join {content_type_whiteboard} ctw on ctw.nid = n.nid and ctw.field_user_reference_uid = n.uid where n.type='whiteboard' and n.uid='" . $user->uid . "') ",
+      	 from {node} n join {users} u on u.uid = n.uid join {content_type_whiteboard} ctw on ctw.nid = n.nid and ctw.field_user_reference_uid = n.uid where n.type='whiteboard' and n.uid='" . $user->uid . "') UNION ALL ",
       );		
 
+
+      $feed_queries['post on other whiteboard'] = array(
+      	'query' => "(select CONCAT('<a href=\"/user/', n.uid,'\">', u.name, '</a> has posted on <a href=\"/user/', u2.uid,'\">', u2.name ,'\'s</a> whiteboard.') as excerpt, 
+      	n.uid as uid,
+      	  n.created as stamp, 
+      	  (n.created*".$weights['post on other whiteboard'].") as s,
+      	
+        CASE 
+          WHEN FROM_UNIXTIME(n.created) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(n.created))), ' minutes ago')
+          WHEN datediff(now(), FROM_UNIXTIME(n.created)) = 1 THEN 'Yesterday'
+          WHEN FROM_UNIXTIME(n.created) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(n.created))), ' hours ago')
+        ELSE date_format(FROM_UNIXTIME(n.created), '%a, %m/%%d/%y %h:%%i%p')
+        END      	as time_ago
+
+      	 from {node} n join {users} u on u.uid = n.uid join {content_type_whiteboard} ctw on ctw.nid = n.nid join {users} u2 on u2.uid = ctw.field_user_reference_uid where ctw.field_user_reference_uid <> n.uid and n.type='whiteboard' and n.uid='" . $user->uid . "') ",
+      );
 		$args = array();
     foreach($feed_queries as $type => $query){
       $query_union .= $query['query'];
