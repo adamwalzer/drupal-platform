@@ -24,7 +24,11 @@ function cmwn_feed_friend_queries_list(){
 
 function cmwn_feed_friend_query_weights(){
   
-  $result = db_query("SELECT query_name, weight FROM {cmwn_feed_weight} cfw");
+  $friend_feed_queries = cmwn_feed_friend_queries_list();
+  
+  $friend_feed_weights = db_placeholders(cmwn_feed_friend_queries_list($friend_feed_queries));
+  
+  $result = db_query("SELECT query_name, weight FROM {cmwn_feed_weight} cfw where query_name in ($friend_feed_weights)", $friend_feed_queries);
   
   $weights = array();
   
@@ -45,7 +49,8 @@ function cmwn_feed_get_timeago($field){
           END      	as time_ago
           ";
 }  
-function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc in v2 profile
+
+function cmwn_friend_feed($uid = 0, $page = 0) {
     
 		$items = array();
     global $user;
@@ -74,117 +79,137 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
     
     $friend_uid_placeholders = db_placeholders($friends);
 		
-    $feed_queries['friend request'] = array(
-      	'query' => "(SELECT CONCAT('<a href=\"/user/', user_a.uid,'\">',user_a.name,'</a> has become friends with <a href=\"/user/',user_b.uid, '\">', user_b.name, '</a>') as excerpt, user_a.uid as uid, updated_at as stamp, (updated_at*".$weights['friend request'].") as s,
-        
+    $feed_queries['friend request'] = "(SELECT 
+        CONCAT('<a href=\"/user/', user_a.uid,'\">',user_a.name,'</a> has become friends with <a href=\"/user/',user_b.uid, '\">', user_b.name, '</a>') as excerpt, 
+        user_a.uid as uid, 
+        updated_at as stamp, 
+        (updated_at*".$weights['friend request'].") as s,
         ".cmwn_feed_get_timeago('updated_at')."
       	
- FROM {user_relationships} ur join {users} user_a on ur.requester_id = user_a.uid join {users} user_b on user_b.uid = ur.requestee_id WHERE requester_id in($friend_uid_placeholders) and approved = 1) UNION ALL ",
-      );
+        FROM {user_relationships} ur 
+        JOIN {users} user_a ON ur.requester_id = user_a.uid 
+        JOIN {users} user_b ON user_b.uid = ur.requestee_id 
+        WHERE requester_id in($friend_uid_placeholders) and approved = 1)";
       
-      $feed_queries['completes flip milestone'] = array(
-      	'query' => "(SELECT CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item milestone \"<em>', n.title ,'</em>.\"') as excerpt, ws.uid as uid, submitted as stamp, (submitted*".$weights['completes flip milestone'].") as s,
-      
+    $feed_queries['completes flip milestone'] = "(SELECT 
+        CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item milestone \"<em>', n.title ,'</em>.\"') as excerpt, 
+        ws.uid as uid, 
+        submitted as stamp, 
+        (submitted*".$weights['completes flip milestone'].") as s,
         ".cmwn_feed_get_timeago('submitted')."
         
-        FROM {webform_submissions} ws JOIN {node} n on n.nid = ws.nid join {users} u on u.uid = ws.uid and n.type='action' WHERE ws.uid in($friend_uid_placeholders)) UNION ALL ",
-      );
+        FROM {webform_submissions} ws 
+        JOIN {node} n ON n.nid = ws.nid 
+        JOIN {users} u ON u.uid = ws.uid AND n.type='action' 
+        WHERE ws.uid in($friend_uid_placeholders)) ";
       
-      $feed_queries['signs up flip'] = array(
-      	'query' => "(select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has begun the action item \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp, (ws.submitted*".$weights['signs up flip'].") as s,
-      
-          ".cmwn_feed_get_timeago('ws.submitted')."
+      $feed_queries['signs up flip'] = "(select 
+        CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has begun the action item \"<em>', nf.title ,'</em>.\"') as excerpt, 
+        ws.uid as uid, 
+        ws.submitted as stamp, 
+        (ws.submitted*".$weights['signs up flip'].") as s,
+        ".cmwn_feed_get_timeago('ws.submitted')."
           
-         from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on u.uid = ws.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select min(delta) from {content_field_actions} cfai where cfai.nid = nf.nid))  UNION ALL ",
-      );
+        FROM {webform_submissions} ws 
+        JOIN node na ON ws.nid = na.nid 
+        JOIN {content_field_actions} cfa ON cfa.field_actions_nid = na.nid 
+        JOIN {node} nf ON nf.nid = cfa.nid 
+        JOIN {users} u ON u.uid = ws.uid 
+        WHERE ws.uid in($friend_uid_placeholders) AND cfa.delta = (select min(delta) FROM {content_field_actions} cfai where cfai.nid = nf.nid)) ";
 
-      $feed_queries['joins special edition flip'] = array(
-      	'query' => "(select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has begun has joined special edition flip \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp, (ws.submitted*".$weights['joins special edition flip'].") as s,
-      
+      $feed_queries['joins special edition flip'] = "(select 
+        CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has begun has joined special edition flip \"<em>', nf.title ,'</em>.\"') as excerpt, 
+        ws.uid as uid, 
+        ws.submitted as stamp, 
+        (ws.submitted*".$weights['joins special edition flip'].") as s,
         ".cmwn_feed_get_timeago('ws.submitted')."
 
-         from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on u.uid = ws.uid join {content_field_special_edition} cfse on cfse.nid = nf.nid and cfse.field_special_edition_value='Yes' where ws.uid in($friend_uid_placeholders) and cfa.delta = (select min(delta) from {content_field_actions} cfai where cfai.nid = nf.nid))  UNION ALL ",
-      );
+        FROM {webform_submissions} ws 
+        JOIN node na ON ws.nid = na.nid 
+        JOIN {content_field_actions} cfa ON cfa.field_actions_nid = na.nid 
+        JOIN {node} nf ON nf.nid = cfa.nid 
+        JOIN {users} u ON u.uid = ws.uid 
+        JOIN {content_field_special_edition} cfse ON cfse.nid = nf.nid AND cfse.field_special_edition_value='Yes' 
+        WHERE ws.uid in($friend_uid_placeholders) AND cfa.delta = (select min(delta) FROM {content_field_actions} cfai WHERE cfai.nid = nf.nid)) ";
 
       
-      $feed_queries['completes flip'] = array(
-      	'query' => "(select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp, (ws.submitted*".$weights['completes flip'].") as s,
-      	
+      $feed_queries['completes flip'] = "(select 
+        CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item \"<em>', nf.title ,'</em>.\"') as excerpt, 
+        ws.uid as uid, ws.submitted as stamp, 
+        (ws.submitted*".$weights['completes flip'].") as s,
         ".cmwn_feed_get_timeago('ws.submitted')."
         
-      	 from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on ws.uid = u.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select max(delta) from {content_field_actions} cfai where cfai.nid = nf.nid)) UNION ALL ",
-      );  
-
-      $feed_queries['reply to own post'] = array(
-      	'query' => "(select CONCAT('<a href=\"/user/', c.uid,'\">', u.name, '</a> has commented on their own post.') as excerpt, 
+        FROM {webform_submissions} ws JOIN node na ON ws.nid = na.nid 
+        JOIN {content_field_actions} cfa ON cfa.field_actions_nid = na.nid 
+        JOIN {node} nf ON nf.nid = cfa.nid 
+        JOIN {users} u ON ws.uid = u.uid 
+        WHERE ws.uid in($friend_uid_placeholders) AND cfa.delta = (select max(delta) FROM {content_field_actions} cfai WHERE cfai.nid = nf.nid)) ";
+      $feed_queries['reply to own post'] = "(select CONCAT('<a href=\"/user/', c.uid,'\">', u.name, '</a> has commented on their own post.<br />\"' , (case 
+      	when length(c.comment) > 25 
+        then concat(substring(c.comment, 1, 25), '...')
+        else c.comment
+         end) , '\"') as excerpt, 
       	c.uid as uid,
       	  timestamp as stamp, 
       	  (timestamp*".$weights['reply to own post'].") as s,
       	
         ".cmwn_feed_get_timeago('timestamp')."
 
-      	 from {comments} c join {node} n on n.type = 'whiteboard' and n.nid = c.nid join 
-      	 
-      	  {content_type_whiteboard} ctw on ctw.nid = n.nid and ctw.field_user_reference_uid = c.uid
-      	 
-          JOIN {users} u on u.uid = c.uid
-      	 
-      	  where c.uid in ($friend_uid_placeholders) and c.status = 1) UNION ALL ",
-      );
+        FROM {comments} c 
+        JOIN {node} n ON n.type = 'whiteboard' AND n.nid = c.nid 
+        JOIN {content_type_whiteboard} ctw ON ctw.nid = n.nid AND ctw.field_user_reference_uid = c.uid
+        JOIN {users} u ON u.uid = c.uid
+        WHERE c.uid IN ($friend_uid_placeholders) and c.status = 0)";      
       
-      
-      $feed_queries['reply to other post'] = array(
-      	'query' => "(select CONCAT('<a href=\"/user/', c.uid,'\">', u.name, '</a> has commented on <a href=\"/user/', u2.uid,'\">' , u2.name , '\\'s</a> post.') as excerpt, 
+      $feed_queries['reply to other post'] = "(select CONCAT('<a href=\"/user/', c.uid,'\">', u.name, '</a> has commented on <a href=\"/user/', u2.uid,'\">' , u2.name , '\\'s</a> post.<br />\"' , (case 
+      	when length(c.comment) > 25 
+        then concat(substring(c.comment, 1, 25), '...')
+        else c.comment
+         end) , '\"') as excerpt, 
       	c.uid as uid,
       	  timestamp as stamp, 
       	  (timestamp*".$weights['reply to other post'].") as s,
       	
         ".cmwn_feed_get_timeago('timestamp')."
 
-      	 from {comments} c join {node} n on n.type = 'whiteboard' and n.nid = c.nid join 
-      	 
-      	  {content_type_whiteboard} ctw on ctw.nid = n.nid and ctw.field_user_reference_uid <> c.uid
-      	 
-          JOIN {users} u on u.uid = c.uid
-          
-          JOIN {users} u2 on u2.uid = n.uid
-      	 
-      	  where c.uid in ($friend_uid_placeholders) and c.status =1) UNION ALL ",
-      );
+        FROM {comments} c 
+        JOIN {node} n ON n.type = 'whiteboard' AND n.nid = c.nid 
+        JOIN {content_type_whiteboard} ctw ON ctw.nid = n.nid AND ctw.field_user_reference_uid <> c.uid
+        JOIN {users} u on u.uid = c.uid
+        JOIN {users} u2 on u2.uid = n.uid
+        WHERE c.uid IN ($friend_uid_placeholders) AND c.status =0)";
       
-
-      $feed_queries['post on own whiteboard'] = array(//carefully note - the field_user_reference on this websites determines who actually made the post. node.uid is not the actual author but whose whiteboard the post appears on.
-      	'query' => "(select CONCAT('<a href=\"/user/', n.uid,'\">', u.name, '</a> has posted on their own whiteboard.') as excerpt, 
+      //carefully note - the field_user_reference on this websites determines who actually made the post. node.uid is not the actual author but whose whiteboard the post appears on.
+      $feed_queries['post on own whiteboard'] = "(select CONCAT('<a href=\"/user/', n.uid,'\">', u.name, '</a> has posted on their own whiteboard.') as excerpt, 
       	n.uid as uid,
-      	  n.created as stamp, 
-      	  (n.created*".$weights['post on own whiteboard'].") as s,
-      	
-        ".cmwn_feed_get_timeago('n.created')."
+        n.created as stamp, 
+      	(n.created*".$weights['post on own whiteboard'].") as s,
+      	".cmwn_feed_get_timeago('n.created')."
 
-      	 from {node} n join {users} u on u.uid = n.uid join {content_type_whiteboard} ctw on ctw.nid = n.nid and ctw.field_user_reference_uid = n.uid where n.type='whiteboard' and
-      	 ctw.field_user_reference_uid in ($friend_uid_placeholders) and n.status = 1) UNION ALL ",
-      );		
+        FROM {node} n 
+        JOIN {users} u ON u.uid = n.uid 
+        JOIN {content_type_whiteboard} ctw ON ctw.nid = n.nid AND ctw.field_user_reference_uid = n.uid 
+        WHERE n.type='whiteboard' AND ctw.field_user_reference_uid in ($friend_uid_placeholders) AND n.status = 1)";
 
 
-      $feed_queries['post on other whiteboard'] = array(
-      	'query' => "(select CONCAT('<a href=\"/user/', u2.uid, '\">', u2.name, '</a> has posted on <a href=\"/user/', u.uid,'\">', u.name ,'s</a> whiteboard.') as excerpt, 
+      $feed_queries['post on other whiteboard'] = "(select CONCAT('<a href=\"/user/', u2.uid, '\">', u2.name, '</a> has posted on <a href=\"/user/', u.uid,'\">', u.name ,'s</a> whiteboard.') as excerpt, 
       	n.uid as uid,
-      	  n.created as stamp, 
-      	  (n.created*".$weights['post on other whiteboard'].") as s,
-      	
-        ".cmwn_feed_get_timeago('n.created')."
+        n.created as stamp, 
+      	(n.created*".$weights['post on other whiteboard'].") as s,
+      	".cmwn_feed_get_timeago('n.created')."
 
-      	 from {node} n join {users} u on u.uid = n.uid join {content_type_whiteboard} ctw on ctw.nid = n.nid join {users} u2 on u2.uid = ctw.field_user_reference_uid where ctw.field_user_reference_uid <> n.uid and n.type='whiteboard' and n.status = 1 and ctw.field_user_reference_uid in ($friend_uid_placeholders)) ",
-      );
+        FROM {node} n JOIN {users} u ON u.uid = n.uid 
+        JOIN {content_type_whiteboard} ctw ON ctw.nid = n.nid 
+        JOIN {users} u2 ON u2.uid = ctw.field_user_reference_uid 
+        WHERE ctw.field_user_reference_uid <> n.uid AND n.type='whiteboard' AND n.status = 1 AND ctw.field_user_reference_uid IN ($friend_uid_placeholders))";
       
     
 		$args = array();
     foreach($feed_queries as $type => $query){
-      $query_union .= $query['query'];
       $args = array_merge($args,$friends);
     }
 
-    $query_union = $query_union . '  order by s desc';
+    $query_union = implode(' UNION ALL ', $feed_queries) . '  order by s desc';
 
     $count_query = "SELECT COUNT(*) FROM (" . $query_union . ") AS count_query";
     

@@ -9,7 +9,7 @@
 
 function cmwn_feed_admin(){
   
-  $feed_queries = cmwn_feed_friend_queries_list();
+  $feed_queries = array_merge(cmwn_feed_friend_queries_list(),cmwn_feed_flip_queries_list());
   
   $form = array();
 
@@ -46,7 +46,7 @@ function cmwn_feed_admin(){
 
 function cmwn_feed_settings_validate($form, &$form_state){
 
-  $feed_queries = cmwn_feed_friend_queries_list();
+  $feed_queries = array_merge(cmwn_feed_friend_queries_list(),cmwn_feed_flip_queries_list());
   
   foreach($feed_queries as $type){
     if(!is_numeric($form_state['values']['cmwn_feed_weight_' . str_replace(' ', '_', $type)]) && $form_state['values']['cmwn_feed_weight_' . str_replace(' ', '_', $type)] != '0'){
@@ -57,7 +57,7 @@ function cmwn_feed_settings_validate($form, &$form_state){
 }
 
 function cmwn_feed_settings_submit($form, &$form_state){
-  $feed_queries = cmwn_feed_friend_queries_list();
+  $feed_queries = array_merge(cmwn_feed_friend_queries_list(),cmwn_feed_flip_queries_list());
   
   //dsm($form_state);
   $result = db_query("SELECT query_name, weight FROM {cmwn_feed_weight} cfw");
