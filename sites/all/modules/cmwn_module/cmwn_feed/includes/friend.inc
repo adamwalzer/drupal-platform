@@ -14,7 +14,8 @@ function cmwn_feed_friend_queries_list(){
     'signs up flip',
     'completes flip',
     'post on own whiteboard',
-    'post on other whiteboard',    
+    'post on other whiteboard', 
+    'joins special edition flip',   
   );  
   return $feed_queries;
 }
@@ -100,6 +101,20 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
 
          from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on u.uid = ws.uid where ws.uid in($friend_uid_placeholders) and cfa.delta = (select min(delta) from {content_field_actions} cfai where cfai.nid = nf.nid))  UNION ALL ",
       );
+
+      $feed_queries['joins special edition flip'] = array(
+      	'query' => "(select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has begun has joined special edition flip \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp, (ws.submitted*".$weights['joins special edition flip'].") as s,
+      
+        CASE 
+          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(ws.submitted))), ' minutes ago')
+          WHEN datediff(now(), FROM_UNIXTIME(ws.submitted)) = 1 THEN 'Yesterday'
+          WHEN FROM_UNIXTIME(ws.submitted) between date_sub(now(), INTERVAL 48 hour) and now() THEN concat(hour(TIMEDIFF(NOW(), FROM_UNIXTIME(ws.submitted))), ' hours ago')
+        ELSE date_format(FROM_UNIXTIME(ws.submitted), '%a, %m/%%d/%y %h:%%i%p')
+        END      	as time_ago
+
+         from {webform_submissions} ws join node na on ws.nid = na.nid join {content_field_actions} cfa on cfa.field_actions_nid = na.nid join {node} nf on nf.nid = cfa.nid join {users} u on u.uid = ws.uid join {content_field_special_edition} cfse on cfse.nid = nf.nid and cfse.field_special_edition_value='Yes' where ws.uid in($friend_uid_placeholders) and cfa.delta = (select min(delta) from {content_field_actions} cfai where cfai.nid = nf.nid))  UNION ALL ",
+      );
+
       
       $feed_queries['completes flip'] = array(
       	'query' => "(select CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item \"<em>', nf.title ,'</em>.\"') as excerpt, ws.uid as uid, ws.submitted as stamp, (ws.submitted*".$weights['completes flip'].") as s,
@@ -147,6 +162,8 @@ function cmwn_friend_feed($uid = 0, $page = 0) {//ganked/modified from feed.inc 
 
       	 from {node} n join {users} u on u.uid = n.uid join {content_type_whiteboard} ctw on ctw.nid = n.nid join {users} u2 on u2.uid = ctw.field_user_reference_uid where ctw.field_user_reference_uid <> n.uid and n.type='whiteboard' and n.uid='" . $user->uid . "') ",
       );
+      
+    
 		$args = array();
     foreach($feed_queries as $type => $query){
       $query_union .= $query['query'];
