@@ -2,7 +2,7 @@
 module_load_include('inc','cmwn_oauth_services','includes/util');
 module_load_include('inc','cmwn_oauth_services','includes/admin');
 module_load_include('inc','cmwn_oauth_services','includes/user');
-
+module_load_include('inc','cmwn_oauth_services','includes/whiteboard');
 function cmwn_oauth_services_menu() {
   
   //These handle oAuth authentication token requests
@@ -42,6 +42,16 @@ function cmwn_oauth_services_menu() {
     'access arguments' => array('access content'),
   );
   
+  //post image to whiteboard
+  $items['services/post/whiteboard'] = array(
+    'page callback' => '_cmwn_oauth_services_post_whiteboard',
+    'access arguments' => array('access content'),
+  );
+  //test whiteboard post api call
+  $items['services/post/whiteboard/test-form'] = array(
+    'page callback' => '_cmwn_oauth_services_post_whiteboard_test',
+    'access arguments' => array('access content'),
+  );    
   return $items;
 }
  
@@ -359,4 +369,47 @@ function cmwn_oauth_services_user_has_context($consumer, $user_context){
    }
   }
   return $match;
+}
+
+
+function _cmwn_oauth_services_post_whiteboard(){
+
+  $uid = $_POST['uid'];
+  $content = $_POST['body'];
+  @$account = user_load($uid);
+  
+  //http://local.cmwn.com:8888/services/post/whiteboard?oauth_consumer_key=kRTvDhFXFtLRa8ZgGKsGBcG6FcccmzsC&oauth_token=MFpkTxttjVg9C9fzuYY8bpAtKzYA6evj&callback=callthisback, replace last param with key from authorizations
+
+  _cmwn_oauth_services_oauth_validate_request();//this will return unauthorized if it does not validate.
+  
+  if($account && $account->status == 1 && sizeof($_FILES) > 0){
+    $callback = $_GET['callback'];
+    $post_result = cmwn_oauth_services_whiteboard_add($uid);
+    header('Content-Type: application/json; charset=utf8');
+    $json = json_encode($post_result);
+    
+    //no call back
+    if( ! isset($_GET['callback']))
+      exit($json);
+    
+    //valid callback, jsonp
+    if(cmwn_json_is_valid_callback($_GET['callback']))
+      exit("{$_GET['callback']}($json)");    
+  }else{
+    //problem
+    header('status: 400 Bad Request', true, 400);    
+  } 
+}
+
+function _cmwn_oauth_services_post_whiteboard_test(){
+  return 'oauth_consumer_key = '.$_GET['oauth_consumer_key'] . '<br />oauth_token = ' . $_GET['oauth_token'] . '<br /><form action="/services/post/whiteboard?oauth_consumer_key='.$_GET['oauth_consumer_key'].'&oauth_token='.$_GET['oauth_token'].'&callback=somecallback" enctype="multipart/form-data" method="post">
+					<textarea columns="60" name="content" placeholder="What\'s new in your world?" rows="3"></textarea>
+											<span class="file"></span>
+						<span class="button" href="#">
+							<span>Add Photo/ Video</span>
+							<input name="files[media]" type="file">
+							<input name="uid" type="text"  value="4980"/>
+						</span>
+										<button class="button" type="submit">Post</button>
+				</form>';
 }
