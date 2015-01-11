@@ -371,6 +371,9 @@ function cmwn_oauth_services_user_has_context($consumer, $user_context){
   return $match;
 }
 
+function cmwn_oauth_services_consumer_key_has_context($consumer_key, $context){
+  return db_result(db_query("SELECT csid FROM {oauth_common_provider_consumer} where consumer_key='%s' and context='%s' limit 1", array($consumer_key,$context)));
+}
 
 function _cmwn_oauth_services_post_whiteboard(){
 
@@ -382,23 +385,29 @@ function _cmwn_oauth_services_post_whiteboard(){
 
   _cmwn_oauth_services_oauth_validate_request();//this will return unauthorized if it does not validate.
   
-  if($account && $account->status == 1 && sizeof($_FILES) > 0){
-    $callback = $_GET['callback'];
-    $post_result = cmwn_oauth_services_whiteboard_add($uid);
-    header('Content-Type: application/json; charset=utf8');
-    $json = json_encode($post_result);
-    
-    //no call back
-    if( ! isset($_GET['callback']))
-      exit($json);
-    
-    //valid callback, jsonp
-    if(cmwn_json_is_valid_callback($_GET['callback']))
-      exit("{$_GET['callback']}($json)");    
+  //check consumer context
+  if(!cmwn_oauth_services_consumer_key_has_context($_GET['oauth_consumer_key'], 'whiteboard')){
+    header("HTTP/1.1 401 Unauthorized");
   }else{
-    //problem
-    header('status: 400 Bad Request', true, 400);    
-  } 
+    if($account && $account->status == 1 && sizeof($_FILES) > 0){
+      $callback = $_GET['callback'];
+      $post_result = cmwn_oauth_services_whiteboard_add($uid);
+      header('Content-Type: application/json; charset=utf8');
+      $json = json_encode($post_result);
+      
+      //no call back
+      if( ! isset($_GET['callback']))
+        exit($json);
+      
+      //valid callback, jsonp
+      if(cmwn_json_is_valid_callback($_GET['callback']))
+        exit("{$_GET['callback']}($json)");    
+    }else{
+      //problem
+      header('status: 400 Bad Request', true, 400);    
+    }     
+  }
+  
 }
 
 function _cmwn_oauth_services_post_whiteboard_test(){
