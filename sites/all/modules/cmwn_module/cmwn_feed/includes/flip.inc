@@ -28,13 +28,16 @@ function cmwn_feed_flip_query_weights(){
   $weights = array();
   
   while ($row = db_fetch_object($result)) {
-    $weights[$row->query_name] = $row->weight?(float)$row->weight:'1';
+    $weights[$row->query_name] = is_numeric($row->weight)?((float)$row->weight):1;
   }     
   
   return $weights;
-
 }
 
+function cmwn_feed_get_flip_weights_value($index){
+  $weights = cmwn_feed_flip_query_weights();
+  return $weights[$index]?$weights[$index]:1;
+}
 
 function cmwn_flip_feed() {
     
@@ -45,12 +48,12 @@ function cmwn_flip_feed() {
       exit;
     }
 
-    $weights = cmwn_feed_flip_query_weights();
+    
 		
     $feed_queries['brand partner released new flip'] =  "(SELECT 
       	    CONCAT('<a href=\"/node/', bpn.nid,'\">', bpn.title,'</a> has released a new flip action item called <em><a href=\"/node/', fn.nid,'\">' , fn.title , '</a></em>' ) as excerpt, 
       	    f.filepath as src,       
-            (fn.created*".$weights['brand partner released new flip'].") as s,
+            (fn.created*".cmwn_feed_get_flip_weights_value('brand partner released new flip').") as s,
             ".cmwn_feed_get_timeago('fn.created')."
       	
             FROM {node} fn 
@@ -63,7 +66,7 @@ function cmwn_flip_feed() {
     $feed_queries['new brand partner'] =  "(SELECT 
       	    CONCAT('<strong>Change My World Now</strong> is celebrating <a href=\"/node/', bpn.nid,'\">', bpn.title,'</a> as a new brand partner.') as excerpt, 
       	    f.filepath as src,       
-            (bpn.created*".$weights['new brand partner'].") as s,
+            (bpn.created*".cmwn_feed_get_flip_weights_value('new brand partner').") as s,
             ".cmwn_feed_get_timeago('bpn.created')."
             
             FROM {node} bpn
@@ -74,7 +77,7 @@ function cmwn_flip_feed() {
     $feed_queries['new brand partner'] =  "(SELECT 
       	    CONCAT('<strong>Change My World Now</strong> is celebrating <a href=\"/node/', bpn.nid,'\">', bpn.title,'</a> as a new brand partner.') as excerpt, 
       	    f.filepath as src,       
-            (bpn.created*".$weights['new brand partner'].") as s,
+            (bpn.created*".cmwn_feed_get_flip_weights_value('new brand partner').") as s,
             ".cmwn_feed_get_timeago('bpn.created')."
             
             FROM {node} bpn
@@ -85,7 +88,7 @@ function cmwn_flip_feed() {
       $feed_queries['special edition flip'] =  "(SELECT 
       	    CONCAT('<a href=\"/node/', bpn.nid,'\">', bpn.title,'</a> has released a new flip action item called <em><a href=\"/node/', fn.nid,'\">' , fn.title , '</a></em>' ) as excerpt, 
       	    f.filepath as src,       
-            (fn.created*".$weights['special edition flip'].") as s,
+            (fn.created*".cmwn_feed_get_flip_weights_value('special edition flip').") as s,
             ".cmwn_feed_get_timeago('fn.created')."
       	
             FROM {node} fn 
@@ -112,7 +115,7 @@ function cmwn_flip_feed() {
       $item = new stdClass();
   		$item->excerpt = $f->excerpt;
       $item->src = ($f->src);
-  		//$item->stamp = $f->stamp;
+  		$item->stamp = $f->stamp;
   		$item->time_ago = $f->time_ago;
   		$items[] = $item;
     }

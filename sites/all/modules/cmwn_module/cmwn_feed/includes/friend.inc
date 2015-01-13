@@ -40,6 +40,11 @@ function cmwn_feed_friend_query_weights(){
 
 }
 
+function cmwn_feed_get_friend_weights_value($index){
+  $weights = cmwn_feed_friend_query_weights();
+  return $weights[$index]?$weights[$index]:1;
+}
+
 function cmwn_feed_get_timeago($field){
   return "CASE 
             WHEN FROM_UNIXTIME(" . $field . ") between date_sub(now(), INTERVAL 60 minute) and now() THEN concat(minute(TIMEDIFF(now(), FROM_UNIXTIME(" . $field . "))), ' minute(s) ago')
@@ -83,7 +88,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {
         CONCAT('<a href=\"/user/', user_a.uid,'\">',user_a.name,'</a> has become friends with <a href=\"/user/',user_b.uid, '\">', user_b.name, '</a>') as excerpt, 
         user_a.uid as uid, 
         updated_at as stamp, 
-        (updated_at*".$weights['friend request'].") as s,
+        (updated_at*".cmwn_feed_get_friend_weights_value('friend request').") as s,
         ".cmwn_feed_get_timeago('updated_at')."
       	
         FROM {user_relationships} ur 
@@ -95,7 +100,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {
         CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item milestone \"<em>', n.title ,'</em>.\"') as excerpt, 
         ws.uid as uid, 
         submitted as stamp, 
-        (submitted*".$weights['completes flip milestone'].") as s,
+        (submitted*".cmwn_feed_get_friend_weights_value('completes flip milestone').") as s,
         ".cmwn_feed_get_timeago('submitted')."
         
         FROM {webform_submissions} ws 
@@ -107,7 +112,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {
         CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has begun the action item \"<em>', nf.title ,'</em>.\"') as excerpt, 
         ws.uid as uid, 
         ws.submitted as stamp, 
-        (ws.submitted*".$weights['signs up flip'].") as s,
+        (ws.submitted*".cmwn_feed_get_friend_weights_value('signs up flip').") as s,
         ".cmwn_feed_get_timeago('ws.submitted')."
           
         FROM {webform_submissions} ws 
@@ -121,7 +126,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {
         CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has begun has joined special edition flip \"<em>', nf.title ,'</em>.\"') as excerpt, 
         ws.uid as uid, 
         ws.submitted as stamp, 
-        (ws.submitted*".$weights['joins special edition flip'].") as s,
+        (ws.submitted*".cmwn_feed_get_friend_weights_value('joins special edition flip').") as s,
         ".cmwn_feed_get_timeago('ws.submitted')."
 
         FROM {webform_submissions} ws 
@@ -136,7 +141,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {
       $feed_queries['completes flip'] = "(select 
         CONCAT('<a href=\"/user/', u.uid,'\">',u.name,'</a> has completed the action item \"<em>', nf.title ,'</em>.\"') as excerpt, 
         ws.uid as uid, ws.submitted as stamp, 
-        (ws.submitted*".$weights['completes flip'].") as s,
+        (ws.submitted*".cmwn_feed_get_friend_weights_value('completes flip').") as s,
         ".cmwn_feed_get_timeago('ws.submitted')."
         
         FROM {webform_submissions} ws JOIN node na ON ws.nid = na.nid 
@@ -151,7 +156,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {
          end) , '\"') as excerpt, 
       	c.uid as uid,
       	  timestamp as stamp, 
-      	  (timestamp*".$weights['reply to own post'].") as s,
+      	  (timestamp*".cmwn_feed_get_friend_weights_value('reply to own post').") as s,
       	
         ".cmwn_feed_get_timeago('timestamp')."
 
@@ -168,7 +173,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {
          end) , '\"') as excerpt, 
       	c.uid as uid,
       	  timestamp as stamp, 
-      	  (timestamp*".$weights['reply to other post'].") as s,
+      	  (timestamp*".cmwn_feed_get_friend_weights_value('reply to other post').") as s,
       	
         ".cmwn_feed_get_timeago('timestamp')."
 
@@ -183,7 +188,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {
       $feed_queries['post on own whiteboard'] = "(select CONCAT('<a href=\"/user/', n.uid,'\">', u.name, '</a> has posted on their own whiteboard.') as excerpt, 
       	n.uid as uid,
         n.created as stamp, 
-      	(n.created*".$weights['post on own whiteboard'].") as s,
+      	(n.created*".cmwn_feed_get_friend_weights_value('post on own whiteboard').") as s,
       	".cmwn_feed_get_timeago('n.created')."
 
         FROM {node} n 
@@ -195,7 +200,7 @@ function cmwn_friend_feed($uid = 0, $page = 0) {
       $feed_queries['post on other whiteboard'] = "(select CONCAT('<a href=\"/user/', u2.uid, '\">', u2.name, '</a> has posted on <a href=\"/user/', u.uid,'\">', u.name ,'s</a> whiteboard.') as excerpt, 
       	n.uid as uid,
         n.created as stamp, 
-      	(n.created*".$weights['post on other whiteboard'].") as s,
+      	(n.created*".cmwn_feed_get_friend_weights_value('post on other whiteboard').") as s,
       	".cmwn_feed_get_timeago('n.created')."
 
         FROM {node} n JOIN {users} u ON u.uid = n.uid 
