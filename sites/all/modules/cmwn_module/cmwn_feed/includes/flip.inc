@@ -28,7 +28,7 @@ function cmwn_feed_flip_query_weights(){
   $weights = array();
   
   while ($row = db_fetch_object($result)) {
-    $weights[$row->query_name] = (float)$row->weight;
+    $weights[$row->query_name] = $row->weight?(float)$row->weight:'1';
   }     
   
   return $weights;
@@ -44,7 +44,7 @@ function cmwn_flip_feed() {
     if($user->uid < 1){
       exit;
     }
-    
+
     $weights = cmwn_feed_flip_query_weights();
 		
     $feed_queries['brand partner released new flip'] =  "(SELECT 
@@ -107,7 +107,7 @@ function cmwn_flip_feed() {
     $count_query = "SELECT COUNT(*) FROM (" . $query_union . ") AS count_query";
     
     $feed_items = pager_query($query_union, 13, 0, $count_query, $args);//careful here, $args must work for count query and main query or this wont work.
-    
+
     while($f = db_fetch_object($feed_items)){
       $item = new stdClass();
   		$item->excerpt = $f->excerpt;
@@ -115,7 +115,6 @@ function cmwn_flip_feed() {
   		//$item->stamp = $f->stamp;
   		$item->time_ago = $f->time_ago;
   		$items[] = $item;
-
     }
 		?>
 		

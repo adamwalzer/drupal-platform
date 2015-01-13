@@ -33,7 +33,7 @@ function cmwn_feed_friend_query_weights(){
   $weights = array();
   
   while ($row = db_fetch_object($result)) {
-    $weights[$row->query_name] = (float)$row->weight;
+    $weights[$row->query_name] = $row->weight?(float)$row->weight:'1';
   }     
   
   return $weights;
