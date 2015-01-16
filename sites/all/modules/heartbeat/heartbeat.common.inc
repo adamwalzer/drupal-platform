@@ -50,7 +50,7 @@ function heartbeat_decode_message_variables($string, $object = FALSE) {
     foreach ($array as $varvalue) {
       $parts = explode("=|=", $varvalue);
       if (isset($parts[0]) && !empty($parts[0])) {
-        if (eregi("\*\*\*", $parts[1])) {
+        if (preg_match("/\*\*\*/i", $parts[1])) {
           $parts[1] = explode("***", $parts[1]);
         }
         $variables[$parts[0]] = !is_array($parts[1]) ? (string)$parts[1] : $parts[1];
