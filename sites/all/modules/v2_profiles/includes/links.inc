@@ -85,6 +85,7 @@
 			}
 
 			$items[] = (object)array('title' => 'My Interest Groups', 'href' => '#');
+      $items[] = (object)array('title' => 'Arcade', 'href' => '/node/13120');
 
 		} else if ($user->user_type == 'parent') {
 
