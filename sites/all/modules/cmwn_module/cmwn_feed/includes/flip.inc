@@ -12,7 +12,7 @@ function cmwn_feed_flip_queries_list(){
     'brand partner released new flip',
     'new brand partner',
     'special edition flip',
-
+    'brand partner birthday',
   );  
   return $feed_queries;
 }
@@ -62,17 +62,6 @@ function cmwn_flip_feed() {
             JOIN {content_field_icon} cfi on bpn.nid =  cfi.nid and bpn.vid = cfi.vid
             JOIN {files} f on f.fid = cfi.field_icon_fid
             WHERE fn.type='flip')";
-
-    $feed_queries['new brand partner'] =  "(SELECT 
-      	    CONCAT('<strong>Change My World Now</strong> is celebrating <a href=\"/node/', bpn.nid,'\">', bpn.title,'</a> as a new brand partner.') as excerpt, 
-      	    f.filepath as src,       
-            (bpn.created*".cmwn_feed_get_flip_weights_value('new brand partner').") as s,
-            ".cmwn_feed_get_timeago('bpn.created')."
-            
-            FROM {node} bpn
-            JOIN {content_field_icon} cfi on bpn.nid =  cfi.nid and bpn.vid = cfi.vid
-            JOIN {files} f on f.fid = cfi.field_icon_fid
-            WHERE bpn.type = 'brand_partner')";
             
     $feed_queries['new brand partner'] =  "(SELECT 
       	    CONCAT('<strong>Change My World Now</strong> is celebrating <a href=\"/node/', bpn.nid,'\">', bpn.title,'</a> as a new brand partner.') as excerpt, 
@@ -96,7 +85,19 @@ function cmwn_flip_feed() {
             JOIN {node} bpn on bpn.nid = cfbp.field_brand_partner_nid
             JOIN {content_field_icon} cfi on bpn.nid =  cfi.nid and bpn.vid = cfi.vid
             JOIN {files} f on f.fid = cfi.field_icon_fid
-            WHERE fn.type='flip')";        
+            WHERE fn.type='flip')";    
+            
+        $feed_queries['brand partner birthday'] =  "(SELECT 
+      	    CONCAT('Happy Birthday, <a href=\"/node/', bpn.nid,'\">', bpn.title,'</a>') as excerpt, 
+      	    f.filepath as src,       
+            (UNIX_TIMESTAMP(ctbp.field_birthday_value)*".cmwn_feed_get_flip_weights_value('brand partner birthday').") as s,
+            ".cmwn_feed_get_timeago('UNIX_TIMESTAMP(ctbp.field_birthday_value)')."
+            
+            FROM {node} bpn
+            JOIN {content_type_brand_partner} ctbp on bpn.nid = ctbp.nid and bpn.vid = ctbp.vid
+            JOIN {content_field_icon} cfi on bpn.nid =  cfi.nid and bpn.vid = cfi.vid            
+            JOIN {files} f on f.fid = cfi.field_icon_fid
+            WHERE bpn.type = 'brand_partner')";                
       
             
     
