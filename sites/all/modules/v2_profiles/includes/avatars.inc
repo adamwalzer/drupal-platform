@@ -99,9 +99,9 @@
 			$node->status = 0;
 			$node->title = $image->filename;
 			$node->type = 'custom_avatar';
-			$node->uid = $user->uid;
 			node_validate($node);
 			node_submit($node);
+			$node->uid = $uid;			
 			node_save($node);
 
 			drupal_set_message('Your avatar has been updated.');
@@ -146,7 +146,7 @@
 				}
 			}
 
-			user_save($_user, array('picture'=>''));
+			//user_save($_user, array('picture'=>''));
 
 			$_node = GenericUser::castAs($_user)->getBaseProfile();
 
@@ -179,30 +179,12 @@
 
 	function v2_profiles_avatars_query($uid) {
 		global $user;
-		
+		$is_child = in_array('child', array_values($user->roles))?true:false;
 		$value = '';
 
 		$cur_user = user_load($uid);
 
 		if (!$cur_user) return $value;
-
-		$query = "
-			SELECT
-				`f`.`filepath`
-			FROM
-				`node` AS `n` JOIN
-				`content_type_custom_avatar` AS `ctca` ON `n`.`nid` = `ctca`.`nid` JOIN
-				`files` AS `f` ON `ctca`.`field_custom_avatar_fid` = `f`.`fid`
-			WHERE
-				`n`.`uid` = " . $cur_user->uid . "
-				".($user->uid!=$uid?" AND `n`.`status` = 1":"")."
-			ORDER BY
-				`n`.`nid` DESC
-			LIMIT
-				1
-		";
-
-		$value = db_result(db_query($query));
 
 		/*
 		if (empty($value)) {
@@ -219,8 +201,8 @@
 		}
 		*/
 
-		if (empty($value)) {
-			$node = GenericUser::castAs($user)->getBaseProfile();
+		if (empty($value)) {//chosen avatar from group
+			$node = GenericUser::castAs($cur_user)->getBaseProfile();
 			if ($node) {
 				$node = node_load($node->field_avatar_reference[0]['nid']);
 				if ($node) {
@@ -228,6 +210,26 @@
 				}
 			}
 		}
+
+    if(!$is_child){// if it's not a child, check to see if they have overriden a selected avatar with an uploaded one.
+  		$query = "
+  			SELECT
+  				`f`.`filepath`
+  			FROM
+  				`node` AS `n` JOIN
+  				`content_type_custom_avatar` AS `ctca` ON `n`.`nid` = `ctca`.`nid` JOIN
+  				`files` AS `f` ON `ctca`.`field_custom_avatar_fid` = `f`.`fid`
+  			WHERE
+  				`n`.`uid` = " . $cur_user->uid . "
+  				".($user->uid!=$uid?" AND `n`.`status` = 1":"")."
+  			ORDER BY
+  				`n`.`nid` DESC
+  			LIMIT
+  				1
+  		";
+  
+  		$value = db_result(db_query($query));      
+    }
 
 		return (!empty($value))? '/'.imagecache_create_path('216x216', $value) : '/sites/all/themes/cmwn/assets/img/default/avatars/216.png';
 
