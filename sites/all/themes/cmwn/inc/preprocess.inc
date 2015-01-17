@@ -59,13 +59,7 @@ admin/content/node-type/*
 EOP;
 	if (!drupal_match_path($_GET['q'], $patterns)) {
 		$scripts = drupal_add_js();
-		unset($scripts['core']['misc/jquery.js']);
 		$scripts['core'] = array_merge(array(
-			drupal_get_path('theme', 'cmwn').'/assets/js/jquery.min.js' => array(
-				'cache' => true,
-				'defer' => false,
-				'preprocess' => true
-			),
 			drupal_get_path('theme', 'cmwn').'/assets/js/jquery.tools.min.js' => array(
 				'cache' => true,
 				'defer' => false,
