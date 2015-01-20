@@ -5,7 +5,6 @@ $cmwn_exit_functions = array();
 set_include_path(get_include_path().PATH_SEPARATOR.dirname(__FILE__).'/classes/');
 spl_autoload_register('cmwn_module_autoload');
 
-
 // Check for presence of url-passed child/parent token
 if(isset($_GET['cptoken'])) {
 	$_SESSION['cptoken'] = $_GET['cptoken'];
@@ -720,6 +719,27 @@ function cmwn_module_user($op, &$edit, &$account, $category = NULL) {
           break;
       }
       break;
+      
+      case 'login':
+        $uid = $account->uid; 
+        if(in_array('child', array_values($account->roles)) || in_array('parent', array_values($account->roles))){      
+          //get list of all users with moderator or super moderator role
+          $moderators = db_query("select u.uid from {users_roles} ur join {users} u on u.uid = ur.uid where u.status > 0 and rid in (11, 26)");//11 = moderator, 26 = senior moderator
+
+          while ($moderator = db_fetch_object($moderators)){
+            //from user_relationships module
+            //add moderator relationship
+            $existing = user_relationships_load(array('requester_id' => $moderator->uid, 'requestee_id' => $uid, 'rtid' => '4'));// rtid = 5 is moderator role
+            if (empty($existing)) {
+              user_relationships_request_relationship($moderator->uid, $uid, '4', '1');
+              user_relationships_request_relationship($uid, $moderator->uid, '4', '1');              
+            }else{
+              //user_relationships_save_relationship(array_shift($existing), $op = 'approve');
+            }
+
+          }
+        }    
+        break;
   }
 }
 
