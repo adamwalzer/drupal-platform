@@ -2731,3 +2731,8 @@ body {
   font-size: 11px !important;
   font-style: italic;
 }
+
+.view-resource-center .views-row{
+  float: left;
+  clear: none;
+}
