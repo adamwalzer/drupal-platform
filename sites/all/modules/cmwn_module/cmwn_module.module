@@ -721,7 +721,7 @@ function cmwn_module_user($op, &$edit, &$account, $category = NULL) {
       break;
       
       case 'login':
-        $uid = $account->uid; 
+       /* $uid = $account->uid; 
         if(in_array('child', array_values($account->roles)) || in_array('parent', array_values($account->roles))){      
           //get list of all users with moderator or super moderator role
           $moderators = db_query("select u.uid from {users_roles} ur join {users} u on u.uid = ur.uid where u.status > 0 and rid in (11, 26)");//11 = moderator, 26 = senior moderator
@@ -738,7 +738,7 @@ function cmwn_module_user($op, &$edit, &$account, $category = NULL) {
             }
 
           }
-        }    
+        }    */
         break;
   }
 }
