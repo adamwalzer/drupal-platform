@@ -13,7 +13,7 @@ if($data->user->user_type == 'parent') {
 	<?php print v2_profiles_whiteboard_index($data->user->uid); ?>
 
 <?php } elseif($data->user->user_type == 'parent' || $data->user->user_type == 'teacher') { ?>
-  <?php //print $data->user->user_type; ?>
+  <?php print $data->user->user_type; ?>
 	<?php print v2_profiles_resource_center_index($data->user->uid); ?>
 	<?php print v2_profiles_whiteboard_index($data->user->uid); ?>  
 	<?php print v2_profiles_news_index($data->user->uid); ?>
