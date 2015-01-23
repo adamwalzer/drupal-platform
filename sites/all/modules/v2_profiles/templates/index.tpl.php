@@ -7,7 +7,6 @@ if($data->user->user_type == 'parent') {
 	}
 }
 ?>
-  <?php print_r($data->user);exit; ?>
 <?php if ($data->user->user_type == 'child') { ?>
 	<?php print v2_profiles_flips_index($data->user->uid); ?>
 	<?php print v2_profiles_whiteboard_index($data->user->uid); ?>

@@ -721,24 +721,41 @@ function cmwn_module_user($op, &$edit, &$account, $category = NULL) {
       break;
       
       case 'login':
-       /* $uid = $account->uid; 
-        if(in_array('child', array_values($account->roles)) || in_array('parent', array_values($account->roles))){      
-          //get list of all users with moderator or super moderator role
-          $moderators = db_query("select u.uid from {users_roles} ur join {users} u on u.uid = ur.uid where u.status > 0 and rid in (11, 26)");//11 = moderator, 26 = senior moderator
+       $uid = $account->uid; 
+        if(in_array('child', array_values($account->roles)) || in_array('teacher', array_values($account->roles)) || in_array('parent', array_values($account->roles)) || in_array('verified-parent', array_values($account->roles))){      
+          //check to ensure this account has required $account->data->user_type variable
+          $data = unserialize($account->data);
 
-          while ($moderator = db_fetch_object($moderators)){
-            //from user_relationships module
-            //add moderator relationship
-            $existing = user_relationships_load(array('requester_id' => $moderator->uid, 'requestee_id' => $uid, 'rtid' => '4'));// rtid = 5 is moderator role
-            if (empty($existing)) {
-              user_relationships_request_relationship($moderator->uid, $uid, '4', '1');
-              user_relationships_request_relationship($uid, $moderator->uid, '4', '1');              
-            }else{
-              //user_relationships_save_relationship(array_shift($existing), $op = 'approve');
+          if(empty($data['user_type'])){
+            //print_r($account->roles);exit;
+            $child_role = variable_get('cmwn_module_child_role','');
+            $parent_role = variable_get('cmwn_module_parent_role','');
+            $teacher_role = variable_get('cmwn_module_teacher_role','');
+            $verified_parent_role = variable_get('cmwn_module_verified_parent_role','');
+            
+
+            
+            switch(true){
+              case array_key_exists($child_role,$account->roles):
+                $data['user_type'] = 'child';
+                break;
+
+              case array_key_exists($parent_role,$account->roles):
+              case array_key_exists($verified_parent_role,$account->roles):              
+                $data['user_type'] = 'parent';
+                break;
+
+              case array_key_exists($teacher_role,$account->roles):
+                $data['user_type'] = 'teacher';
+                break;
             }
-
+            
+            //save it so this is not an issue next login.
+            if(isset($data['user_type'])){
+              user_save($account, $data);                          
+            }
           }
-        }    */
+        }  
         break;
   }
 }
