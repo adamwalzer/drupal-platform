@@ -124,7 +124,6 @@
 					   	break;
 
 						case 'parent':
-						case 'verified-parent':
 
 					   	$user = ParentUser::castAs($user);
 					   	$children = $user->getChildren();
