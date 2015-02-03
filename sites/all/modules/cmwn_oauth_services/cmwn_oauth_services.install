@@ -10,7 +10,6 @@ function cmwn_oauth_services_schema() {
       'uid' => array(
         'description' => t('User ID of the user'),
         'type' => 'int',
-        'description' => "uid of user having access to this context",
         'length' => 10,
         'not null' => TRUE,
       ),

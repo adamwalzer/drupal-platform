@@ -1,0 +1,17 @@
+<?php
+
+cmwn_notifications_admin_settings() {
+  $form = array();
+  
+  $vocabularies = taxonomy_get_vocabularies();
+  dsm($vocabularies);
+  $form['cmwn_notifications_vocabulary'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => variable_get('cmwn_notifications_vocabulary', ''),
+  );
+
+  // Pass the form array through system_settings_form()
+  return system_settings_form($form);
+}
+
