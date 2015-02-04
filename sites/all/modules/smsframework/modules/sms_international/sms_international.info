@@ -1,10 +1,8 @@
-name = Send to phone
-description = Provides various tools for sending bits of information via SMS.
+name = "SMS International"
+description = "Provides international number validation."
 dependencies[] = sms
 package = SMS Framework
 core = 6.x
-
-
 ; Information added by drupal.org packaging script on 2013-10-01
 version = "6.x-2.0-alpha1+1-dev"
 core = "6.x"

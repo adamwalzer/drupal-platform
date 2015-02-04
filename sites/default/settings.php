@@ -315,7 +315,7 @@ $cli = (php_sapi_name() == 'cli');
 if (isset($_SERVER['PANTHEON_ENVIRONMENT'])) {
   switch ($_SERVER['PANTHEON_ENVIRONMENT']) {
     case 'test':
-     $base_url = 'http://test-cmwn.gotpantheon.com/'; // NO trailing slash!
+     $base_url = 'http://test-cmwn.gotpantheon.com'; // NO trailing slash!
      break;
     case 'dev':
       $base_url = 'http://dev-cmwn.gotpantheon.com'; // NO trailing slash!

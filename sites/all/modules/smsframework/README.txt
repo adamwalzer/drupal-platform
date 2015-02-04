@@ -1,4 +1,3 @@
-$Id: README.txt,v 1.2.2.2 2009/02/05 23:50:07 diggersf Exp $
 
 Description
 ===========

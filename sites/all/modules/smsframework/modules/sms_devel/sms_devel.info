@@ -1,9 +1,8 @@
-name = Send to phone
-description = Provides various tools for sending bits of information via SMS.
-dependencies[] = sms
-package = SMS Framework
+name = Devel
+description = Dev and test tools to assist module/site development with the SMS Framework.
 core = 6.x
-
+package = SMS Framework
+dependencies[] = sms
 
 ; Information added by drupal.org packaging script on 2013-10-01
 version = "6.x-2.0-alpha1+1-dev"
