@@ -1,17 +1,153 @@
 <?php
-
-cmwn_notifications_admin_settings() {
-  $form = array();
+/**
+ * Display message overview list
+ */
+function cmwn_notifications_messaging_get($account,$subject) {
+  $output = '';
+  $messages = messaging_store('get', array('subject' => $subject,'method' => 'simple', 'uid' => $account->uid), array('mqid DESC'), MESSAGING_SIMPLE_PAGER, 0, TRUE);
+  if ($messages) {
+    $header = array(t('Subject'), t('Date'),t('View'));
+    $rows = array();
+    foreach ($messages as $message) {
+      $message = (array)$message;
+      $rows[] = array(
+        l($message['subject'], 'user/'. $account->uid .'/messages/view/'. $message['mqid']),
+        //!empty($message['sender_account']) ? theme('username', $message['sender_account']) : t('System'),
+        format_date($message['created'], 'custom', 'F j, Y, g:i a'),
+        l(t('View'), 'user/'. $account->uid .'/messages/view/'. $message['mqid']),
+      );
+    }    
+    $output .= theme('table', $header, $rows);
+    $output .= theme('pager', array(), MESSAGING_SIMPLE_PAGER);
+  } else {
+    $output .= '<p class="message-queue-empty">' . t('No pending messages') . '</p>';
+  }
+  return $output;
+}  
   
-  $vocabularies = taxonomy_get_vocabularies();
-  dsm($vocabularies);
-  $form['cmwn_notifications_vocabulary'] = array(
-    '#type' => 'select',
-    '#options' => $options,
-    '#default_value' => variable_get('cmwn_notifications_vocabulary', ''),
-  );
+  
+function cmwn_notifications_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'delete':
+      //check if being deleted by an admin/moderator
+      global $user;
+      
+      $moderator_roles = array('3', '11', '26');
 
-  // Pass the form array through system_settings_form()
-  return system_settings_form($form);
+      $is_moderator = (in_array('administrator', array_values($user->roles)) || in_array('moderator', array_values($user->roles)) || in_array('senior_moderator', array_values($user->roles)));
+
+
+      
+      if(($node->type == 'whiteboard' || $node->type == 'video') && $node->uid != $user->uid && $is_moderator){
+        //moderator deleting post not their own
+        $post_user = user_load($node->uid);
+        @$image =  $node->field_image[0]['filename'];
+        @$body  = '"' . $node->body . '"';
+        @$video =  $node->field_video[0]['filename'];
+        
+        $post_identifier = $video . ' ' . $image . ' ' . $body;
+        cmwn_notifications_rejected_content($post_user, $post_identifier);
+      }
+      
+      break;
+  }
+}  
+  
+//appears not to be used due to v2 profiles account.inc not invoking hook_user :(  
+function cmwn_notifications_user($op, &$edit, &$account, $category = NULL) {
+  switch($op){
+    case 'update':
+			if(trim($edit['pass']) != '' && $edit['pass'] != $account->pass){
+  			cmwn_notifications_password_change();  			
+			}
+      break;
+  }
+}
+function cmwn_notifications_rejected_content($account, $post_identifier){
+  //password has changed, push message.
+  $message = array(
+    'type' => 'profile-message',
+    'subject' => t('Inappropriate Content'),
+    'body' => 'Inappropriate Content<br /> you have submitted content that has been deemed inappropriate
+for CMWN. Please resubmit your content ...
+Your post (' . $post_identifier . ') was removed from CMWN.
+We suggest following the outline below and your content will follow
+guidlines for CMWN....',
+    'language' => user_preferred_language($account),
+  );
+  messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
 }
 
+function cmwn_notifications_password_change($account){
+  //password has changed, push message.
+  $message = array(
+    'type' => 'profile-message',
+    'subject' => t('Password Changed'),
+    'body' => 'You have changed your password.',
+    'language' => user_preferred_language($account),
+  );
+  messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
+}
+
+function cmwn_notifications_username_change($account){
+  //password has changed, push message.
+  $message = array(
+    'type' => 'profile-message',
+    'subject' => t('Username Changed'),
+    'body' => 'You have changed your username.',
+    'language' => user_preferred_language($account),
+  );
+  messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
+}
+
+function cmwn_notifications_email_change($account){
+  //password has changed, push message.
+  $message = array(
+    'type' => 'profile-message',
+    'subject' => t('Email Changed'),
+    'body' => 'You have changed the email address associated with your account.',
+    'language' => user_preferred_language($account),
+  );
+  messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
+}
+
+
+function cmwn_notifications_webform_submission_insert($node, $submission) {
+  //determine if this is the final action item for this flip being inserted. If it is, push award message.
+  //get flip nid from this action item nid
+  $nid = db_result(db_query("SELECT nid FROM {content_field_actions} where field_actions_nid = %d", $node->nid));
+  if($nid){
+    $flip_node = node_load($nid);
+    global $user;
+    if($flip_node->field_actions[count($flip_node->field_actions)]['nid'] == $flip_node->nid){//is this the last action item in this flip?
+      cmwn_notifications_flip_award($user, $flip_node->nid, $flip_node->title);
+      watchdog('cmwn_notifications','attempted to insert flip messaging');
+      watchdog('cmwn_notifications',print_r($flip_node,true));      
+    }
+
+  }
+}    
+  
+function cmwn_notifications_flip_award($account, $nid, $title){
+ /*
+ * @param $account
+ *   User object to recieve message.
+ * @param $message
+ *   Array of message parts that will be compiled depending on send method.
+ *   Mandatory message parts, which may have nexted parts are:
+ *   - 'type'
+ *   - 'subject'
+ *   - 'body'. The message body may have 'header', 'content', 'footer', 'etc'
+ * @param $method
+ *   Optional send method. Defaults to the user account predefined method_exists
+ */
+  $message = array(
+    'type' => 'profile-message',
+    'subject' => t('Flip Award'),
+    'body' => 'You have earned a flip award for action item "' . $title . '."',
+    'language' => user_preferred_language($account),
+  );
+  messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
+}
+
+  

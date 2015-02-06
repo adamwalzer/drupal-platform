@@ -1,5 +1,5 @@
 <?php
-
+/*
 function cmwn_notifications_schema() {
   $schema = array();
 
@@ -51,3 +51,4 @@ function cmwn_notifications_uninstall(){
 function cmwn_oauth_services_install(){
   drupal_install_schema('cmwn_notifications');  
 }
+*/

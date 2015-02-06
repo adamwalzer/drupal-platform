@@ -81,7 +81,12 @@
 			}
 
 			if (in_array('can_receive_notices', $user->roles) || in_array('can_receive_notices_via_parent', $user->roles)) {
-				$items[] = (object)array('title' => 'My Notices', 'href' => '/user/'.$user->uid.'/notices');
+				//$items['notices'] = (object)array('title' => 'My Notices', 'href' => '/user/'.$user->uid.'/notices');
+				$items['notices'] = (object)array('title' => 'My Notices', 'href' => '#');
+				$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Posting', 'href' => '/user/'.$user->uid.'/notices/posting');
+				$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Award', 'href' => '/user/'.$user->uid.'/notices/award');
+				$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Action', 'href' => '/user/'.$user->uid.'/notices/action');
+				$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Account', 'href' => '/user/'.$user->uid.'/notices/account');				
 			}
 
 			$items[] = (object)array('title' => 'My Interest Groups', 'href' => '#');

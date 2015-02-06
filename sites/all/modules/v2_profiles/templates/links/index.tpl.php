@@ -6,8 +6,10 @@
 
 		<div class="section">
 			<ul>
-				<?php foreach ($data->items as $item) { ?>
-					<li<?php echo($item->active||$item->title=='Add a Child'?' class="'.($item->active?'active':'').($item->title=='Add a Child'?' add-a-child':'').'"' : ''); ?>><a href="<?php print $item->href; ?>"><?php print $item->title; ?></a></li>
+				<?php foreach ($data->items as $index => $item) { ?>
+					<li<?php echo($item->active||$item->title=='Add a Child'?' class="'.($item->active?'active':'').($item->title=='Add a Child'?' add-a-child':'').'"' : ''); ?>>
+					<a href="<?php print $item->href; ?>"><?php print $item->title; ?></a>
+					</li>
 				<?php } ?>
 			</ul>
 		</div>

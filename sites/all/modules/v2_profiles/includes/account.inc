@@ -40,6 +40,7 @@
 						if ($_password1 === $_password2) {
 							db_query("UPDATE `users` SET `pass` = '" . db_escape_string(md5($_password1)) . "' WHERE `uid` = " . $user->uid . ";");
 							drupal_set_message('Your profile was successfully updated.');
+              cmwn_notifications_password_change($user);							
 							drupal_goto('user/'.$user->uid.'/account');
 						} else {
 							drupal_set_message('Your passwords must match.', 'error');
@@ -62,6 +63,7 @@
 							} else {
 								db_query("UPDATE `users` SET `mail` = '" . db_escape_string($_email) . "' WHERE `uid` = " . $user->uid . ";");
 								drupal_set_message('Your profile was successfully updated.');
+                cmwn_notifications_email_change($user);
 								drupal_goto('user/'.$user->uid.'/account');
 							}
 						} else {
@@ -103,6 +105,7 @@
 						if ($_count == 0) {
 							db_query("UPDATE `users` SET `name` = '" . db_escape_string($_username) . "' WHERE `uid` = " . $user->uid . ";");
 							drupal_set_message('Your profile was successfully updated.');
+							cmwn_notifications_username_change($user);
 							drupal_goto('user/'.$user->uid.'/account');
 						} else {
 							drupal_set_message('The username is already taken, please choose another.', 'error');
