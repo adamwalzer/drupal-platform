@@ -95,9 +95,18 @@
 		} else if ($user->user_type == 'parent') {
 
 			$items[] = (object)array('title' => 'My News', 'href' => '/user');
+			
+			$items['notices'] = (object)array('title' => 'My Notices', 'href' => '#');
+			$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Account', 'href' => '/user/'.$user->uid.'/notices/account');							
+			
+			//list children, show custom link to children's messages
+
 			$items[] = (object)array('title' => 'My Children\'s Profiles', 'href' => '/user/'.$user->uid.'/children');
 			$items[] = (object)array('title' => 'My Children\'s Permissions', 'href' => '/user/'.$user->uid.'/children/permissions');
 			$items[] = (object)array('title' => 'Add a Child', 'href' => '/user/'.$user->uid.'/children/add');
+
+
+
 
 		} else {
 

@@ -4,9 +4,9 @@
  */
 function cmwn_notifications_messaging_get($account,$subject) {
   $output = '';
-  $messages = messaging_store('get', array('subject' => $subject,'method' => 'simple', 'uid' => $account->uid), array('mqid DESC'), MESSAGING_SIMPLE_PAGER, 0, TRUE);
+  $messages = messaging_store('get',array('subject' => $subject,'method' => 'simple', 'uid' => $account->uid), array('mqid DESC'), 100, 20, false);
   if ($messages) {
-    $header = array(t('Subject'), t('Date'),t('View'));
+    $header = array(t('Subject'), t('Date'), t('View'));
     $rows = array();
     foreach ($messages as $message) {
       $message = (array)$message;
@@ -24,7 +24,50 @@ function cmwn_notifications_messaging_get($account,$subject) {
   }
   return $output;
 }  
+
+/**
+ * Retrieve from messaging database storage
+ * 
+ * @param $params
+ *   Array of field value pairs
+ * @param $order
+ *   Optional array of field names to order by
+ * @param $limit
+ *   Optional maximum number of rows to retrieve
+ * @param $pager
+ *   Optional pager element for pager queries
+ * @param $unpack
+ *   Optional fully load stored data
+ */
+ /*
+function cmwn_notifications_messaging_store_get($params, $order = NULL, $limit = NULL, $pager = NULL, $unpack = FALSE) {
+  static $include;
+  if (!isset($include)) {
+    require_once drupal_get_path('module', 'messaging') .'/messaging.store.inc';
+    $include = TRUE;
+  }  
   
+  $messages = $where = $args = array();
+  $t = messaging_store_query($params);
+  list ($where, $args) = messaging_store_query($params);
+  $sql = 'SELECT * FROM {messaging_store}'; 
+  $sql .= $where ? ' WHERE '.implode(' AND ', $where) : '';
+  $sql .= $order ? ' ORDER BY '.implode(', ', $order) : '';
+
+  if (!is_null($pager)) {
+    $result = pager_query($sql, $limit, $pager, NULL, $args);
+  } elseif ($limit) {
+    $result = db_query_range($sql, $args, 0, $limit);
+  } else {
+    $result = db_query($sql, $args);
+  }
+  while ($msg = db_fetch_object($result)) {
+    messaging_store_unpack($msg, $unpack);
+    $messages[$msg->mqid] = $msg;
+  }
+  return $messages;
+}
+*/
   
 function cmwn_notifications_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   switch ($op) {

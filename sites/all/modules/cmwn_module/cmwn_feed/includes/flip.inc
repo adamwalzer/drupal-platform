@@ -103,7 +103,7 @@ function cmwn_flip_feed() {
     
 		$args = array();
     foreach($feed_queries as $type => $query){
-      $args = array_merge($args,$friends);
+      //$args = array_merge($args,$friends);//?
     }
 
     $query_union = implode(' UNION ALL ', $feed_queries) . '  order by s desc';

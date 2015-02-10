@@ -21,9 +21,7 @@
 		<div class="section">
 			<div class="empty">
 				<?php
-  				print cmwn_notifications_messaging_get($data->user,'Password Changed');
-  				print cmwn_notifications_messaging_get($data->user,'Username Changed');  				
-  				print cmwn_notifications_messaging_get($data->user,'Email Changed');
+  				print cmwn_notifications_messaging_get($data->user, array('Password Changed', 'Username Changed', 'Email Changed'));
 				?>
 			</div>
 		</div>
