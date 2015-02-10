@@ -22,6 +22,16 @@
 		"type" => MENU_CALLBACK,
 	);
 
+	$v2_profiles_menu_items["user/%/notices/child/posting/%"] = array(	
+		"access arguments" => array(1),
+		"access callback" => 'v2_profiles_access',
+		"description" => "",
+		"page arguments" => array(1),
+		"page callback" => "v2_profiles_notices_index_child_posting",
+		"title" => "Notices - Child's Posting",
+		"type" => MENU_CALLBACK,
+	);
+
 	$v2_profiles_menu_items["user/%/notices/account"] = array(	
 		"access arguments" => array(1),
 		"access callback" => 'v2_profiles_access',
@@ -51,6 +61,14 @@
 		'arguments' => array('data' => array()),
 		'template' => 'templates/notices/index_posting'
 	);
+	
+	$v2_profiles_theme_items['v2_profiles_notices_index_child_posting'] = array(
+		'arguments' => array('data' => array()),
+		'template' => 'templates/notices/index_child_posting'
+	);
+	
+		
+	
 
 	$v2_profiles_theme_items['v2_profiles_notices_index_account'] = array(
 		'arguments' => array('data' => array()),
@@ -84,6 +102,25 @@
 		$data->user = $user;
 
 		return theme('v2_profiles_notices_index_posting', $data);
+
+	}
+
+	function v2_profiles_notices_index_child_posting($uid){
+
+		$data = new stdClass();
+
+		$user = user_load($uid);
+
+		$data->user = $user;
+		
+		$child_uid  = arg(5);
+    $is_child = db_result(db_query('select requestee_id from {user_relationships} ur where requester_id = %d and rtid =2 and approved = 1', array($uid)));
+    if($is_child){
+  		$data->child = user_load($child_uid);
+    }
+
+
+		return theme('v2_profiles_notices_index_child_posting', $data);
 
 	}
 	

@@ -1,23 +1,34 @@
 <?php
+  
+function cmwn_notifications_init(){
+  drupal_add_css(drupal_get_path('module', 'cmwn_notifications') .'/css/cmwn_notifications.css');
+}  
+  
 /**
  * Display message overview list
  */
-function cmwn_notifications_messaging_get($account,$subject) {
+function cmwn_notifications_messaging_get($account,$subject,$sender = null) {
   $output = '';
-  $messages = messaging_store('get',array('subject' => $subject,'method' => 'simple', 'uid' => $account->uid), array('mqid DESC'), 100, 20, false);
+  if($sender){
+    $messages = messaging_store('get',array('sender'=>$sender,'subject' => $subject,'method' => 'simple', 'uid' => $account->uid), array('mqid DESC'), 100, 20, false);  
+  }else{
+    $messages = messaging_store('get',array('subject' => $subject,'method' => 'simple', 'uid' => $account->uid), array('mqid DESC'), 100, 20, false);  
+  }
+  
   if ($messages) {
-    $header = array(t('Subject'), t('Date'), t('View'));
+    $header = array(t('Subject'), t('Date'), t(''));
     $rows = array();
     foreach ($messages as $message) {
       $message = (array)$message;
       $rows[] = array(
-        l($message['subject'], 'user/'. $account->uid .'/messages/view/'. $message['mqid']),
+        '<h4>' . l($message['subject'], 'user/'. $account->uid .'/messages/view/'. $message['mqid'],array('query' => array('destination'=>$_GET['q']))) . '</h4>',
+        //'<h4>' . $message['subject'] . '</h4>',
         //!empty($message['sender_account']) ? theme('username', $message['sender_account']) : t('System'),
         format_date($message['created'], 'custom', 'F j, Y, g:i a'),
-        l(t('View'), 'user/'. $account->uid .'/messages/view/'. $message['mqid']),
+        l(t('Review'), 'user/'. $account->uid .'/messages/view/'. $message['mqid'],array('attributes'=>array('class'=>'button'),'query' => array('destination'=>$_GET['q']))),
       );
     }    
-    $output .= theme('table', $header, $rows);
+    $output .= '<div class="notices-table">' . theme('table', $header, $rows) . '</div>';
     $output .= theme('pager', array(), MESSAGING_SIMPLE_PAGER);
   } else {
     $output .= '<p class="message-queue-empty">' . t('No pending messages') . '</p>';
@@ -25,49 +36,6 @@ function cmwn_notifications_messaging_get($account,$subject) {
   return $output;
 }  
 
-/**
- * Retrieve from messaging database storage
- * 
- * @param $params
- *   Array of field value pairs
- * @param $order
- *   Optional array of field names to order by
- * @param $limit
- *   Optional maximum number of rows to retrieve
- * @param $pager
- *   Optional pager element for pager queries
- * @param $unpack
- *   Optional fully load stored data
- */
- /*
-function cmwn_notifications_messaging_store_get($params, $order = NULL, $limit = NULL, $pager = NULL, $unpack = FALSE) {
-  static $include;
-  if (!isset($include)) {
-    require_once drupal_get_path('module', 'messaging') .'/messaging.store.inc';
-    $include = TRUE;
-  }  
-  
-  $messages = $where = $args = array();
-  $t = messaging_store_query($params);
-  list ($where, $args) = messaging_store_query($params);
-  $sql = 'SELECT * FROM {messaging_store}'; 
-  $sql .= $where ? ' WHERE '.implode(' AND ', $where) : '';
-  $sql .= $order ? ' ORDER BY '.implode(', ', $order) : '';
-
-  if (!is_null($pager)) {
-    $result = pager_query($sql, $limit, $pager, NULL, $args);
-  } elseif ($limit) {
-    $result = db_query_range($sql, $args, 0, $limit);
-  } else {
-    $result = db_query($sql, $args);
-  }
-  while ($msg = db_fetch_object($result)) {
-    messaging_store_unpack($msg, $unpack);
-    $messages[$msg->mqid] = $msg;
-  }
-  return $messages;
-}
-*/
   
 function cmwn_notifications_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   switch ($op) {
@@ -89,6 +57,11 @@ function cmwn_notifications_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
         
         $post_identifier = $video . ' ' . $image . ' ' . $body;
         cmwn_notifications_rejected_content($post_user, $post_identifier);
+        //check if this child has a parent.
+        $parent_uid = db_result(db_query('select requester_id from {user_relationships} where requestee_id = %d and approved = 1  and rtid =2', array($post_user->uid)));
+        $parent_account = user_load($parent_uid);
+        cmwn_notifications_rejected_content_parent($parent_account, $post_identifier, $post_user);
+        
       }
       
       break;
@@ -118,6 +91,25 @@ guidlines for CMWN....',
     'language' => user_preferred_language($account),
   );
   messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
+}
+
+function cmwn_notifications_rejected_content_parent($parent_account, $post_identifier, $child_account){
+  //password has changed, push message.
+  
+  $message = array(
+    'type' => 'profile-message',
+    'subject' => t('Inappropriate Content'),
+    'body' => 'Inappropriate Content<br /> your child '.$child_account->name.' has submitted content that has been deemed inappropriate
+for CMWN. 
+The post (' . $post_identifier . ') was removed from CMWN.
+We suggest reviewing the outline below with your child and their content will follow
+guidlines for CMWN....',
+    'language' => user_preferred_language($account),
+  );
+  messaging_message_send_user($parent_account, &$message, $method = NULL, $queue = 0);
+  $mqid = db_last_insert_id('messaging_store', 'mqid');
+  //set sender to child's uid to keep track of which child this parent notice is for!
+  db_query('update {messaging_store} set sender = %d where mqid = %d', array($child_account->uid, $mqid));
 }
 
 function cmwn_notifications_password_change($account){
@@ -163,8 +155,10 @@ function cmwn_notifications_webform_submission_insert($node, $submission) {
     global $user;
     if($flip_node->field_actions[count($flip_node->field_actions)-1]['nid'] == $node->nid){//is this the last action item in this flip?
       cmwn_notifications_flip_award($user, $flip_node->nid, $flip_node->title);
-      watchdog('cmwn_notifications','attempted to insert flip messaging');
-      watchdog('cmwn_notifications',print_r($flip_node,true));      
+      //send notice to parent
+      $parent_uid = db_result(db_query('select requester_id from {user_relationships} where requestee_id = %d and approved = 1  and rtid =2', array($user->uid)));
+      $parent_account = user_load($parent_uid);
+      cmwn_notifications_flip_award_parent($parent_account, $flip_node->nid, $flip_node->title, $user);
     }
 
   }
@@ -190,6 +184,31 @@ function cmwn_notifications_flip_award($account, $nid, $title){
     'language' => user_preferred_language($account),
   );
   messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
+}
+
+function cmwn_notifications_flip_award_parent($parent_account, $nid, $title, $child_account){
+ /*
+ * @param $account
+ *   User object to recieve message.
+ * @param $message
+ *   Array of message parts that will be compiled depending on send method.
+ *   Mandatory message parts, which may have nexted parts are:
+ *   - 'type'
+ *   - 'subject'
+ *   - 'body'. The message body may have 'header', 'content', 'footer', 'etc'
+ * @param $method
+ *   Optional send method. Defaults to the user account predefined method_exists
+ */
+  $message = array(
+    'type' => 'profile-message',
+    'subject' => t('Flip Award'),
+    'body' => 'Your child '.$child_account->name.' has earned a flip award for action item "' . $title . '."',
+    'language' => user_preferred_language($account),
+  );
+  messaging_message_send_user($parent_account, &$message, $method = NULL, $queue = 0);
+  $mqid = db_last_insert_id('messaging_store', 'mqid');
+  //set sender to child's uid to keep track of which child this parent notice is for!
+  db_query('update {messaging_store} set sender = %d where mqid = %d', array($child_account->uid, $mqid));  
 }
 
   

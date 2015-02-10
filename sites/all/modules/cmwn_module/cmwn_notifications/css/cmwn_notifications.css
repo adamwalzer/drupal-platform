@@ -1,0 +1,19 @@
+div.notices-table td{
+  padding: 4px 8px !important;
+}
+
+div.notices-table table{
+  width: 100%;
+}
+
+div.notices-table table td:last-child{
+  text-align: right;
+}
+
+#v2 div.notices-table table td:first-child h4 a{
+  font-family: 'CMWNJadeRegular';
+  color: #54c2f2;
+  font-size: 20px;
+  text-transform: uppercase;
+}
+

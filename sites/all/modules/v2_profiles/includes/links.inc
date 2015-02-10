@@ -100,7 +100,16 @@
 			$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Account', 'href' => '/user/'.$user->uid.'/notices/account');							
 			
 			//list children, show custom link to children's messages
-
+			$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;My Child', 'href' => '#');
+			
+			$children = db_query('select u.uid, u.name from {user_relationships} ur join {users} u on u.uid = ur.requestee_id where requester_id = %d and approved = 1 and rtid = 2', array($user->uid));
+			
+			while($child = db_fetch_object($children)){
+  			$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . $child->name, 'href' => '/user/'.$user->uid.'/notices/child/posting/'.$child->uid);   			
+			}
+			
+			
+			
 			$items[] = (object)array('title' => 'My Children\'s Profiles', 'href' => '/user/'.$user->uid.'/children');
 			$items[] = (object)array('title' => 'My Children\'s Permissions', 'href' => '/user/'.$user->uid.'/children/permissions');
 			$items[] = (object)array('title' => 'Add a Child', 'href' => '/user/'.$user->uid.'/children/add');
