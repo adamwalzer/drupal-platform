@@ -34,11 +34,10 @@ function cmwn_notifications_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       
       $moderator_roles = array('3', '11', '26');
 
-      $is_moderator = (in_array('administrator', array_values($user->roles)) || in_array('moderator', array_values($user->roles)) || in_array('senior_moderator', array_values($user->roles)));
-
-
-      
-      if(($node->type == 'whiteboard' || $node->type == 'video') && $node->uid != $user->uid && $is_moderator){
+      //$is_moderator = (in_array('administrator', array_values($user->roles)) || in_array('moderator', array_values($user->roles)) || in_array('senior_moderator', array_values($user->roles)));
+//      print 'delete';
+      if(($node->type == 'whiteboard' || $node->type == 'video') && $node->uid != $user->uid){
+//        print 'delete mod';exit;
         //moderator deleting post not their own
         $post_user = user_load($node->uid);
         @$image =  $node->field_image[0]['filename'];
@@ -119,7 +118,7 @@ function cmwn_notifications_webform_submission_insert($node, $submission) {
   if($nid){
     $flip_node = node_load($nid);
     global $user;
-    if($flip_node->field_actions[count($flip_node->field_actions)]['nid'] == $flip_node->nid){//is this the last action item in this flip?
+    if($flip_node->field_actions[count($flip_node->field_actions)-1]['nid'] == $node->nid){//is this the last action item in this flip?
       cmwn_notifications_flip_award($user, $flip_node->nid, $flip_node->title);
       watchdog('cmwn_notifications','attempted to insert flip messaging');
       watchdog('cmwn_notifications',print_r($flip_node,true));      

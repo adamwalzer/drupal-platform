@@ -38,7 +38,7 @@
 		"description" => "",
 		"page arguments" => array(1),
 		"page callback" => "v2_profiles_notices_index_award",
-		"title" => "Notices - Awward",
+		"title" => "Notices - Award",
 		"type" => MENU_CALLBACK,
 	);
 	
