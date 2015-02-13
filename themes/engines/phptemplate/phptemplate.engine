@@ -9,7 +9,7 @@
  * Implementation of hook_init().
  */
 function phptemplate_init($template) {
-  var_dump(debug_backtrace());
+  dsm(debug_backtrace());
   $file = dirname($template->filename) .'/template.php';
   if (file_exists($file)) {
     include_once "./$file";
