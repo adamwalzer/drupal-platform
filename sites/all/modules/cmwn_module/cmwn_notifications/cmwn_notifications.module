@@ -430,4 +430,4 @@ function cmwn_notifications_ordinal($num) {
     }
   }
   return $num.'th';
-}
+} 
