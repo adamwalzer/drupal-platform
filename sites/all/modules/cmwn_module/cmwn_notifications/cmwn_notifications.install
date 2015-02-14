@@ -1,0 +1,54 @@
+<?php
+/*
+function cmwn_notifications_schema() {
+  $schema = array();
+
+  $schema['cmwn_notifications'] = array(
+    'description' => t('Stores notifications.'),
+    'fields' => array(
+      
+      'notice_id' => array(
+        'description' => t('The primary identifier for CMWN notifications.'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      
+      'uid' => array(
+        'description' => t('User ID of the user'),
+        'type' => 'int',
+        'length' => 10,
+        'not null' => TRUE,
+      ),
+      
+      'status' => array(
+        'description' => t('Status of notification. Dismissed (or inactive) = 1, pending = 0'),
+        'type' => 'int',
+        'length' => 10,
+        'not null' => TRUE,
+      ),
+
+      'notification' => array(
+        'description' => t('Text of the notification'),
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+      ),      
+      
+      
+
+    ),
+    'primary key' => array('notice_id')
+  );
+
+  return $schema;
+}
+
+function cmwn_notifications_uninstall(){
+  drupal_uninstall_schema('cmwn_notifications');  
+}
+
+function cmwn_oauth_services_install(){
+  drupal_install_schema('cmwn_notifications');  
+}
+*/

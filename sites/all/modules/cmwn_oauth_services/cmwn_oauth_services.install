@@ -1,0 +1,69 @@
+<?php
+
+function cmwn_oauth_services_schema() {
+  $schema = array();
+
+  $schema['cmwn_oauth_user_context'] = array(
+    'description' => t('Stores what contexts a user has access to.'),
+    'fields' => array(
+
+      'uid' => array(
+        'description' => t('User ID of the user'),
+        'type' => 'int',
+        'length' => 10,
+        'not null' => TRUE,
+      ),
+
+      'cid' => array(
+        'type' => 'int',
+        'description' => "CID Context ID from oAuth context module. References a context the user has access to.",
+        'length' => 11,
+        'not null' => TRUE,
+      ),
+    ),
+  );
+
+  return $schema;
+}
+
+function cmwn_oauth_services_uninstall(){
+  drupal_uninstall_schema('cmwn_oauth_services');  
+  db_drop_field($ret, 'oauth_common_provider_consumer','ip');
+  db_drop_field($ret, 'oauth_common_provider_consumer','domain');   
+}
+
+function cmwn_oauth_services_install(){
+  drupal_install_schema('cmwn_oauth_services');  
+}
+
+
+
+function cmwn_oauth_services_update_6001() {
+  
+  $ip = array(
+    'type' => 'varchar',
+    'description' => "Holds ip address request must come from",
+    'length' => 30,
+    'not null' => FALSE,
+  ); 
+  
+  $domain = array(
+    'type' => 'varchar',
+    'description' => "Hold domain request must come from",
+    'length' => 50,
+    'not null' => FALSE,
+  );   
+  
+  $ret = array();
+
+  db_add_field($ret, 'oauth_common_provider_consumer', 'ip', $ip);//modifying oauth table to hold ip
+  db_add_field($ret, 'oauth_common_provider_consumer', 'domain', $ip);//modifying oauth table to hold domain
+
+  return $ret;
+}
+
+function cmwn_oauth_services_update_6002() {
+  $ret = array();
+  db_add_unique_key($ret, 'cmwn_oauth_user_context', 'uid_cid', array('uid', 'cid'));  
+  return $ret;
+}

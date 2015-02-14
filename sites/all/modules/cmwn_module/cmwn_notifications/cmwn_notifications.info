@@ -1,0 +1,5 @@
+name = "CMWN Notifications"
+description = "Tracks certain events to notify user of with both internal and external notifications."
+package = "CMWN"
+core = "6.x"
+dependencies[] = "cmwn_module"

@@ -1,0 +1,63 @@
+<?php
+
+function cmwn_school_menu() {
+  $page_path = drupal_get_path('module', 'cmwn_child_perms').'/pages/';
+  $items = array();
+  $items['whats-my-story/my-school'] = array(
+    'title' => t("My School"),
+    'description' => t(''),
+    'page callback' => 'cmwn_school_view',
+    'file path' => $page_path,
+    'file' => 'cmwn_module_child_permissions.inc',
+    'access arguments' => array("access content"),
+  );
+  return $items;
+}
+
+function cmwn_school_view() {
+  global $user;
+  if (ChildUser::canHydrate($user)) {
+    $child = ChildUser::castAs($user);
+    if ($school = $child->getSchool()) {
+      return node_view($school, false, true);
+    }
+  }
+  drupal_set_message(t('This page is for registered users only. !link.', array('!link' => l('Create your profile now', 'user/register'))));
+  drupal_access_denied();
+}
+
+function cmwn_school_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  global $user;
+  switch ($node->type) {
+    case 'school':
+      if ($op == 'view' && $a4) {
+        $access = false;
+        if (in_array('administrator', array_values($user->roles))) {
+          $access = true;
+        }
+        $child_role = get_role_from_rid(variable_get('cmwn_module_child_role', ''));
+        $parent_role = get_role_from_rid(variable_get('cmwn_module_parent_role', ''));
+        $teacher_role = get_role_from_rid(variable_get('cmwn_module_teacher_role', ''));
+        switch ($user->user_type) {
+          case $child_role:
+            if ($school = ChildUser::castAs($user)->getSchool()) {
+              if ($school->nid == $node->nid) {
+                $access = true;
+              }
+            }
+            break;
+          case $parent_role:
+            
+            break;
+          case $teacher_role:
+            
+            break;
+        }
+        if (!$access) {
+          drupal_access_denied();
+          exit;
+        }
+      }
+      break;
+  }
+}

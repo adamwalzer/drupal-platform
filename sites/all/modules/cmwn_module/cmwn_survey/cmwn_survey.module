@@ -1,0 +1,140 @@
+<?php
+
+function cmwn_survey_menu() {
+	$items = array();
+	$items['admin/settings/cmwn/survey'] = array(
+		'title' => t('Interest Survey Settings'),
+		'description' => t(''),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('cmwn_survey_admin_settings'),
+		'access arguments' => array('administer site configuration'),
+	);
+	return $items;
+}
+
+function cmwn_survey_form_alter(&$form, &$form_state, $form_id) {
+	switch ($form_id) {
+		case 'webform_client_form_'.variable_get('cmwn_survey_interest_survey_nid', ''):
+			$form['#submit'][] = 'cmwn_survey_interest_survey_form_submit';
+			break;
+	}
+}
+
+function cmwn_survey_admin_settings(){
+	$webforms = array();
+	$sql = "SELECT nid, title FROM {node} WHERE type = 'webform'";
+	$result = db_query($sql);
+	while ($row = db_fetch_object($result)) {
+		$webforms[$row->nid] = $row->title;
+	}
+	$form = array(
+		'cmwn_survey_interest_survey_nid' => array(
+			'#type' => 'select',
+			'#title' => 'Interest Survey',
+			'#options' => $webforms,
+			'#default_value' => variable_get('cmwn_survey_interest_survey_nid', '')
+		),
+	);
+	return system_settings_form($form);
+}
+
+function cmwn_survey_init() {
+	global $user;
+	$nid = variable_get('cmwn_survey_interest_survey_nid', '');
+	if (!(arg(0) == 'node' && arg(1) == $nid) && ChildUser::canHydrate($user)) {
+		if (!ChildUser::castAs($user)->hasCompletedInterestSurvey()) {
+			//drupal_set_message(t("Don't forget to <a href=\"!url\">complete your interest survey!</a>", array('!url' => url('node/'.$nid))));
+		}
+	}
+}
+
+function cmwn_survey_interest_survey_form_submit($form, &$form_state) {
+
+	global $user;
+
+	$interests = array(
+		11 => 'Readers & Dreamers',
+		12 => 'The Spotlights',
+		13 => 'On Your Mark',
+		14 => 'The Respectables',
+		15 => 'Wild at Heart',
+		16 => 'The Elements',
+		17 => 'Globalistics',
+		18 => 'Dollars & Sense',
+	);
+
+	$matrix = array(
+		1 => array(
+			1 => 18,
+			2 => 16,
+			3 => 15,
+			4 => 14,
+			5 => 13,
+			6 => 12,
+			7 => 11,
+			8 => 17,
+		),
+		2 => array(
+			1 => 18,
+			2 => 16,
+			3 => 15,
+			4 => 14,
+			5 => 13,
+			6 => 12,
+			7 => 11,
+			8 => 17,
+		),
+		3 => array(
+			1 => 18,
+			2 => 16,
+			3 => 15,
+			4 => 14,
+			5 => 13,
+			6 => 12,
+			7 => 11,
+			8 => 17,
+		),
+		4 => array(
+			1 => 18,
+			2 => 16,
+			3 => 15,
+			4 => 14,
+			5 => 13,
+			6 => 12,
+			7 => 11,
+			8 => 17,
+		),
+		5 => array(
+			1 => 18,
+			2 => 16,
+			3 => 15,
+			4 => 14,
+			5 => 13,
+			6 => 12,
+			7 => 11,
+			8 => 17,
+		)
+	);
+
+	$taxonomy = array();
+
+	foreach ($form_state['values']['submitted'] as $key => $answers) {
+		if (is_array($answers)) {
+			foreach ($answers as $answer) {
+				$taxonomy[$matrix[$key][$answer]] = taxonomy_get_term($matrix[$key][$answer]);
+			}
+		} else {
+			$taxonomy[$matrix[$key][$answers]] = taxonomy_get_term($matrix[$key][$answers]);
+		}
+	}
+
+	$child = ChildUser::castAs($user);
+	if ($child) {
+		$node = $child->getChildProfile();
+		$node->taxonomy = $taxonomy;
+		node_save($node);
+	}
+
+	drupal_goto('user/register/child/2/confirmation');
+
+}

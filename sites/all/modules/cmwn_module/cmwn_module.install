@@ -1,0 +1,70 @@
+<?php
+
+function cmwn_module_schema() {
+  $schema = array();
+
+  $schema['cmwn_parental_consent_token'] = array(
+    'description' => 'Table for storing additional properties for voucher nodes.',
+    'fields' => array(
+      'cuid' => array(
+        'description' => 'Child User ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'puid' => array(
+        'description' => 'Parent User ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'puip' => array(
+        'description' => 'Parent User IP address.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'token' => array(
+        'description' => 'Unique token to validate parental consent requests.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'description' => 'Timestamp of when the token was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'redeemed' => array(
+        'description' => 'Timestamp of when the token was used.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('cuid', 'puid'),
+  );
+  return $schema;
+}
+
+function cmwn_module_install() {
+  drupal_install_schema('cmwn_module');
+  db_query("UPDATE {system} SET weight = 10 WHERE name = 'cmwn_module'");
+}
+
+function cmwn_module_update_6001() {
+  $ret = array();
+  db_add_field($ret, 'cmwn_parental_consent_token', 'parent_reminders', array(
+    'description' => 'Number of reminder emails sent to parent.',
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0
+  ));
+  return $ret;
+}
+
+function cmwn_module_uninstall() {
+  drupal_uninstall_schema('cmwn_module');
+  db_query("DELETE FROM {variable} WHERE name LIKE 'cmwn_module_%%'");
+}

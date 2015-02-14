@@ -1,0 +1,5 @@
+name = "CMWN Instant Verify/Instant Authenticate"
+description = "Integrates registration process into the LexisNexis Instant Verify/Instant Authenticate web services."
+package = "CMWN"
+core = "6.x"
+dependencies[] = "cmwn_module"

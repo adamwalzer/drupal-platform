@@ -1,0 +1,181 @@
+<?php
+
+function cmwn_video_perm() {
+  return array('moderate_viddler_video');
+}
+
+function cmwn_video_menu() {
+  $items = array();
+  $items['admin/content/moderate/video'] = array(
+    'title' => t('Moderate Video'),
+    'description' => t(''),
+    'page callback' => 'cmwn_video_moderate_video',
+    'access arguments' => array('moderate content'),
+  );
+  $items['admin/settings/cmwn/viddler'] = array(
+    'title' => t('Viddler Settings'),
+    'description' => t(''),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmwn_video_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+  );
+  return $items;
+}
+
+function cmwn_video_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      return array(
+        'upload_video' => array(
+          'info' => t('Upload Video')
+        ),
+      );
+      break;
+    case 'view':
+      switch ($delta) {
+        case 'upload_video':
+          $block = array();
+          $block['subject'] = t('Upload Video');
+          if (user_access('create video content')) {
+            require_once drupal_get_path('module', 'node').'/node.pages.inc';
+            $block['content'] = node_add('video');
+          } else {
+            $options = array(
+              'query' => drupal_get_destination()
+            );
+            $block['content'] = t('Please <a href="!login">login</a> or <a href="!register">register</a> to upload your video!', array('!login' => url('user/login', $options), '!register' => url('user/register/child', $options)));
+          }
+          return $block;
+          break;
+      }
+      break;
+  }
+}
+
+function cmwn_video_admin_settings() {
+  $form = array(
+    'viddler_api_settings' => array(
+      '#type' => 'fieldset',
+      '#title' => 'Viddler API Settings',
+      'cmwn_video_viddler_api_key' => array(
+        '#type' => 'textfield',
+        '#title' => 'API Key',
+        '#default_value' => variable_get('cmwn_video_viddler_api_key', '')
+      ),
+      'cmwn_video_viddler_user' => array(
+        '#type' => 'textfield',
+        '#title' => 'Username',
+        '#default_value' => variable_get('cmwn_video_viddler_user', '')
+      ),
+      'cmwn_video_viddler_pass' => array(
+        '#type' => 'textfield',
+        '#title' => 'Password',
+        '#default_value' => variable_get('cmwn_video_viddler_pass', ''),
+      ),
+    )
+  );
+  return system_settings_form($form);
+}
+
+function cmwn_video_rules_action_info() {
+  return array(
+    'cmwn_video_rules_action_upload_video' => array(
+      'label' => t('Upload Video'),
+      'arguments' => array(
+        'node' => array('type' => 'node', 'label' => t('Node containing video')),
+        'user' => array('type' => 'user', 'label' => t('Video\'s author')),
+      ),
+      'module' => 'CMWN',
+    ),
+  );
+}
+
+function cmwn_video_rules_action_upload_video($node, $user, $settings, $element, &$state) {
+  $video_field_name = $settings['video_field_name'];
+  $video_id_field_name = $settings['video_id_field_name'];
+  $video_permalink_field_name = $settings['video_permalink_field_name'];
+  $video_thumbnail_field_name = $settings['video_thumbnail_field_name'];
+  $description = array(
+    'uid' => $user->uid,
+    'name' => $user->name
+  );
+  if ($video_field_name && $video_id_field_name && $video_permalink_field_name) {
+    $results = _cmwn_video_upload_video($node->{$video_field_name}[0]['filepath'], $node->title, json_encode($description), variable_get('cmwn_video_viddler_api_key', ''), variable_get('cmwn_video_viddler_user', ''), variable_get('cmwn_video_viddler_pass', ''));
+    if (isset($results['video']) && is_array($results['video'])) {
+      $node->{$video_id_field_name}[0]['value'] = $results['video']['id'];
+      $node->{$video_permalink_field_name}[0]['value'] = $results['video']['url'];
+      $node->{$video_thumbnail_field_name}[0]['value'] = $results['video']['thumbnail_url'];
+      node_save($node);
+    }
+  }
+}
+
+function cmwn_video_rules_action_upload_video_form($settings, &$form, &$form_state) {
+  $settings += array(
+  	'video_field_name' => '',
+    'video_id_field_name' => '',
+    'video_permalink_field_name' => '',
+    'video_thumbnail_field_name' => '',
+    'value' => NULL
+  );
+  $form['settings']['video_field_name'] = array(
+    '#type' => 'select',
+    '#title' => t('Video Field'),
+    '#options' => content_rules_get_field_names_by_type(),
+    '#default_value' => $settings['video_field_name'],
+    '#description' => t('Select the machine-name of the field.'),
+    '#required' => TRUE,
+  );
+  $form['settings']['video_id_field_name'] = array(
+    '#type' => 'select',
+    '#title' => t('Video ID Field'),
+    '#options' => content_rules_get_field_names_by_type(),
+    '#default_value' => $settings['video_id_field_name'],
+    '#description' => t('Select the machine-name of the field.'),
+    '#required' => TRUE,
+  );
+  $form['settings']['video_permalink_field_name'] = array(
+    '#type' => 'select',
+    '#title' => t('Video Permalink Field'),
+    '#options' => content_rules_get_field_names_by_type(),
+    '#default_value' => $settings['video_permalink_field_name'],
+    '#description' => t('Select the machine-name of the field.'),
+    '#required' => TRUE,
+  );
+  $form['settings']['video_thumbnail_field_name'] = array(
+    '#type' => 'select',
+    '#title' => t('Video Thumbnail Field'),
+    '#options' => content_rules_get_field_names_by_type(),
+    '#default_value' => $settings['video_thumbnail_field_name'],
+    '#description' => t('Select the machine-name of the field.'),
+    '#required' => TRUE,
+  );
+  // Hide some form elements in the first step.
+  $form['negate']['#access'] = FALSE;
+  $form['input_help']['#access'] = FALSE;
+  $form['weight']['#access'] = FALSE;
+}
+
+function cmwn_video_rules_action_upload_video_submit(&$settings, $form, $form_state) {
+  
+}
+
+function _cmwn_video_upload_video($filename, $title, $description, $api_key, $username, $password) {
+  require_once 'sites/all/libraries/viddler/phpviddler.php';
+  $v = new Viddler_V2($api_key);
+  $user = $v->viddler_users_auth(array('user'=>$username, 'password'=>$password));
+  $params = array(
+    'sessionid'=>$user['auth']['sessionid'],
+    'title'=>$title, 
+    'tags'=>'tag1,tag2,tag3',
+    'description'=>$description,
+    'file'=>'@' . $filename
+  );
+  $prepare = $v->viddler_videos_prepareUpload(array('sessionid' => $user['auth']['sessionid']));
+  $results = $v->viddler_videos_upload($params, $prepare['upload']['endpoint']);
+  return $results;
+}
+
+function cmwn_video_moderate_video() {
+  return views_embed_view('moderate_video', 'default');
+}

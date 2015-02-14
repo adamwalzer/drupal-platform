@@ -1,0 +1,989 @@
+<?php
+
+global $cmwn_exit_functions;
+$cmwn_exit_functions = array();
+set_include_path(get_include_path().PATH_SEPARATOR.dirname(__FILE__).'/classes/');
+spl_autoload_register('cmwn_module_autoload');
+
+// Check for presence of url-passed child/parent token
+if(isset($_GET['cptoken'])) {
+	$_SESSION['cptoken'] = $_GET['cptoken'];
+}
+
+
+function cmwn_module_init() {
+  global $user;
+  if ($user->uid > 0) {
+    $timeout = 60 * 60; // Seconds
+    if (!isset($_SESSION['cmwn_last_access'])) {
+      $_SESSION['cmwn_last_access'] = time();
+    }
+    if ((time() - $_SESSION['cmwn_last_access']) > $timeout) {
+      $logout = true;
+    }
+    $_SESSION['cmwn_last_access'] = time();
+    if ($logout) {
+      include drupal_get_path('module', 'user').'/user.pages.inc';
+      watchdog('cmwn_module', 'Session closed for %name due to inactivity.', array('%name' => $user->name));
+      // Destroy the current session, and reset $user to the anonymous user.
+      drupal_session_destroy();
+      // Load the anonymous user
+      $user = drupal_anonymous_user();
+      drupal_set_message('Taking a break from changing the world? Come back soon!');
+      drupal_goto('user/login');
+    }
+  }
+}
+
+function cmwn_module_autoload($class) {
+  $found = false;
+  $paths = explode(PATH_SEPARATOR, get_include_path());
+  foreach ($paths as $path) {
+    $filepath = $path.$class.'.php';
+    if (file_exists($filepath)) {
+      $found = true;
+      require_once $filepath;
+    }
+  }
+  if (!$found) {
+    spl_autoload($class);
+  }
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function cmwn_module_views_api() {
+  return array(
+    'api' => 2.0,
+    'path' => drupal_get_path('module', 'cmwn_module') . '/inc',
+  );
+}
+
+function cmwn_module_menu() {
+  $page_path = drupal_get_path('module', 'cmwn_module').'/pages/';
+  $items = array();
+  $items['admin/settings/cmwn'] = array(
+    'title' => t('CMWN Settings'),
+    'description' => t(''),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmwn_module_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['admin/content/moderate'] = array(
+    'title' => t('Moderate Content'),
+    'description' => t(''),
+    'page callback' => 'cmwn_module_moderate_content',
+    'file path' => $page_path,
+    'file' => 'cmwn_module_moderate_content.inc',
+    'access arguments' => array('moderate content'),
+  );
+  /*$items['admin/content/moderate/forum-posts'] = array(
+    'title' => t('Moderate Forum Posts'),
+    'description' => t(''),
+    'page callback' => 'cmwn_module_moderate_forum_post',
+    'file path' => $page_path,
+    'file' => 'cmwn_module_moderate_content.inc',
+    'access arguments' => array('administer site configuration'),
+  );*/
+  $items['admin/content/moderate/forum-posts'] = array(
+    'title' => t('Moderate Forum Topics'),
+    'description' => t(''),
+    'page callback' => 'cmwn_module_moderate_group_message',
+    'file path' => $page_path,
+    'file' => 'cmwn_module_moderate_content.inc',
+    'access arguments' => array('moderate content'),
+  );
+  $items['user/%user/friend'] = array(
+    'title' => "Become Friends",
+    'access callback' => 'cmwn_module_access_make_friends',
+    'access arguments' => array(1, true),
+    'page callback' => 'cmwn_module_friend',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK
+  );
+  $items['user/%user/friend/confirm'] = array(
+    'title' => "Become Friends",
+    'access callback' => 'cmwn_module_access_make_friends',
+    'access arguments' => array(1, true),
+    'page callback' => 'cmwn_module_friend_confirm',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK
+  );
+  $items['user/%user/friend/cancel'] = array(
+    'title' => "Become Friends",
+    'access callback' => 'cmwn_module_access_make_friends',
+    'access arguments' => array(1, true),
+    'page callback' => 'cmwn_module_friend_cancel',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK
+  );
+  $items['user/%user/edit-profile'] = array(
+    'title' => "Edit My Profile",
+    'access callback' => 'cmwn_module_access_edit_profile',
+    'access arguments' => array(1),
+    'page callback' => 'cmwn_module_edit_profile',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK
+  );
+  $items['user/%user/delete-profile'] = array(
+    'title' => "Delete My Profile",
+    'access callback' => 'cmwn_module_access_delete_profile',
+    'access arguments' => array(1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmwn_module_delete_profile_confirm', 1),
+    'type' => MENU_CALLBACK
+  );
+  $items['user/%user/add-child'] = array(
+    'title' => "Add My Child",
+    'access callback' => 'cmwn_module_access_add_child',
+    'access arguments' => array(1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmwn_module_add_child', 1),
+    'type' => MENU_CALLBACK
+  );
+  $items['avatar/%node/pick'] = array(
+    'title' => "Pick Avatar",
+    'access arguments' => array('access content'),
+    'page callback' => 'cmwn_module_pick_avatar',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK
+  );
+  $items['whats-my-story/my-interests'] = array(
+    'title' => t('My Interests'),
+    'description' => t(''),
+    'page callback' => 'cmwn_module_my_interests',
+    'file path' => $page_path,
+    'file' => 'cmwn_module_my_interests.inc',
+    'access arguments' => array('access content'),
+  );
+  $items['whats-my-story/my-interests/ajax/%node'] = array(
+    'title' => t('My Interests'),
+    'description' => t(''),
+    'page callback' => 'cmwn_module_my_interests',
+    'page arguments' => array(3),
+    'file path' => $page_path,
+    'file' => 'cmwn_module_my_interests.inc',
+    'access arguments' => array('access content'),
+  );
+  $items['video/%'] = array(
+    'title' => t('Video'),
+    'description' => t(''),
+    'page callback' => 'cmwn_module_viddler_video',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+  );
+  $items['admin/user/parent-reminders'] = array(
+    'title' => t('Parent Reminders'),
+    'description' => t(''),
+    'page callback' => 'cmwn_module_parent_reminders',
+    'access arguments' => array('administer site configuration')
+  );
+  $items['admin/user/parent-reminders/confirm'] = array(
+    'title' => t('Parent Reminders'),
+    'description' => t(''),
+    'page callback' => 'cmwn_module_parent_reminders',
+    'page arguments' => array(true),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK
+  );
+  $items['register-choose'] = array(
+    'title' => t('Choose your Path!'),
+    'description' => t(''),
+    'page callback' => 'cmwn_module_choose_role',
+    'file path' => $page_path,
+    'file' => 'cmwn_module_choose_role.inc',
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+function cmwn_module_menu_alter(&$items) {
+  $old_access_callback = $items['og/subscribe/%node']['access callback'];
+  $items['og/subscribe/%node']['access callback'] = '_cmwn_module_project_node_access';
+  $items['og/subscribe/%node']['access arguments'] = array(1, $old_access_callback);
+  
+
+  $old_page_callback = $items['forum']['page callback'];
+  $items['forum']['page callback'] = '_cmwn_module_forum';
+  $items['forum']['page arguments'] = array(1, $old_page_callback);
+}
+
+function _cmwn_module_forum($tid = 0, $callback = null) {
+  global $user;
+  $sql = "SELECT * FROM {content_field_forum} WHERE field_forum_value = %d";
+  $result = db_query($sql, $tid);
+  while ($row = db_fetch_object($result)) {
+    $node = node_load($row->nid);
+    if ($node && ($node->type == 'project' || $node->type == 'interest') && !og_is_group_member($row->nid, true, $user->uid) && in_array(get_role_from_rid(variable_get('cmwn_module_verified_parent_role', '')), $user->roles)) {
+      drupal_set_message(t("Please !join first!", array('!join' => l('join this project', 'node/'.$node->nid))));
+      return drupal_access_denied();
+    }
+    if ($node && ($node->type == 'project' || $node->type == 'interest') && !in_array(get_role_from_rid(variable_get('cmwn_module_approved_child_role', '')), $user->roles)) {
+      drupal_set_message(t("You need your parent's approval to post to the forum."));
+      return drupal_access_denied();
+    }
+  }
+  return $callback($tid);
+}
+
+function _cmwn_module_project_node_access($op, $node, $account = NULL) {
+  global $user;
+  if ($account == null) {
+    $account = $user;
+  }
+  if (in_array('administrator', array_values($account->roles))) {
+    return true;
+  }
+  if (in_array(get_role_from_rid(variable_get('cmwn_module_approved_child_role', '')), $user->roles)) {
+    return true;
+  } else {
+    drupal_set_message('Your account must be approved by a parent before joining a group.');
+  }
+  return false;
+}
+
+function cmwn_module_parent_reminders($confirm = false) {
+  $sql = 'SELECT cpct.*, u.name, u.mail, u.data FROM {cmwn_parental_consent_token} cpct inner join users u on u.uid = cpct.cuid where puid = 0';
+  $result = db_query($sql);
+  $out = '';
+  $header = array(
+    '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+    'Child',
+    'Parent\'s Email',
+    'Reminders Sent'
+  );
+  $rows = array();
+  drupal_add_js(drupal_get_path('module', 'cmwn_module').'/parent-reminders.js', 'module');
+  while ($row = db_fetch_object($result)) {
+    $child = user_load($row->cuid);
+    if (ChildUser::canHydrate($child)) {
+      $data = unserialize($row->data);
+      if ($data['parent_email']) {
+        $rows[] = array(
+          '<input class="user" id="user-'.$row->cuid.'" name="user-'.$row->cuid.'" type="checkbox" checked="checked" />',
+          l($row->name, 'user/'.$row->cuid),
+          $data['parent_email'],
+          $row->parent_reminders
+        );
+        if ($confirm) {
+          $ids = explode(',', $_GET['include']);
+          if (in_array($row->cuid, $ids)) {
+            $parentmail = $data['parent_email'];
+            $mail = array(
+              'cmwn_module',
+              'parent_permission_request',
+              $parentmail,
+              user_preferred_language($child),
+              array(
+                'user' => user_load($row->cuid)
+              )
+            );
+            _cmwn_module_parent_permission_request($mail);
+            $sql = "UPDATE {cmwn_parental_consent_token} cpct SET parent_reminders = parent_reminders + 1 WHERE cuid = %d";
+            db_query($sql, array($row->cuid));
+          } else {
+            drupal_set_message('Skipped user:'.l($row->name, 'user/'.$row->cuid));
+          }
+        }
+      }
+    }
+  }
+  if ($confirm) {
+    drupal_set_message('Parent reminder emails sent.');
+    drupal_goto('admin/user/parent-reminders');
+  }
+  return '<button id="sendReminders">Send Reminders</button>'.theme('table', $header, $rows);
+}
+
+function cmwn_module_viddler_video($video_id) {
+  echo theme('cmwn_module_viddler_video', $video_id);
+  exit;
+}
+
+function cmwn_module_pick_avatar($node) {
+  global $user;
+  $profile = GenericUser::castAs($user)->getBaseProfile();
+  $profile->field_avatar_reference[0]['nid'] = $node->nid;
+  node_save($profile);
+  drupal_set_message('Your avatar has now been set.');
+  drupal_goto('user/'.$user->uid);
+}
+
+function cmwn_module_theme() {
+  $path = drupal_get_path('module', 'cmwn_module') .'/theme';
+  return array(
+    'cmwn_module_friends' => array(
+      'template' => 'cmwn_module_friends',
+      'path' => $path,
+      'arguments' => array('user' => null, 'friends' => array())
+    ),
+    'cmwn_module_interests' => array(
+      'template' => 'cmwn_module_interests',
+      'path' => $path,
+      'arguments' => array('user' => null, 'interests' => array())
+    ),
+    'cmwn_module_my_interests' => array(
+      'template' => 'cmwn_module_my_interests',
+      'path' => $path,
+      'arguments' => array('user' => null, 'interests' => array())
+    ),
+    'cmwn_module_projects' => array(
+      'template' => 'cmwn_module_projects',
+      'path' => $path,
+      'arguments' => array('user' => null, 'projects' => array())
+    ),
+    'user_register' => array(
+      'arguments' => array('form' => null),
+      'template' => 'user-register'
+    ),
+    'cmwn_module_viddler_video' => array(
+      'template' => 'cmwn_module_viddler_video',
+      'path' => $path,
+      'arguments' => array('video_id' => null)
+    ),
+    'cmwn_module_block_contact' => array(
+      'template' => 'cmwn_module_block_contact',
+      'path' => $path
+    ),
+    'cmwn_module_social' => array(
+      'template' => 'cmwn_module_social',
+      'path' => $path
+    ),
+    'cmwn_module_choose_role' => array(
+      'template' => 'cmwn_module_choose_role',
+      'path' => $path
+    ),
+  );
+}
+
+function cmwn_module_access_make_friends($account, $verbose = false) {
+  global $user;
+  $actingUserCanMakeFriends = in_array(get_role_from_rid(variable_get('cmwn_child_perms_roles_make_friends', '')), $user->roles);
+  $targetUserCanMakeFriends = in_array(get_role_from_rid(variable_get('cmwn_child_perms_roles_make_friends', '')), $account->roles);
+  if ($verbose) {
+    if (!$actingUserCanMakeFriends) {
+      drupal_set_message('Your parent has not given you permission to make friends.');
+    }
+    if (!$targetUserCanMakeFriends) {
+      drupal_set_message("This user's parent has not given him or her permission to make friends.");
+    }
+  }
+  return $actingUserCanMakeFriends && $targetUserCanMakeFriends;
+}
+
+function cmwn_module_access_edit_profile($account) {
+  global $user;
+  return $user->uid == $account->uid || in_array('administrator', $user->roles);
+}
+
+function cmwn_module_access_delete_profile($account) {
+  global $user;
+  return $user->uid == $account->uid || in_array('administrator', $user->roles);
+}
+
+function cmwn_module_access_add_child($account) {
+  global $user;
+  return ($user->uid == $account->uid && ParentUser::canHydrate($account)) || in_array('administrator', $user->roles);
+}
+
+function cmwn_module_edit_profile($account) {
+  $type = '';
+  switch (get_class($account)) {
+    case 'ParentUser':
+      $type = 'parent';
+      break;
+    case 'ChildUser':
+      $type = 'child';
+      break;
+    case 'TeacherUser':
+      $type = 'teacher';
+      break;
+  }
+  return views_embed_view('avatar_picker', 'default', $type);
+}
+
+function cmwn_module_delete_profile_confirm(&$form_state, $account) {
+  $form['uid'] = array(
+    '#type' => 'value',
+    '#value' => $account->uid,
+  );
+  $question = t('Are you sure you want to delete your account?');
+  $description = t('You will not be able to undo this action and you will not be able to reteive any information about your account.');
+  if (ParentUser::canHydrate($account)) {
+    $description .= t(' Any accounts your children have will also be deleted.');
+  }
+  return confirm_form($form,
+    $question,
+    isset($_GET['destination']) ? $_GET['destination'] : '<front>',
+    $description,
+    t('Delete'),
+    t('Cancel')
+  );
+}
+
+function cmwn_module_add_child(&$form_state, $account) {
+  $form = array();
+  $form['puid'] = array(
+    '#type' => 'value',
+    '#value' => $account->uid
+  );
+  $form['token'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Enter the token you received in your reminder email.'
+  );
+  $form['add'] = array(
+    '#type' => 'submit',
+    '#value' => 'Add Child'
+  );
+  return $form;
+}
+
+function cmwn_module_add_child_submit($form, &$form_state) {
+  $parent = ParentUser::castAs(user_load($form_state['values']['puid']));
+  $token = get_parent_registration_token($form_state['values']['token']);
+  if ($token) {
+    $child = user_load($token['cuid']);
+    if ($child) {
+      $child = ChildUser::castAs($child);
+      if ($child) {
+        $token['puid'] = $parent->uid;
+        $token['puip'] = ip2long($_SERVER['REMOTE_ADDR']);
+        drupal_write_record('cmwn_parental_consent_token', $token, array('cuid'));
+        user_relationships_request_relationship($parent, $child, 2, true); // Parent
+        user_relationships_request_relationship($child, $parent, 3, true); // Child
+        $roles = user_roles();
+        $index = variable_get('cmwn_module_approved_child_role', '');
+        if ($index) {
+          $child->roles[$index] = $roles[$index];
+          user_save($child, array('roles' => $child->roles));
+        }
+        drupal_set_message($child->name.' has been linked to your account.');
+        return;
+      }
+    }
+  }
+  drupal_set_message('Unable to link child to your account.', 'error');
+}
+
+function cmwn_module_delete_profile_confirm_submit($form, &$form_state) {
+  $account = user_load($form_state['values']['uid']);
+  switch (get_class($account)) {
+    case 'ParentUser':
+      $account = ParentUser::castAs($account);
+      $children = $account->getChildren();
+      foreach ($children as $child) {
+        user_delete($form_state['values'], $child->uid);
+      }
+      break;
+    case 'ChildUser':
+      $account = ChildUser::castAs($account);
+      break;
+    case 'TeacherUser':
+      $account = TeacherUser::castAs($account);
+      break;
+  }
+  if ($form_state['values']['confirm']) {
+    user_delete($form_state['values'], $form_state['values']['uid']);
+  }
+
+  $form_state['redirect'] = '<front>';
+  drupal_set_message('Your account has been deleted.');
+  //drupal_goto('');
+}
+
+function cmwn_module_friend($account) {
+  global $user;
+  user_relationships_request_relationship($user, $account, 4, false);
+  drupal_set_message('This user has been notified that you would like to be friends.');
+  drupal_goto('user');
+}
+
+function cmwn_module_friend_confirm($account) {
+  global $user;
+  $rel = user_relationships_load(array('between' => array($user->uid, $account->uid)));
+  $rel = array_pop($rel);
+  if ($rel) {
+    user_relationships_save_relationship($rel, 'approve');
+  }
+  drupal_set_message('You have confirmed this user as your friend.');
+  drupal_goto('user');
+}
+
+function cmwn_module_friend_cancel($account) {
+  global $user;
+  $rel = user_relationships_load(array('between' => array($user->uid, $account->uid)));
+  $rel = array_pop($rel);
+  if ($rel) {
+    user_relationships_delete_relationship($rel, $user);
+  }
+  drupal_set_message('You have cancelled this friendship request.');
+  drupal_goto('user');
+}
+
+function cmwn_module_admin_settings() {
+  if (module_exists('token')) {
+    $token_help = array(
+      '#title' => t('Replacement patterns'),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#description' => t('The following tokens are available to help with this string generation.'),
+      '#value' => theme('token_help', array('global', 'user')),
+    );
+  }
+  $roles = user_roles();
+  $form = array(
+    'parent_consent_email' => array(
+      '#type' => 'fieldset',
+      '#title' => 'Parent Consent Email',
+      'cmwn_module_parent_permission_request_subject' => array(
+        '#type' => 'textfield',
+        '#title' => 'Subject',
+        '#default_value' => variable_get('cmwn_module_parent_permission_request_subject', '')
+      ),
+      'cmwn_module_parent_permission_request_message' => array(
+        '#type' => 'textarea',
+        '#title' => 'Message',
+        '#default_value' => variable_get('cmwn_module_parent_permission_request_message', ''),
+        '#description' => t("The following tokens are available for replacement into the subject and message fields above.").theme('fieldset', $token_help)
+      )
+    ),
+    'roles' => array(
+      '#type' => 'fieldset',
+      '#title' => 'Roles',
+      'cmwn_module_child_role' => array(
+        '#type' => 'select',
+        '#title' => 'Child Role',
+        '#options' => $roles,
+        '#default_value' => variable_get('cmwn_module_child_role', '')
+      ),
+      'cmwn_module_approved_child_role' => array(
+        '#type' => 'select',
+        '#title' => 'Approved Child Role',
+        '#options' => $roles,
+        '#default_value' => variable_get('cmwn_module_approved_child_role', '')
+      ),
+      'cmwn_module_parent_role' => array(
+        '#type' => 'select',
+        '#title' => 'Parent Role',
+        '#options' => $roles,
+        '#default_value' => variable_get('cmwn_module_parent_role', '')
+      ),
+      'cmwn_module_verified_parent_role' => array(
+        '#type' => 'select',
+        '#title' => 'Verified Parent Role',
+        '#options' => $roles,
+        '#default_value' => variable_get('cmwn_module_verified_parent_role', '')
+      ),
+      'cmwn_module_teacher_role' => array(
+        '#type' => 'select',
+        '#title' => 'Teacher Role',
+        '#options' => $roles,
+        '#default_value' => variable_get('cmwn_module_teacher_role', '')
+      ),
+    )
+  );
+  return system_settings_form($form);
+}
+
+function cmwn_module_perm() {
+  return array(
+    'access own profile',
+    'assign child to school',
+    'edit own childs permissions',
+    'award children badges',
+  	'moderate content'
+  );
+}
+
+function cmwn_module_system_settings_form_submit($form, &$form_state) {
+  //watchdog('cmwn_module setting', 'System setting has been altered.', null, WATCHDOG_NOTICE);
+}
+
+function cmwn_module_form_alter(&$form, &$form_state, $form_id) {
+  $path = drupal_get_path('module', 'cmwn_module');
+  if (is_array($form['#submit']) && in_array('system_settings_form_submit', $form['#submit'])) {
+    if (!in_array('cmwn_module_system_settings_form_submit', $form['#submit'])) {
+    $form['#submit'][] = 'cmwn_module_system_settings_form_submit';
+    }
+  }
+  switch ($form_id) {
+    case 'user_login':
+      //var_dump($form);die;
+      $form['info'] = array(
+        '#value' => t('<div class="info">Not a member yet? !link.</div>', array('!link' => l('Create your profile now', 'user/register')))
+      );
+      $form['name']['#colon'] = false;
+      $form['pass']['#colon'] = false;
+      break;
+    case 'search_block_form':
+      //var_dump($form);die;
+      unset($form['search_block_form']['#title']);
+      $form['search_block_form']['#default_value'] = 'Search';
+      //var_dump($form);die;
+      break;
+    case 'sponsor_logo_node_form':
+      require_once $path.'/inc/form-alter/node-form.inc';
+      cmwn_module_sponsor_logo_node_form($form, $form_state);
+      break;
+    case 'hum_news_node_form':
+      require_once $path.'/inc/form-alter/node-form.inc';
+      cmwn_module_hum_news_node_form($form, $form_state);
+      break;
+    case 'school_node_form':
+      require_once $path.'/inc/form-alter/node-form.inc';
+      cmwn_module_school_node_form($form, $form_state);
+      break;
+    case 'video_node_form':
+      require_once $path.'/inc/form-alter/node-form.inc';
+      cmwn_module_video_node_form($form, $form_state);
+      break;
+    case 'project_submission_node_form':
+      require_once $path.'/inc/form-alter/node-form.inc';
+      cmwn_module_project_submission_node_form($form, $form_state);
+      break;
+    case 'badge_node_form':
+      require_once $path.'/inc/form-alter/node-form.inc';
+      cmwn_module_badge_node_form($form, $form_state);
+      break;
+    case 'user_register':
+      require_once $path.'/inc/form-alter/user-register.inc';
+      cmwn_module_user_register($form, $form_state);
+      break;
+    case 'base_profile_node_form':
+      require_once $path.'/inc/form-alter/base-profile-node-form.inc';
+      cmwn_module_base_profile_node_form($form, $form_state);
+      break;
+    case 'child_profile_node_form':
+      require_once $path.'/inc/form-alter/child-profile-node-form.inc';
+      cmwn_module_child_profile_node_form($form, $form_state);
+      break;
+    case 'parent_profile_node_form':
+      require_once $path.'/inc/form-alter/parent-profile-node-form.inc';
+      cmwn_module_parent_profile_node_form($form, $form_state);
+      break;
+    case 'teacher_profile_node_form':
+      require_once $path.'/inc/form-alter/teacher-profile-node-form.inc';
+      cmwn_module_teacher_profile_node_form($form, $form_state);
+      break;
+    case 'forum_node_form':
+      require_once $path.'/inc/form-alter/node-form.inc';
+      cmwn_module_forum_node_form($form, $form_state);
+      break;
+  }
+}
+
+function cmwn_module_user($op, &$edit, &$account, $category = NULL) {
+  switch ($op) {
+    case 'load':
+      if (in_array(get_role_from_rid(variable_get('cmwn_module_child_role', '')), $account->roles)) {
+        $account = ChildUser::castAs($account);
+      } else if (in_array(get_role_from_rid(variable_get('cmwn_module_parent_role', '')), $account->roles)) {
+        $account = ParentUser::castAs($account);
+      } else if (in_array(get_role_from_rid(variable_get('cmwn_module_teacher_role', '')), $account->roles)) {
+        $account = TeacherUser::castAs($account);
+      } else {
+        $account = GenericUser::castAs($account);
+      }
+      break;
+    case 'view':
+      break;
+    case 'insert':
+      $roles = user_roles();
+      $index = get_rid_from_role($edit['user_type']);
+      if ($index) {
+        $account->roles[$index] = $roles[$index];
+      }
+      //var_dump(get_rid_from_role($edit['user_type']), $edit['user_type']);die;
+      switch (get_rid_from_role($edit['user_type'])) {
+        case variable_get('cmwn_module_child_role', ''):
+          if ($edit['parent_email']) {
+            $parentmail = $edit['parent_email'];
+            $mail = array(
+              'cmwn_module',
+              'parent_permission_request',
+              $parentmail,
+              user_preferred_language($account),
+              array(
+                'user' => $account
+              )
+            );
+            cmwn_module_register_exit('_cmwn_module_parent_permission_request', array($mail, $account));
+          }
+          break;
+        case variable_get('cmwn_module_parent_role', ''):
+          if ($edit['parental_consent_token']) {
+            cmwn_module_register_exit('_cmwn_module_add_parent_child_relationship', array($account, user_load($edit['parental_consent_token']['cuid'])));
+          }
+          break;
+      }
+      break;
+      
+      case 'login':
+       $uid = $account->uid; 
+        if(in_array('child', array_values($account->roles)) || in_array('teacher', array_values($account->roles)) || in_array('parent', array_values($account->roles)) || in_array('verified-parent', array_values($account->roles))){      
+          //check to ensure this account has required $account->data->user_type variable
+          $data = unserialize($account->data);
+
+          if(empty($data['user_type'])){
+            //print_r($account->roles);exit;
+            $child_role = variable_get('cmwn_module_child_role','');
+            $parent_role = variable_get('cmwn_module_parent_role','');
+            $teacher_role = variable_get('cmwn_module_teacher_role','');
+            $verified_parent_role = variable_get('cmwn_module_verified_parent_role','');
+            
+
+            
+            switch(true){
+              case array_key_exists($child_role,$account->roles):
+                $data['user_type'] = 'child';
+                break;
+
+              case array_key_exists($parent_role,$account->roles):
+              case array_key_exists($verified_parent_role,$account->roles):              
+                $data['user_type'] = 'parent';
+                break;
+
+              case array_key_exists($teacher_role,$account->roles):
+                $data['user_type'] = 'teacher';
+                break;
+            }
+            
+            //save it so this is not an issue next login.
+            if(isset($data['user_type'])){
+              user_save($account, $data);                          
+            }
+          }
+        }  
+        break;
+  }
+}
+
+function cmwn_module_mail($key, &$message, $params) {
+  $language = $message['language'];
+  $user = content_profile_load('base_profile', $params['user']->uid, '', true);
+  if (!is_array($user->data)) {
+    $user->data = unserialize($user->data);
+  }
+  switch($key) {
+    case 'parent_permission_request':
+      if ($user && $user->uid > 0 && $user->data['user_type'] == get_role_from_rid(variable_get('cmwn_module_child_role', ''))) {
+        $roles = user_roles();
+        $user = user_load($user->uid);
+        $child = ChildUser::castAs($user);
+        if ($child) {
+          $token = $child->getParentalConsentToken();
+          //var_dump($token);die;
+          $parent_registration_link = url('user/register/parent/'.$token['token'], array('absolute' => true));
+          $parent_registration_token = $token['token'];
+          $path = drupal_get_path('module', 'cmwn_module');
+          $url = url('', array('absolute' => true));
+          ob_start();
+$template = 'email.inc';
+$parent = @user_load(array('mail'=>$user->parent_email));
+if ($parent) $parent = @ParentUser::castAs($parent);
+if ($parent && sizeof($parent->getChildren()) > 0) $template = 'email-2.inc';
+          include $path.'/inc/'.$template;
+          $html = ob_get_clean();
+          $message['subject'] = t(variable_get('cmwn_module_parent_permission_request_subject', '[user-raw]'));
+          $message['subject'] = token_replace($message['subject'], 'global', null, TOKEN_PREFIX, TOKEN_SUFFIX, array(), true);
+          $message['subject'] = token_replace($message['subject'], 'user', $user, TOKEN_PREFIX, TOKEN_SUFFIX, array(), true);
+          $message['body'][0] = $html;
+          $message['headers']['MIME-Version'] = '1.0';
+          $message['headers']['Content-Type'] = 'text/html;charset=utf-8';
+        }
+      }
+      break;
+  }
+}
+
+function _cmwn_module_parent_permission_request($mail) {
+  call_user_func_array('drupal_mail', $mail);
+}
+
+function cmwn_module_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($node->type) {
+    case 'sponsor_logo':
+      if ($op == 'view' && $a4) {
+        drupal_goto('');
+      }
+      break;
+    case 'group_message':
+      switch ($op) {
+        case 'insert':
+          //var_dump(func_get_args());die;
+          if (module_exists('cmwn_feed')) {
+            //cmwn_feed_record($node->uid, t(''), time());
+          }
+          break;
+      }
+      break;
+    case 'forum':
+      //drupal_set_breadcrumb(array(l('foo', 'bar')));
+      break;
+  }
+}
+
+function cmwn_module_register_exit($function, $params) {
+  global $cmwn_exit_functions;
+  $cmwn_exit_functions[$function] = $params;
+}
+
+function cmwn_module_exit() {
+  global $cmwn_exit_functions;
+  foreach ($cmwn_exit_functions as $function => $params) {
+    call_user_func_array($function, $params);
+  }
+}
+
+function cmwn_module_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      return array(
+        'sponsors' => array(
+          'info' => t('Our Sponsors')
+        ),
+        'hum_news' => array(
+          'info' => t('Hum News')
+        ),
+        'contact' => array(
+          'info' => t('How to Stay in Contact')
+        )
+      );
+      break;
+    case 'view':
+      switch ($delta) {
+        case 'sponsors':
+          $block = array();
+          $block['subject'] = l('Our Partners', 'node/266');
+          $block['content'] = views_embed_view('sponsors', 'default');
+          return $block;
+          break;
+        case 'hum_news':
+          $block = array();
+          $block['subject'] = l('Hum News', 'http://www.humnews.com/');
+          $block['content'] = views_embed_view('hum_news', 'default');
+          return $block;
+          break;
+        case 'contact':
+          $block = array();
+          $block['subject'] = l('How to Stay in Contact', 'node/666');
+          $block['content'] = theme('cmwn_module_block_contact');
+          return $block;
+          break;
+      }
+      break;
+  }
+}
+
+function cmwn_module_token_list($type = 'all') {
+  if ($type == 'user' || $type == 'all') {
+    $tokens['user']['parent_registration_link'] = t("Link to send parent to register (Only applies to child role).");
+    $tokens['user']['parent_registration_token'] = t("Token to allow already-registered parents associate their child's account with theirs (Only applies to child role).");
+    return $tokens;
+  }
+}
+
+function cmwn_module_token_values($type, $object = NULL, $options = array()) {
+  $tokens = array();
+  switch ($type) {
+    case 'user':
+      if (isset($object->uid)) {
+        $user = user_load($object->uid);
+      }
+      if ($user && $user->uid > 0) {
+        $roles = user_roles();
+        if (in_array(get_role_from_rid(variable_get('cmwn_module_child_role', '')), array($user->user_type, $user->data['user_type']))) {
+          $child = ChildUser::castAs($user);
+          if ($child) {
+            $token = $child->getParentalConsentToken();
+            $tokens['parent_registration_link'] = url('user/register/parent/'.$token['token'], array('absolute' => true));
+            $tokens['parent_registration_token'] = $token['token'];
+          }
+        }
+      }
+      break;
+  }
+  return $tokens;
+}
+
+function get_rid_from_role($role) {
+  static $roles = false;
+  if (!$roles) {
+    $roles = user_roles();
+  }
+  return array_search($role, $roles);
+}
+
+function get_role_from_rid($rid) {
+  static $roles = false;
+  if (!$roles) {
+    $roles = user_roles();
+  }
+  return $roles[$rid];
+}
+
+function get_school_nid_by_code($code) {
+  return db_result(db_query("SELECT nid FROM {content_type_school} WHERE field_school_code_value = '%s'", $code));
+}
+
+function get_parent_registration_token($token) {
+  return db_fetch_array(db_query("SELECT * FROM {cmwn_parental_consent_token} WHERE token = '%s'", $token));
+}
+
+function template_preprocess_cmwn_module_friends(&$vars) {
+  foreach ($vars['friends'] as &$friend) {
+    $friend = user_load($friend->uid);
+    $friend = ChildUser::castAs($friend);
+  }
+}
+
+function template_preprocess_cmwn_module_interests(&$vars) {
+  
+}
+
+function template_preprocess_cmwn_module_projects(&$vars) {
+  
+}
+
+function template_preprocess_user_register(&$vars) {
+  
+}
+
+function template_preprocess_cmwn_module_block_contact(&$vars) {
+  
+}
+
+function template_preprocess_cmwn_module_social(&$vars) {
+  
+}
+
+function template_preprocess_cmwn_module_viddler_video(&$vars) {
+  
+}
+
+if (!function_exists('flag_reset_flag')) {
+  
+  /**
+   * Remove all flagged content from a flag.
+   *
+   * @param $flag
+   *   The flag object.
+   * @param $content_id
+   *   Optional. The content ID on which all flaggings will be removed. If left
+   *   empty, this will remove all of this flag's content.
+   */
+  function flag_reset_flag($flag, $content_id = NULL) {
+    $result = db_query("SELECT * FROM {flag_content} WHERE fid = %d" . ($content_id ? " AND content_id = %d" : ''), $flag->fid, $content_id);
+    $rows = array();
+    while ($row = db_fetch_array($result)) {
+      $rows[] = $row;
+    }
+    module_invoke_all('flag_reset', $flag, $content_id, $rows);
+  
+    db_query("DELETE FROM {flag_content} WHERE fid = %d" . ($content_id ? " AND content_id = %d" : ''), $flag->fid, $content_id);
+    return db_affected_rows();
+  }
+
+}
