@@ -17,3 +17,17 @@ div.notices-table table td:last-child{
   text-transform: uppercase;
 }
 
+
+.parent-child-notices-avatar{
+  float: right;
+  clear: none;
+}
+
+
+#v2 .block.notices-parent-child  .header .section h2{
+  line-height: 52px !important;
+}
+
+#v2 .block.notices-parent-child .header {
+  padding: 1px 1px 1px 12px; !important;
+}

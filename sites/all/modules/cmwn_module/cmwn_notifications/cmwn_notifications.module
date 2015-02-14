@@ -1,9 +1,134 @@
 <?php
+
   
 function cmwn_notifications_init(){
   drupal_add_css(drupal_get_path('module', 'cmwn_notifications') .'/css/cmwn_notifications.css');
 }  
   
+function cmwn_notifications_menu() {
+  $items = array();
+  
+  $items['node/%node/delete_format'] = array(
+    'title' => 'Remove Due to Format', 
+    'access arguments' => array('remove post for file format issues'),
+    'page callback' => 'cmwn_notifications_delete_file_format',
+    'page arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,   
+  ); 
+
+  $items['node/%node/delete_bullying'] = array(
+    'title' => 'Remove Due to Bullying', 
+    'access arguments' => array('remove post for bullying'),
+    'page callback' => 'cmwn_notifications_delete_bullying',
+    'page arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,   
+  ); 
+
+  $items['node/%node/delete_inappropriate'] = array(
+    'title' => 'Remove Due to Inappropriate', 
+    'access arguments' => array('remove post for inappropriate'),
+    'page callback' => 'cmwn_notifications_delete_inappropriate',
+    'page arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,   
+  ); 
+   
+  return $items;
+}
+  
+function cmwn_notifications_perm() {
+  return array('remove post for file format issues','remove post for bullying', 'remove post for inappropriate');
+}  
+  
+/*Form for File Format*/
+function cmwn_notifications_delete_file_format(){
+  return drupal_get_form('cmwn_notifications_delete_file_format_form');
+}  
+
+function cmwn_notifications_delete_file_format_form(&$form_state){  
+  $form['delete_confirm'] = array(
+    '#value' => t('Are you sure you want to remove this content due to a file format issue? <br />The author will receive a notification that it was removed for this reason.<br /><br />'),
+  );
+  $form['nid'] = array(
+    '#type' => 'hidden',
+    '#value' => arg(1),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value'=> 'Yes, remove this content due to a file format issue.',
+  );
+  
+  return $form;
+}
+  
+function cmwn_notifications_delete_file_format_form_submit($form, &$form_state){
+  //note, hook_nodeapi delete fu in this module checks for delete_format to change message in case its format issue not inappropriate content issue.
+  node_delete($form_state['values']['nid']);
+  drupal_set_message(t('Content was removed due to file format error.'));
+  drupal_goto('admin/content/node');
+}
+
+/*Form for Bullying*/
+function cmwn_notifications_delete_bullying(){
+  return drupal_get_form('cmwn_notifications_delete_bullying_form');
+}  
+
+function cmwn_notifications_delete_bullying_form(&$form_state){  
+  $form['delete_confirm'] = array(
+    '#value' => t('Are you sure you want to remove this content due to bullying? <br />The author will receive a notification that it was removed for this reason.<br /><br />'),
+  );
+  $form['nid'] = array(
+    '#type' => 'hidden',
+    '#value' => arg(1),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value'=> 'Yes, remove this content due to bullying.',
+  );
+  
+  return $form;
+}
+  
+function cmwn_notifications_delete_bullying_form_submit($form, &$form_state){
+  //note, hook_nodeapi delete fu in this module checks for delete_bullying arg in url to change message based on context
+  node_delete($form_state['values']['nid']);
+  drupal_set_message(t('Content was removed due to bullying.'));
+  drupal_goto('admin/content/node');
+}
+
+
+/*Form for Inappropriate*/
+function cmwn_notifications_delete_inappropriate(){
+  return drupal_get_form('cmwn_notifications_delete_inappropriate_form');
+}  
+
+function cmwn_notifications_delete_inappropriate_form(&$form_state){  
+  $form['delete_confirm'] = array(
+    '#value' => t('Are you sure you want to remove this content due to being inappropriate? <br />The author will receive a notification that it was removed for this reason.<br /><br />'),
+  );
+  $form['nid'] = array(
+    '#type' => 'hidden',
+    '#value' => arg(1),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value'=> 'Yes, remove this content due to inappropriate content.',
+  );
+  
+  return $form;
+}
+  
+function cmwn_notifications_delete_inappropriate_form_submit($form, &$form_state){
+  //note, hook_nodeapi delete fu in this module checks for delete_bullying arg in url to change message based on context
+  node_delete($form_state['values']['nid']);
+  drupal_set_message(t('Content was removed due to inappropriate.'));
+  drupal_goto('admin/content/node');
+}
+
+
+
 /**
  * Display message overview list
  */
@@ -48,19 +173,44 @@ function cmwn_notifications_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       //$is_moderator = (in_array('administrator', array_values($user->roles)) || in_array('moderator', array_values($user->roles)) || in_array('senior_moderator', array_values($user->roles)));
 //      print 'delete';
       if(($node->type == 'whiteboard' || $node->type == 'video') && $node->uid != $user->uid){
-//        print 'delete mod';exit;
-        //moderator deleting post not their own
         $post_user = user_load($node->uid);
         @$image =  $node->field_image[0]['filename'];
         @$body  = '"' . $node->body . '"';
         @$video =  $node->field_video[0]['filename'];
-        
-        $post_identifier = $video . ' ' . $image . ' ' . $body;
-        cmwn_notifications_rejected_content($post_user, $post_identifier);
-        //check if this child has a parent.
-        $parent_uid = db_result(db_query('select requester_id from {user_relationships} where requestee_id = %d and approved = 1  and rtid =2', array($post_user->uid)));
-        $parent_account = user_load($parent_uid);
-        cmwn_notifications_rejected_content_parent($parent_account, $post_identifier, $post_user);
+        $post_identifier = $video . ' ' . $image . ' ' . $body; 
+        @$parent_uid = db_result(db_query('select requester_id from {user_relationships} where requestee_id = %d and approved = 1  and rtid =2', array($post_user->uid)));       
+        $user_warnings = variable_get('cmwn_notifications_' . $node->uid, array('bullying'=>0,'inappropriate'=>0));
+        switch (true){
+          case (arg(2) == 'delete_format'):
+            //moderator deleting post due to format issue
+            cmwn_notifications_rejected_content($post_user, $post_identifier, 'format');
+            break;
+          case (arg(2) == 'delete_bullying'):
+            //moderator deleting post due to bullying
+            $user_warnings['bullying']++;
+            variable_set('cmwn_notifications_' . $node->uid, $user_warnings);            
+            cmwn_notifications_rejected_content($post_user, $post_identifier, 'bullying');
+            //check if this child has a parent.
+            if($parent_uid){
+              $parent_account = user_load($parent_uid);
+              cmwn_notifications_rejected_content_parent($parent_account, $post_identifier, $post_user,'bullying');                        
+            }
+
+            break;
+                    
+          case (arg(2) == 'delete_inappropriate'):
+            //moderator deleting post not their own, presume due to inappropriate content
+            $user_warnings['inappropriate']++;
+            variable_set('cmwn_notifications_' . $node->uid, $user_warnings);
+            cmwn_notifications_rejected_content($post_user, $post_identifier,'inappropriate');
+            //check if this child has a parent.
+            if($parent_uid){
+              $parent_account = user_load($parent_uid);
+              cmwn_notifications_rejected_content_parent($parent_account, $post_identifier, $post_user,'inappropriate');                        
+            }
+          
+            break;
+        }
         
       }
       
@@ -78,34 +228,90 @@ function cmwn_notifications_user($op, &$edit, &$account, $category = NULL) {
       break;
   }
 }
-function cmwn_notifications_rejected_content($account, $post_identifier){
+
+function cmwn_notifications_rejected_content($account, $post_identifier, $reason = 'inappropriate'){
   //password has changed, push message.
-  $message = array(
-    'type' => 'profile-message',
-    'subject' => t('Inappropriate Content'),
-    'body' => 'Inappropriate Content<br /> you have submitted content that has been deemed inappropriate
-for CMWN. Please resubmit your content ...
-Your post (' . $post_identifier . ') was removed from CMWN.
-We suggest following the outline below and your content will follow
-guidlines for CMWN....',
-    'language' => user_preferred_language($account),
-  );
+  $user_warnings = variable_get('cmwn_notifications_' . $account->uid, array('bullying' => 0,'inappropriate' => 0));
+
+  switch($reason){
+    case 'format':
+      $message = array(
+          'type' => 'profile-message',
+          'subject' => t('File Error'),
+          'body' => 'Unacceptable File Upload Format<br /> you have submitted a file of the wrong format.      Your post (' . $post_identifier . ') was removed from CMWN.
+      We suggest following the outline below and your content will follow guidelines for CMWN....',
+          'language' => user_preferred_language($account),
+        );
+      break;
+    case 'bullying':
+      $message = array(
+          'type' => 'profile-message',
+          'subject' => t('Bullying Warning'),
+          'body' => 'Unacceptable Bullying Behavior<br /> Your post (' . $post_identifier . ') was removed from CMWN due to bullying.
+          This was your ' . cmwn_notifications_ordinal($user_warnings['bullying']) . ' warning for bullying.
+      We suggest following the outline below and your content will follow guidelines for CMWN....',
+          'language' => user_preferred_language($account),
+        );
+      break;
+        
+    default:
+      $message = array(
+        'type' => 'profile-message',
+        'subject' => t('Inappropriate Content'),
+        'body' => 'Inappropriate Content<br /> you have submitted content that has been deemed inappropriate
+    for CMWN. Please resubmit your content ...
+    Your post (' . $post_identifier . ') was removed from CMWN.
+    This was your ' . cmwn_notifications_ordinal($user_warnings['inappropriate']) . ' warning for inappropriate content.    
+    We suggest following the outline below and your content will follow guidelines for CMWN....',
+        'language' => user_preferred_language($account),
+      );
+      break;
+    
+  }
   messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
 }
 
-function cmwn_notifications_rejected_content_parent($parent_account, $post_identifier, $child_account){
+function cmwn_notifications_rejected_content_parent($parent_account, $post_identifier, $child_account, $reason = 'inappropriate'){
   //password has changed, push message.
-  
-  $message = array(
-    'type' => 'profile-message',
-    'subject' => t('Inappropriate Content'),
-    'body' => 'Inappropriate Content<br /> your child '.$child_account->name.' has submitted content that has been deemed inappropriate
-for CMWN. 
-The post (' . $post_identifier . ') was removed from CMWN.
-We suggest reviewing the outline below with your child and their content will follow
-guidlines for CMWN....',
-    'language' => user_preferred_language($account),
-  );
+  $user_warnings = variable_get('cmwn_notifications_' . $child_account->uid, array('bullying' => 0,'inappropriate' => 0));  
+  switch($reason){
+      case 'format':
+        $message = array(
+          'type' => 'profile-message',
+          'subject' => t('File Error'),
+          'body' => 'Unacceptable File Format Error<br /> your child '.$child_account->name.' has submitted content that has was of the wrong file format. 
+      The post (' . $post_identifier . ') was removed from CMWN.
+      We suggest reviewing the outline below with your child and their content will follow guidelines for CMWN....',
+          'language' => user_preferred_language($account),
+        );         
+        break;
+      case 'bullying':
+        $message = array(
+          'type' => 'profile-message',
+          'subject' => t('Bullying Warning'),
+          'body' => 'Bullying Warning<br /> your child '.$child_account->name.' has submitted content that has been deemed inappropriate 
+      for CMWN due to bullying.
+      The post (' . $post_identifier . ') was removed from CMWN.
+      This was your child\'s ' . cmwn_notifications_ordinal($user_warnings['bullying']) . ' warning for bullying.    
+      We suggest reviewing the outline below with your child and their content will follow guidelines for CMWN....',
+          'language' => user_preferred_language($account),
+        );        
+        break;
+      default:
+        $message = array(
+          'type' => 'profile-message',
+          'subject' => t('Inappropriate Content'),
+          'body' => 'Inappropriate Content<br /> your child ' . $child_account->name . ' has submitted content that has been deemed inappropriate
+      for CMWN. 
+      The post (' . $post_identifier . ') was removed from CMWN.
+      This was your child\'s ' . cmwn_notifications_ordinal($user_warnings['inappropriate']) . ' warning for bullying.          
+      We suggest reviewing the outline below with your child and their content will follow guidelines for CMWN....',
+          'language' => user_preferred_language($account),
+        );      
+        break;
+  }
+      
+
   messaging_message_send_user($parent_account, &$message, $method = NULL, $queue = 0);
   $mqid = db_last_insert_id('messaging_store', 'mqid');
   //set sender to child's uid to keep track of which child this parent notice is for!
@@ -212,3 +418,16 @@ function cmwn_notifications_flip_award_parent($parent_account, $nid, $title, $ch
 }
 
   
+
+
+function cmwn_notifications_ordinal($num) {
+  if (!in_array(($num % 100),array(11,12,13))){
+    switch ($num % 10) {
+      // Handle 1st, 2nd, 3rd
+      case 1:  return $num.'st';
+      case 2:  return $num.'nd';
+      case 3:  return $num.'rd';
+    }
+  }
+  return $num.'th';
+}
