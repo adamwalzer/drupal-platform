@@ -312,7 +312,7 @@ function cmwn_notifications_rejected_content_parent($parent_account, $post_ident
   }
       
 
-  messaging_message_send_user($parent_account, &$message, $method = NULL, $queue = 0);
+  messaging_message_send_user($parent_account, $message, $method = NULL, $queue = 0);
   $mqid = db_last_insert_id('messaging_store', 'mqid');
   //set sender to child's uid to keep track of which child this parent notice is for!
   db_query('update {messaging_store} set sender = %d where mqid = %d', array($child_account->uid, $mqid));
