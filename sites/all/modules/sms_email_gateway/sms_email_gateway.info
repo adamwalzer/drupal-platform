@@ -1,0 +1,11 @@
+name = "E-mail Gateway"
+description = "Allows the SMS Framework to use E-mail gateways."
+dependencies[] = sms
+package = SMS Framework
+core = 6.x
+; Information added by drupal.org packaging script on 2011-03-27
+version = "6.x-1.0"
+core = "6.x"
+project = "sms_email_gateway"
+datestamp = "1301211070"
+

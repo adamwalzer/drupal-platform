@@ -1,0 +1,12 @@
+name = "E-mail Gateway Testing"
+description = "Simple test module for incoming messages via the e-meil gateway."
+dependencies[] = sms
+dependencies[] = sms_email_gateway
+package = SMS Framework
+core = 6.x
+; Information added by drupal.org packaging script on 2011-03-27
+version = "6.x-1.0"
+core = "6.x"
+project = "sms_email_gateway"
+datestamp = "1301211070"
+

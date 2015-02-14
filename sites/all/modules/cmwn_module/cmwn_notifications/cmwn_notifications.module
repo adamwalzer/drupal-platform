@@ -268,7 +268,7 @@ function cmwn_notifications_rejected_content($account, $post_identifier, $reason
       break;
     
   }
-  messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
+  messaging_message_send_user($account, $message, $method = NULL, $queue = 0);
 }
 
 function cmwn_notifications_rejected_content_parent($parent_account, $post_identifier, $child_account, $reason = 'inappropriate'){
@@ -326,7 +326,7 @@ function cmwn_notifications_password_change($account){
     'body' => 'You have changed your password.',
     'language' => user_preferred_language($account),
   );
-  messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
+  messaging_message_send_user($account, $message, $method = NULL, $queue = 0);
 }
 
 function cmwn_notifications_username_change($account){
@@ -337,7 +337,7 @@ function cmwn_notifications_username_change($account){
     'body' => 'You have changed your username.',
     'language' => user_preferred_language($account),
   );
-  messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
+  messaging_message_send_user($account, $message, $method = NULL, $queue = 0);
 }
 
 function cmwn_notifications_email_change($account){
@@ -348,7 +348,7 @@ function cmwn_notifications_email_change($account){
     'body' => 'You have changed the email address associated with your account.',
     'language' => user_preferred_language($account),
   );
-  messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
+  messaging_message_send_user($account, $message, $method = NULL, $queue = 0);
 }
 
 
@@ -389,7 +389,7 @@ function cmwn_notifications_flip_award($account, $nid, $title){
     'body' => 'You have earned a flip award for action item "' . $title . '."',
     'language' => user_preferred_language($account),
   );
-  messaging_message_send_user($account, &$message, $method = NULL, $queue = 0);
+  messaging_message_send_user($account, $message, $method = NULL, $queue = 0);
 }
 
 function cmwn_notifications_flip_award_parent($parent_account, $nid, $title, $child_account){
@@ -411,7 +411,7 @@ function cmwn_notifications_flip_award_parent($parent_account, $nid, $title, $ch
     'body' => 'Your child '.$child_account->name.' has earned a flip award for action item "' . $title . '."',
     'language' => user_preferred_language($account),
   );
-  messaging_message_send_user($parent_account, &$message, $method = NULL, $queue = 0);
+  messaging_message_send_user($parent_account, $message, $method = NULL, $queue = 0);
   $mqid = db_last_insert_id('messaging_store', 'mqid');
   //set sender to child's uid to keep track of which child this parent notice is for!
   db_query('update {messaging_store} set sender = %d where mqid = %d', array($child_account->uid, $mqid));  
