@@ -1,5 +1,0 @@
-name = "CMWN Child Permissions"
-description = "Defines permissions that parents can control for their children."
-package = "CMWN"
-core = "6.x"
-dependencies[] = "cmwn_module"

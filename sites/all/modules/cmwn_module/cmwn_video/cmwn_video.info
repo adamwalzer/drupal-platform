@@ -1,5 +1,0 @@
-name = "CMWN Video"
-description = "Integrates CMWN with Viddler."
-package = "CMWN"
-core = "6.x"
-dependencies[] = "cmwn_module"

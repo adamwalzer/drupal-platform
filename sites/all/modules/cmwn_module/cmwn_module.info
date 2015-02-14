@@ -1,4 +1,0 @@
-name = "CMWN Module"
-description = "CMWN Proprietary Functionality"
-package = "CMWN"
-core = "6.x"

@@ -1,5 +1,0 @@
-name = "CMWN Survey"
-description = "CMWN Survey"
-package = "CMWN"
-core = "6.x"
-dependencies[] = "cmwn_module"

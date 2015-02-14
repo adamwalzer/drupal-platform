@@ -1,8 +1,0 @@
-<?php
-function cmwn_word_filter_install() {
-  
-}
-
-function cmwn_word_filter_uninstall() {
-  db_query("DELETE FROM {variable} WHERE name LIKE 'cmwn_word_filter_%%'");
-}

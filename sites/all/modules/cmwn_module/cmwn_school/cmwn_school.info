@@ -1,5 +1,0 @@
-name = "CMWN School"
-description = "Provides functionality required by school pages."
-package = "CMWN"
-core = "6.x"
-dependencies[] = "cmwn_module"

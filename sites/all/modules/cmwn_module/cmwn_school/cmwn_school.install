@@ -1,9 +1,0 @@
-<?php
-
-function cmwn_school_install() {
-  db_query("UPDATE {system} SET weight = -10 WHERE name = 'cmwn_school'");
-}
-
-function cmwn_school_uninstall() {
-  db_query("DELETE FROM {variable} WHERE name LIKE 'cmwn_school_%%'");
-}

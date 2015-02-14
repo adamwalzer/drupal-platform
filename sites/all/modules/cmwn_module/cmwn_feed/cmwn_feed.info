@@ -1,5 +1,0 @@
-name = "CMWN Feed"
-description = "Records user actions for display in the shine feed."
-package = "CMWN"
-core = "6.x"
-dependencies[] = "cmwn_module"

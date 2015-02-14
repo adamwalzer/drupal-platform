@@ -1,8 +1,0 @@
-<?php
-function cmwn_store_install() {
-  
-}
-
-function cmwn_store_uninstall() {
-  db_query("DELETE FROM {variable} WHERE name LIKE 'cmwn_store_%%'");
-}

@@ -1,8 +1,0 @@
-<?php
-function cmwn_survey_install() {
-  
-}
-
-function cmwn_survey_uninstall() {
-  db_query("DELETE FROM {variable} WHERE name LIKE 'cmwn_survey_%%'");
-}

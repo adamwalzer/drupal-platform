@@ -1,5 +1,0 @@
-name = "CMWN Store"
-description = "Integrates CMWN with PrintMojo."
-package = "CMWN"
-core = "6.x"
-dependencies[] = "cmwn_module"

@@ -1,9 +1,0 @@
-<?php
-
-function cmwn_child_perms_install() {
-  db_query("UPDATE {system} SET weight = -10 WHERE name = 'cmwn_child_perms'");
-}
-
-function cmwn_child_perms_uninstall() {
-  db_query("DELETE FROM {variable} WHERE name LIKE 'cmwn_child_perms_%%'");
-}
