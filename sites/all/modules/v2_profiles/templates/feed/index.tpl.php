@@ -1,6 +1,6 @@
 <?php /* 1.4 */ ?>
 
-<div class="block feed index">
+<div class="block feed sidebar-profile index">
 
 	<?php if (in_array('can_receive_notices', $user->roles) && sizeof($data->items->group1 ) > 0) { ?>
 
@@ -39,7 +39,7 @@
 	<?php if ($user->user_type == 'child') { ?>
 
 		<?php if (in_array('can_make_friends', $user->roles)) { ?>
-
+      <div class="sidebar-toggle hide"></div>
 			<div class="header">
 
 				<div class="section">

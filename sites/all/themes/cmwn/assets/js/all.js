@@ -68,12 +68,67 @@ $(function(){
 		});
 	}
 
+
+  //UI Refresh toggle sidebar
+  var sidebar_toggling = false;
+  $('#v2 div.sidebar-toggle').click(function(){
+    var toggle_btn = $(this);
+    if(!sidebar_toggling){
+      switch(toggle_btn.hasClass('hide')){
+        case true:
+          sidebar_toggling = true;  
+          $('.sidebar-profile').animate({
+            width: 0,
+            right: 0
+          }, 0, 'linear',function(){
+            $(this).addClass('hidden').removeClass('visible');//sidebar-profile  
+            toggle_btn.addClass('show').removeClass('hide');                      
+            sidebar_toggling = false;
+          });
+          
+          
+          $(this).animate({
+            right: -40
+          }, 0, 'linear',function(){
+            
+          });
+        
+          break;
+        default://show
+          sidebar_toggling = true;
+          $('.sidebar-profile').animate({
+            width: 240,
+            right: -240
+          }, 0, 'linear',function(){
+            $(this).addClass('visible').removeClass('hidden');//sidebar-profile
+            toggle_btn.addClass('hide').removeClass('show');            
+            sidebar_toggling = false;
+          });
+          
+          
+          $(this).animate({
+            right: 0
+          }, 0, 'linear',function(){
+            
+          });
+        
+          break;
+      }
+
+    }
+
+  });
+  
+  
+  //UI Refresh Whiteboard/Newsfeed tabs
+  $('#whiteboard-profile-tabs').tabs({collapsible: true});
+  //UI Refresh Call Monitor
+  $('span.call-monitor').click(function(){console.log('call monitor');$("#mainpanel li a.subpanel_toggle, .chatbox a.chatboxhead").live('click');});
 	/* 1.4 feed */
 
     
     //friend feed
     $('.section.friend-feed .scroll').load('/cmwn_feed/friend/' + $('.section.friend-feed .scroll').attr('u'), function(){
-      console.log('loaded ff');
       //set height
       var ffh = 0;//friend feed height
       $('.section.friend-feed .scroll .item:lt(12)').each(function() {//set to height of first 12 items
@@ -369,7 +424,7 @@ $(function(){
 		var target = $('#v2 .whiteboard .create .form span.file');
 		target.prev().removeClass('with-file');
 		target.text('');
-		target.next().find('span').text('Add Photo/ Video');
+		target.next().find('span').text('Add Media');
 		if (source.val() != '') {
 			var allowed = ['gif','jpg','JPG','jpeg','png','avi','flv','m4v','mov','mp4','mpg','wmv'];
 			var name = source.val().replace("C:\\fakepath\\", "");
@@ -377,11 +432,11 @@ $(function(){
 			if (jQuery.inArray(extension, allowed) != -1) {
 				target.prev().addClass('with-file');
 				target.text('File: ' + name);
-				target.next().find('span').text('Change Photo/ Video');
+				target.next().find('span').text('Change');
 			} else {
 				target.prev().addClass('with-file');
 				target.text(extension + ' is not a supported file format.');
-				target.next().find('span').text('Change Photo/ Video');
+				target.next().find('span').text('Change');
 				source.val('');
 			}
 		}

@@ -31,7 +31,12 @@
 	require_once(drupal_get_path('module','v2_profiles').'/includes/videos.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/whiteboard.inc');
 
-	///
+  if (module_exists('jquery_ui')) {
+    jquery_ui_add(array('ui.tabs'));
+    drupal_add_css(drupal_get_path('module', 'jquery_ui') . '/jquery.ui/themes/default/ui.all.css');
+  }	
+
+	//
 
 	function v2_profiles_access($uid) {
 

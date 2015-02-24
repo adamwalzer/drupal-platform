@@ -74,7 +74,7 @@
 	///
 
 	function v2_profiles_whiteboard_index($uid) {
-
+    
 		$data = new stdClass();
 
 		$user = user_load($uid);

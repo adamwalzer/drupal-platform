@@ -3,3 +3,4 @@ description = Custom profile functionality.
 name = Profiles
 package = v2
 version = 1.0
+dependencies[] = jquery_ui

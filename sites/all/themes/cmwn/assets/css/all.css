@@ -79,7 +79,7 @@ body {
 #v2 .form-submit {
 	background:#7829bb;
 	border:none;
-	border-radius:6px;
+	border-radius:4px;
 	box-shadow:0px 0px 6px rgba(0,0,0,0.12);
 	color:#ffffff;
 	cursor:pointer;
@@ -133,11 +133,14 @@ body {
 }
 
 #v2 .button span {
-	color:#ffffff;
-	cursor:pointer;
-	font-family:'CMWNJadeRegular';
-	font-size:18px;
-	height:30px;
+  color: #FFF;
+  cursor: pointer;
+  font-family: "CMWNJadeRegular";
+  font-size: 18px;
+  height: 30px;
+  width: 100%;/*?*/
+  display: inline-block;
+  text-align: center;
 }
 
 #v2 .button:hover span {
@@ -302,7 +305,14 @@ body {
 		overflow:hidden;
 		padding:12px;
 		position:relative;
+		background: url(../img/blue-header-bg.jpg) repeat center;
+		background-size: cover;
 	}
+
+	#v2 .block ul.header{
+    padding: 0 0 3px 0;
+	}
+
 
 		#v2 .block .header .section {
 		}
@@ -2382,15 +2392,17 @@ body {
 }
 
 #v2 .block.whiteboard.index .create {
-	height:84px;
+	height:132px;
 	padding:24px 24px 24px 132px;
+	padding:24px 18px 24px 120px;	
 	position:relative;
 	width:468px;
+	box-sizing: border-box;
 }
 
 #v2 .block.whiteboard.index .create .avatar {
 	box-shadow:0px 0px 6px rgba(0,0,0,0.12);
-	left:24px;
+	left:18px;
 	overflow:hidden;
 	position:absolute;
 	top:24px;
@@ -2400,7 +2412,7 @@ body {
 #v2 .block.whiteboard.index .create .form {
 	height:84px;
 	position:relative;
-	width:468px;
+	width:486px;
 }
 
 #v2 .block.whiteboard.index .create .form textarea {
@@ -2409,6 +2421,10 @@ body {
 	position:absolute;
 	top:0px;
 	width:274px;
+}
+
+#v2 .block.whiteboard.index .create .form textarea{
+  width: 342px;
 }
 
 #v2 .block.whiteboard.index .create .form textarea.with-file {
@@ -2432,14 +2448,15 @@ body {
 
 #v2 .block.whiteboard.index .create .form span.button {
 	background:#56bb36;
-	height:60px;
+	height:38px;
 	line-height:20px;
 	overflow:hidden;
-	padding:12px;
+	padding: 10px 12px 12px 12px;
 	position:absolute;
-	right:84px;
+	right:0px;
 	top:0px;
-	width:60px;
+	width:115px;
+	box-sizing: border-box;
 }
 
 #v2 .block.whiteboard.index .create .form span.button input[type="file"] {
@@ -2466,7 +2483,9 @@ body {
 	padding:0px;
 	position:absolute;
 	right:0px;
-	width:72px;
+	width:115px;
+	height: 38px;
+	box-sizing: border-box;
 }
 
 #v2 .block.whiteboard.index .create .form button:hover {
@@ -2696,6 +2715,7 @@ body {
 	top: 0;
 	z-index: 10;
 }
+
 #v2 .add-child-overlay {
 	background:#ffffff;
 	border: 1px solid #82d7f4;
@@ -2714,6 +2734,7 @@ body {
 	width: 370px;
 	z-index:11;
 }
+
 #v2 .add-child-overlay h3 {
 	color:#30c5f2;
 	font-family:'CMWNJadeRegular';
@@ -2735,4 +2756,74 @@ body {
 .view-resource-center .views-row{
   float: left;
   clear: none;
+}
+
+#v2 div.sidebar-toggle{
+  background: url(../img/sidebar-toggle-hide.png) no-repeat center center;
+  padding: 6px 6px 6px 6px;
+  width: 29px;
+  height: 27px;  
+  cursor: pointer;
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  top: 0;
+}
+
+#v2 div.sidebar-toggle.show{
+  background: url(../img/sidebar-toggle-show.png) no-repeat center center,		 url(../img/blue-header-bg.jpg) repeat center;
+  background-size: normal, cover;
+    
+}
+
+div.block.sidebar-profile.hidden .header,
+div.block.sidebar-profile.hidden .content{
+  display: none;
+}
+
+
+.whiteboard.ui-tabs-nav li{
+  border: 0 !important;
+}
+
+.whiteboard.ui-tabs-nav li a{
+  display: inline-block;
+  height: 40px;
+  position: relative;
+  width: 100%;    
+}
+
+.whiteboard.ui-tabs-nav li a.tab-newsfeed{
+
+}
+
+.whiteboard.ui-tabs-nav li:not(.ui-tabs-selected) a{
+  background: #9a41e4 !important;
+  box-shadow: 12px -10px 10px -3px rgba(0,0,0,.3) inset !important;
+}
+
+.whiteboard.ui-tabs-nav li a h2{
+  padding: 12px !important;
+  letter-spacing: .02em;
+}
+
+
+
+.whiteboard.ui-tabs-nav ul.header li:first-child{
+  width: 34%;
+}
+
+.whiteboard.ui-tabs-nav ul.header li:last-child{
+  width: 66%;
+}
+
+#v2 .call-monitor{
+  background: transparent url(../img/chat.png) no-repeat center center;
+  position: absolute;
+  z-index: 1;
+  right:12px;
+  top: 12px;
+  width: 25px;
+  height: 21px;
+  cursor: pointer;
 }
