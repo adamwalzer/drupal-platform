@@ -78,11 +78,7 @@
   <div class="content">
     
     <?php 
-      if($build_mode == 'teaser'){
-        print 'teaser mode';
-      }else{
-        
-      }
+     print 'teaser: ' . $teaser;
       print $content; 
       
       ?>
