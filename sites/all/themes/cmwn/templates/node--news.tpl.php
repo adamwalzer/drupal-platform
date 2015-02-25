@@ -76,12 +76,7 @@
   <?php endif; ?>
 
   <div class="content">
-    
-    <?php 
-     print 'teaser: ' . $teaser;
-      print $content; 
-      
-      ?>
+    <?php print $content; ?>
   </div>
 
   <?php print $links; ?>
