@@ -2827,3 +2827,11 @@ div.block.sidebar-profile.hidden .content{
   height: 21px;
   cursor: pointer;
 }
+
+
+#drupalchat .subpanel_title div.status-1 {
+    background: url("../img/greendot.png") no-repeat scroll 100% center transparent !important;
+    background-size: cover !important;
+    width: 14px;
+    height: 14px;
+}

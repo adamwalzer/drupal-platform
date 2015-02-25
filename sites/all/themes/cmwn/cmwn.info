@@ -20,6 +20,7 @@ scripts[] = assets/js/skin.js
 scripts[] = assets/js/modal.js
 scripts[] = assets/js/jquery.form.js
 scripts[] = assets/js/jscroll/jquery.jscroll.min.js
+scripts[] = assets/js/jquery.hoverIntent.minified.js
 
 scripts[] = assets/js/jquery.excanvas.js
 scripts[] = assets/js/jquery.isotope.min.js

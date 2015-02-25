@@ -33,6 +33,8 @@
 
   if (module_exists('jquery_ui')) {
     jquery_ui_add(array('ui.tabs'));
+    jquery_ui_add(array('ui.dialog'));
+    
     drupal_add_css(drupal_get_path('module', 'jquery_ui') . '/jquery.ui/themes/default/ui.all.css');
   }	
 

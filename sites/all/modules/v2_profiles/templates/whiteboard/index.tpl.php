@@ -178,3 +178,14 @@
 	</div>
 
 <?php } ?>
+
+
+
+
+<?php //dialog boxes ?>
+<div id="dialog-message-call-monitor" title="Call a monitor">
+    <p>
+      <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+      This button calls a monitor
+    </p>
+</div>

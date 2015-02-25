@@ -125,10 +125,6 @@ $(function(){
   //UI Refresh Call Monitor
   $('span.call-monitor').click(function(){ 
 
-
-  
-    
-  
   if($("#mainpanel li a.subpanel_toggle").next(".subpanel").is(':visible')){ //If subpanel is already active...
       $("#mainpanel li a.subpanel_toggle").next(".subpanel").hide(); //Hide active subpanel
       $("#drupalchat li a").removeClass('active'); //Remove active class on the subpanel trigger
@@ -146,14 +142,39 @@ $(function(){
       }
   }
   
+
   
-  
-  
-  
-    
-    
+
     //$(".subpanel").hide();$("#drupalchat li a").removeClass('active');
   });
+  
+  
+  //tooltips
+  $('span.call-monitor').hoverIntent(
+    over:function(){
+    
+      $( "#dialog-message-call-monitor" ).dialog({
+      modal: true,
+      buttons: {
+      Ok: function() {
+            $( this ).dialog( "GOT IT!" );
+          }
+      }
+     
+     
+    });      
+    
+    
+    },
+    
+    out:function(){
+      
+    },
+    interval: 100
+  );  
+  
+  
+  
 	/* 1.4 feed */
 
     
