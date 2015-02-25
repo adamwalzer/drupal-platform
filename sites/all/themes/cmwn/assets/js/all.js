@@ -123,7 +123,37 @@ $(function(){
   //UI Refresh Whiteboard/Newsfeed tabs
   $('#whiteboard-profile-tabs').tabs({collapsible: true});
   //UI Refresh Call Monitor
-  $('span.call-monitor').click(function(){console.log('call monitor');$("#mainpanel li a.subpanel_toggle, .chatbox a.chatboxhead").live('click');});
+  $('span.call-monitor').click(function(){ 
+
+
+  
+    
+  
+  if($("#mainpanel li a.subpanel_toggle").next(".subpanel").is(':visible')){ //If subpanel is already active...
+      $("#mainpanel li a.subpanel_toggle").next(".subpanel").hide(); //Hide active subpanel
+      $("#drupalchat li a").removeClass('active'); //Remove active class on the subpanel trigger
+  }
+  else { //if subpanel is not active...
+      $(".subpanel").hide(); //Hide all subpanels
+      $("#mainpanel li a.subpanel_toggle").next(".subpanel").toggle(); //Toggle the subpanel to make active
+      $("#drupalchat li a").removeClass('active'); //Remove active class on all subpanel trigger
+      $("#mainpanel li a.subpanel_toggle").toggleClass('active'); //Toggle the active class on the subpanel trigger
+      // Chat box functions
+      var isTextarea = $("#mainpanel li a.subpanel_toggle").next(".subpanel").children(".chatboxinput").children(".chatboxtextarea");
+      if (isTextarea.length > 0) { 
+      	isTextarea[0].focus();
+      	$("#mainpanel li a.subpanel_toggle").next(".subpanel").children(".chatboxcontent").scrollTop($("#mainpanel li a.subpanel_toggle").next(".subpanel").children(".chatboxcontent")[0].scrollHeight);
+      }
+  }
+  
+  
+  
+  
+  
+    
+    
+    //$(".subpanel").hide();$("#drupalchat li a").removeClass('active');
+  });
 	/* 1.4 feed */
 
     
