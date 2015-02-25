@@ -157,9 +157,10 @@
   	</div>
   </div>
   <div id="newsfeed-tab">
+    <?php print views_embed_view('newsfeed', 'block_1'); ?>
     <div class="items">
       <div class="item">
-        News Feed Tab here!
+
       </div>
     </div>
 
