@@ -150,29 +150,8 @@ $(function(){
   
   
   //tooltips
-  $('span.call-monitor').hoverIntent(
-    over:function(){
-    
-      $( "#dialog-message-call-monitor" ).dialog({
-      modal: true,
-      buttons: {
-      Ok: function() {
-            $( this ).dialog( "GOT IT!" );
-          }
-      }
-     
-     
-    });      
-    
-    
-    },
-    
-    out:function(){
-      
-    },
-    interval: 100
-  );  
-  
+  //$('span.call-monitor').qtip();
+  //$('[title]').qtip();  
   
   
 	/* 1.4 feed */

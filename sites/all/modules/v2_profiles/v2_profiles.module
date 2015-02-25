@@ -34,9 +34,13 @@
   if (module_exists('jquery_ui')) {
     jquery_ui_add(array('ui.tabs'));
     jquery_ui_add(array('ui.dialog'));
+    jquery_ui_add(array('ui.tooltip'));    
     
     drupal_add_css(drupal_get_path('module', 'jquery_ui') . '/jquery.ui/themes/default/ui.all.css');
   }	
+  //qtip
+  drupal_add_js(drupal_get_path('theme', 'cmwn') . '/assets/js/jquery.qtip.custom/jquery.qtip.min.js'); // Within a theme  
+  drupal_add_css(drupal_get_path('theme', 'cmwn') . '/assets/js/jquery.qtip.custom/jquery.qtip.min.css'); // Within a theme  
 
 	//
 

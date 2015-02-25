@@ -8,7 +8,7 @@
           <a href="#whiteboard-tab"><h2>Whiteboard</h2></a>
     		</li>
     		<li class="section">
-          <a href="#newsfeed-tab" class="tab-newsfeed"><h2>News Feed</h2></a><span class="call-monitor"></span>
+          <a href="#newsfeed-tab" class="tab-newsfeed"><h2>News Feed</h2></a><span class="call-monitor" title="Call a Monitor"></span>
     		</li>
   		</ul>
 

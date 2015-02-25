@@ -12,6 +12,7 @@ stylesheets[all][] = assets/css/main-nav.css
 stylesheets[all][] = assets/css/modal.css
 
 stylesheets[all][] = assets/css/jquery.tipped.css
+//stylesheets[all][] = assets/js/jquery.qtip.custom/jquery.qtip.min.css
 stylesheets[all][] = assets/css/all.css
 
 stylesheets[all][] = assets/css/responsive.css
@@ -20,7 +21,7 @@ scripts[] = assets/js/skin.js
 scripts[] = assets/js/modal.js
 scripts[] = assets/js/jquery.form.js
 scripts[] = assets/js/jscroll/jquery.jscroll.min.js
-scripts[] = assets/js/jquery.hoverIntent.minified.js
+//scripts[] = assets/js/jquery.qtip.custom/jquery.qtip.min.js
 
 scripts[] = assets/js/jquery.excanvas.js
 scripts[] = assets/js/jquery.isotope.min.js
