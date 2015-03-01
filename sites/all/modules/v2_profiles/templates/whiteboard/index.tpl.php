@@ -159,7 +159,7 @@
   <div id="newsfeed-tab">
 
     <div class="items">
-          <?php print views_embed_view('newsfeed', 'block_1') . 'test';?>
+          <?php print views_embed_view('newsfeed', 'block_1');?>
     </div>
 
   </div>

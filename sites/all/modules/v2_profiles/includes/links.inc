@@ -71,7 +71,7 @@
 			//$items[] = (object)array('title' => 'My News', 'href' => '/user/'.$user->uid.'/news');
 
 			if (in_array('can_upload_media', $user->roles)) {
-				$items[] = (object)array('title' => 'My Videos', 'href' => '/user/'.$user->uid.'/videos');
+				$items[] = (object)array('title' => 'My Media', 'href' => '/user/'.$user->uid.'/videos');
 			}
 
 			if (in_array('can_make_friends', $user->roles)) {

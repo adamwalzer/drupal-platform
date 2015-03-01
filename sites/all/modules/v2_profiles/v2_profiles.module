@@ -187,6 +187,13 @@
 			$form['#submit'][] = 'v2_profiles_flips_submit';
 
 		}
+		
+    if($form_id == 'comment_form'){
+      $form['submit']['#value'] = t('Post');
+
+      $form['comment_filter']['comment']['#attributes']['placeholder'] = 'Comment...';
+      //print_r($form);
+    }
 
 	}
 

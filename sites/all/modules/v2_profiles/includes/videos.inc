@@ -2,7 +2,7 @@
 
 	/* 1.4 */
 
-	$v2_profiles_menu_items["user/%/videos"] = array(	
+	$v2_profiles_menu_items["user/%/videos"] = array(
 		"access arguments" => array(1),
 		"access callback" => 'v2_profiles_access',
 		"description" => "",
@@ -12,7 +12,7 @@
 		"type" => MENU_CALLBACK,
 	);
 
-	$v2_profiles_menu_items["user/%/videos/%"] = array(	
+	$v2_profiles_menu_items["user/%/videos/%"] = array(
 		"access arguments" => array(1),
 		"access callback" => 'v2_profiles_access',
 		"description" => "",
@@ -59,7 +59,9 @@
 		$school = v2_profiles_school_query($uid);
 		$items->group5 = v2_profiles_videos_query_schools($school->nid);
 
-		$items->group1 = array_merge($items->group2, $items->group3, $items->group4, $items->group5);
+    $items->group6 = v2_profiles_photos_query_user($uid);
+    $items->group7 = v2_profiles_media_query_projects($uid);
+		$items->group1 = array_merge($items->group2, $items->group3, $items->group4, $items->group5, $items->group6, $items->group7);
 
 		$data->items = $items;
 		$data->user = $user;
@@ -112,10 +114,26 @@
 
 	}
 
+function v2_profiles_media_query_projects($uid) {//flip
+
+		$items = array();
+
+		$query = "select distinct ws.nid, ws.sid, wsd.cid, n.title, n.created, ws.uid, 'flip_milestone' as type from {webform_submissions} ws join {webform_submitted_data} wsd on wsd.sid = ws.sid and wsd.nid = ws.nid join {webform_component} wc on wc.cid = wsd.cid and wc.nid = wsd.nid, {node} n  where n.nid=ws.nid and ws.uid = %d and ws.nid in (select field_actions_nid from {content_field_actions}) and wc.type = 'file'";
+
+		$results = db_query($query, array($uid));
+
+		while ($result = db_fetch_object($results)) {
+			$items[] = $result;
+		}
+		//print_r($items);exit;
+		return $items;
+	}
+
 	function v2_profiles_videos_query_friends($uids) {
 
 		$items = array();
 
+		//friends videos
 		$query = "
 			SELECT
 				`n`.`nid` AS `nid`
@@ -128,12 +146,42 @@
 				`n`.`status` = 1;
 		";
 
+
 		$results = db_query($query);
 
 		while ($result = db_fetch_object($results)) {
 			$items[] = node_load($result->nid);
 		}
 
+		//friends photos from their whiteboard
+
+
+	$query = "
+			SELECT
+				`n`.`nid` AS `nid`
+			FROM
+				`node` AS `n` join {content_field_image} cfi on cfi.nid =n.nid
+			WHERE
+				`n`.`uid` IN (".implode($uids,',').") AND n.type = 'whiteboard' and cfi.field_image_fid is not null and
+				`n`.`status` = 1;
+		";
+
+		$results = db_query($query);
+
+		while ($result = db_fetch_object($results)) {
+			$items[] = node_load($result->nid);
+		}
+
+
+		//flip projects
+
+		$query = "select distinct ws.nid, ws.sid, wsd.cid, n.title, n.created, ws.uid, 'flip_milestone' as type from {webform_submissions} ws join {webform_submitted_data} wsd on wsd.sid = ws.sid and wsd.nid = ws.nid join {webform_component} wc on wc.cid = wsd.cid and wc.nid = wsd.nid, {node} n  where n.nid=ws.nid and ws.uid IN   (".implode($uids,',').") and ws.nid in (select field_actions_nid from {content_field_actions}) and wc.type = 'file'";
+
+		$results = db_query($query);
+
+		while ($result = db_fetch_object($results)) {
+			$items[] = $result;
+		}
 		return $items;
 
 	}
@@ -206,6 +254,30 @@
 			WHERE
 				`n`.`uid` = ".$uid." AND
 				`cfs`.`field_school_nid` IS NULL AND
+				`n`.`status` = 1;
+		";
+
+		$results = db_query($query);
+
+		while ($result = db_fetch_object($results)) {
+			$items[] = node_load($result->nid);
+		}
+
+		return $items;
+
+	}
+
+	function v2_profiles_photos_query_user($uid) {
+
+		$items = array();
+
+		$query = "
+			SELECT
+				`n`.`nid` AS `nid`
+			FROM
+				`node` AS `n` join {content_field_image} cfi on cfi.nid =n.nid
+			WHERE
+				`n`.`uid` = ".$uid." AND n.type = 'whiteboard' and cfi.field_image_fid is not null and
 				`n`.`status` = 1;
 		";
 

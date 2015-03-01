@@ -76,23 +76,23 @@ $(function(){
     if(!sidebar_toggling){
       switch(toggle_btn.hasClass('hide')){
         case true:
-          sidebar_toggling = true;  
+          sidebar_toggling = true;
           $('.sidebar-profile').animate({
             width: 0,
             right: 0
           }, 0, 'linear',function(){
-            $(this).addClass('hidden').removeClass('visible');//sidebar-profile  
-            toggle_btn.addClass('show').removeClass('hide');                      
+            $(this).addClass('hidden').removeClass('visible');//sidebar-profile
+            toggle_btn.addClass('show').removeClass('hide');
             sidebar_toggling = false;
           });
-          
-          
+
+
           $(this).animate({
             right: -40
           }, 0, 'linear',function(){
-            
+
           });
-        
+
           break;
         default://show
           sidebar_toggling = true;
@@ -101,29 +101,29 @@ $(function(){
             right: -240
           }, 0, 'linear',function(){
             $(this).addClass('visible').removeClass('hidden');//sidebar-profile
-            toggle_btn.addClass('hide').removeClass('show');            
+            toggle_btn.addClass('hide').removeClass('show');
             sidebar_toggling = false;
           });
-          
-          
+
+
           $(this).animate({
             right: 0
           }, 0, 'linear',function(){
-            
+
           });
-        
+
           break;
       }
 
     }
 
   });
-  
-  
+
+
   //UI Refresh Whiteboard/Newsfeed tabs
   $('#whiteboard-profile-tabs').tabs({collapsible: true});
   //UI Refresh Call Monitor
-  $('span.call-monitor').click(function(){ 
+  $('span.call-monitor').click(function(){
 
   if($("#mainpanel li a.subpanel_toggle").next(".subpanel").is(':visible')){ //If subpanel is already active...
       $("#mainpanel li a.subpanel_toggle").next(".subpanel").hide(); //Hide active subpanel
@@ -136,35 +136,32 @@ $(function(){
       $("#mainpanel li a.subpanel_toggle").toggleClass('active'); //Toggle the active class on the subpanel trigger
       // Chat box functions
       var isTextarea = $("#mainpanel li a.subpanel_toggle").next(".subpanel").children(".chatboxinput").children(".chatboxtextarea");
-      if (isTextarea.length > 0) { 
+      if (isTextarea.length > 0) {
       	isTextarea[0].focus();
       	$("#mainpanel li a.subpanel_toggle").next(".subpanel").children(".chatboxcontent").scrollTop($("#mainpanel li a.subpanel_toggle").next(".subpanel").children(".chatboxcontent")[0].scrollHeight);
       }
   }
-  
-
-  
 
     //$(".subpanel").hide();$("#drupalchat li a").removeClass('active');
   });
-  
-  
+
+
   //tooltips
   //$('span.call-monitor').qtip();
-  //$('[title]').qtip();  
-  
-  
+  //$('[title]').qtip();
+
+
 	/* 1.4 feed */
 
-    
+
     //friend feed
     $('.section.friend-feed .scroll').load('/cmwn_feed/friend/' + $('.section.friend-feed .scroll').attr('u'), function(){
       //set height
       var ffh = 0;//friend feed height
       $('.section.friend-feed .scroll .item:lt(12)').each(function() {//set to height of first 12 items
          ffh += $(this).height() + 12;//top and bottom padding factored in.
-      });	
-      $('.section.friend-feed .items .scroll').height(ffh);//make room for pager 
+      });
+      $('.section.friend-feed .items .scroll').height(ffh);//make room for pager
 
       //institute scrolling thingy
       //$('#v2 .block.feed.index .content .section .items .scroll').jScrollPane({'verticalGutter':6});
@@ -178,15 +175,15 @@ $(function(){
         callback:function(){},
       });
     });
-    
+
     // flip feed
     $('.section.flip-feed .scroll').load('/cmwn_feed/flip', function(){
       //set height
       var ffh = 0;//friend feed height
       $('.section.flip-feed .scroll .item:lt(12)').each(function() {//set to height of first 12 items
          ffh += $(this).height() + 12;//top and bottom padding factored in.
-      });	
-      $('.section.flip-feed .items .scroll').height(ffh);//make room for pager 
+      });
+      $('.section.flip-feed .items .scroll').height(ffh);//make room for pager
 
       //institute scrolling thingy
       //$('#v2 .block.feed.index .content .section .items .scroll').jScrollPane({'verticalGutter':6});
@@ -199,7 +196,7 @@ $(function(){
         padding: 50,
         callback:function(){},
       });
-    });    
+    });
 
 	/* 1.4 flips */
 
@@ -237,8 +234,8 @@ $(function(){
 
 	if (modal_tipped.length > 0) {
 		modal_tipped.each(function(){
-			var source = $(this);	
-			var content = $(this).find('.block.modal.flips.description');	
+			var source = $(this);
+			var content = $(this).find('.block.modal.flips.description');
 			Tipped.create(
 				source,
 				content.attr('id'),{
@@ -477,7 +474,7 @@ $(function(){
 
 	if (modal_tipped.length > 0) {
 		modal_tipped.each(function(){
-			var source = $(this);		
+			var source = $(this);
 			Tipped.create(
 				source,
 				'<div class="block tipped">'+source.attr('title')+'</div>',{

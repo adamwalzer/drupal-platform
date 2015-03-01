@@ -242,7 +242,7 @@ function taxonomy_image_get_object($tid, $recursive = NULL) {
 
     // Not cached, so go build it.
     if ($image[$tid] = db_fetch_object(db_query('SELECT i.path, d.name, d.description FROM {term_image} i INNER JOIN {term_data} d USING(tid) WHERE i.tid=%d', $tid))) {
-      $image[$tid]->url = file_create_url($mypath . $image[$tid]->path);
+      $image[$tid]->url = file_create_url($fullpath . $image[$tid]->path);
     }
     elseif ($recursive) {
       // Walk up the taxonomy hierarchy and look for an image.

@@ -159,3 +159,8 @@ function cmwn_form_element($element, $value) {
 
   return $output;
 }
+
+
+function cmwn_process_html(&$variables) {
+  $variables['styles'] = preg_replace('/\.css\?.*"/','.css"', $variables['styles']);
+}
