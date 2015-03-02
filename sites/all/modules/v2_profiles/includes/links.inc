@@ -2,7 +2,7 @@
 
 	/* 1.4 */
 
-	$v2_profiles_menu_items['user/%/links'] = array(	
+	$v2_profiles_menu_items['user/%/links'] = array(
 		'access arguments' => array(1),
 		'access callback' => 'v2_profiles_access',
 		'description' => '',
@@ -52,7 +52,7 @@
 
 	}
 
-	function v2_profiles_links_query_all($uid) {
+	/*function v2_profiles_links_query_all($uid) {
 
 		$items = array();
 
@@ -86,36 +86,33 @@
 				$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Posting', 'href' => '/user/'.$user->uid.'/notices/posting');
 				$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Award', 'href' => '/user/'.$user->uid.'/notices/award');
 				$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Action', 'href' => '/user/'.$user->uid.'/notices/action');
-				$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Account', 'href' => '/user/'.$user->uid.'/notices/account');				
+				$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Account', 'href' => '/user/'.$user->uid.'/notices/account');
 			}
 
 			$items[] = (object)array('title' => 'My Interest Groups', 'href' => '#');
       $items[] = (object)array('title' => 'Arcade', 'href' => '/node/13120');
 
 		} else if ($user->user_type == 'parent') {
+			$items[] = (object)array('title' => 'My Profile &amp; Whiteboard', 'href' => '/user');
+			//$items[] = (object)array('title' => 'My News', 'href' => '/user');
+			$items[] = (object)array('title' => 'My Child\'s Profiles', 'href' => '/user/'.$user->uid.'/children');
+			$items[] = (object)array('title' => 'My Child\'s Permissions', 'href' => '/user/'.$user->uid.'/children/permissions');
 
-			$items[] = (object)array('title' => 'My News', 'href' => '/user');
-			
+
 			$items['notices'] = (object)array('title' => 'My Notices', 'href' => '#');
-			$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Account', 'href' => '/user/'.$user->uid.'/notices/account');							
-			
+			$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Account', 'href' => '/user/'.$user->uid.'/notices/account');
+
 			//list children, show custom link to children's messages
 			$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;My Child', 'href' => '#');
-			
+
 			$children = db_query('select u.uid, u.name from {user_relationships} ur join {users} u on u.uid = ur.requestee_id where requester_id = %d and approved = 1 and rtid = 2', array($user->uid));
-			
+
 			while($child = db_fetch_object($children)){
-  			$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . $child->name, 'href' => '/user/'.$user->uid.'/notices/child/posting/'.$child->uid);   			
+  			$items[] = (object)array('title' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . $child->name, 'href' => '/user/'.$user->uid.'/notices/child/posting/'.$child->uid);
 			}
-			
-			
-			
-			$items[] = (object)array('title' => 'My Children\'s Profiles', 'href' => '/user/'.$user->uid.'/children');
-			$items[] = (object)array('title' => 'My Children\'s Permissions', 'href' => '/user/'.$user->uid.'/children/permissions');
+
+
 			$items[] = (object)array('title' => 'Add a Child', 'href' => '/user/'.$user->uid.'/children/add');
-
-
-
 
 		} else {
 
@@ -129,6 +126,99 @@
 			else $item->active = false;
 
 		}
+
+		return $items;
+
+	}*/
+
+
+	function v2_profiles_links_query_all($uid) {
+
+		$items = array();
+
+		$user = user_load($uid);
+
+		if ($user->user_type == 'child') {
+
+			$items[] = l('My Profile & Whiteboard', 'user');
+
+			$school = v2_profiles_school_query($uid);
+
+			if ($school) {
+				$items[] = l('My School',  'user/'.$user->uid.'/school');
+			}
+
+			//$items[] = (object)array('title' => 'My News', 'href' => '/user/'.$user->uid.'/news');
+
+			if (in_array('can_upload_media', $user->roles)) {
+				$items[] = l('My Media', 'user/'.$user->uid.'/videos');
+			}
+
+			if (in_array('can_make_friends', $user->roles)) {
+				$count = v2_profiles_friends_query_requests($user->uid);
+				$count = sizeof($count);
+				$items[] = l('My Friends &amp; Requests'.(($count>0)?' <span>'.$count.'</span>':''),  'user/'.$user->uid.'/friends/browse');
+			}
+
+			if (in_array('can_receive_notices', $user->roles) || in_array('can_receive_notices_via_parent', $user->roles)) {
+				//$items['notices'] = (object)array('title' => 'My Notices', 'href' => '/user/'.$user->uid.'/notices');
+				$items['notices'] = array(
+						'data' => 'My Notices',
+						'children' => array(
+								l('Posting', 'user/'.$user->uid.'/notices/posting'),
+								l('Award', 'user/'.$user->uid.'/notices/award'),
+								l('Action', 'user/'.$user->uid.'/notices/action'),
+								l('Account', 'user/'.$user->uid.'/notices/account'),
+							),
+					);
+			}
+
+			$items[] = 'My Interest Groups';
+      $items[] =l('Arcade', 'node/13120');
+
+		} else if ($user->user_type == 'parent') {
+			$items[] = l('My Profile & Whiteboard', 'user');
+			$items[] = l('My Child\'s Profiles', 'user/'.$user->uid.'/children');
+			$items[] = l('My Child\'s Permissions', 'user/'.$user->uid.'/children/permissions');
+
+
+			$children = db_query('select u.uid, u.name from {user_relationships} ur join {users} u on u.uid = ur.requestee_id where requester_id = %d and approved = 1 and rtid = 2', array($user->uid));
+			$children_links = array();
+			while($child = db_fetch_object($children)){
+				$children_links[] = l($child->name, 'user/'.$user->uid.'/notices/child/posting/'.$child->uid);
+			}
+
+
+			$items['notices'] =array(
+					'data' => '<a>My Notices</a>',
+					'children' => array(
+							l('Account', 'user/'.$user->uid.'/notices/account'),
+							array(
+								'data' => '<a>My Child</a>',
+								'children'=>$children_links,
+							),
+
+						),
+			);
+
+
+			$items[] = array(
+				'data'=>l('Add a Child', 'user/'.$user->uid.'/children/add'),
+				'class'=>'add-a-child'
+			);
+
+		} else {
+
+			$items[] = l('My News', 'user');
+
+		}
+
+		/*foreach ($items as $item) {
+
+			if ($_SERVER['REQUEST_URI'] === $item->href) $item->active = true;
+			else $item->active = false;
+
+		}*/
 
 		return $items;
 

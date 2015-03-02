@@ -1,8 +1,8 @@
 <?php
-	
+
 	/* 1.4 */
 
-	$v2_profiles_menu_items["user/%/friends"] = array(	
+	$v2_profiles_menu_items["user/%/friends"] = array(
 		"access arguments" => array(1),
 		"access callback" => 'v2_profiles_access',
 		"description" => "",
@@ -62,7 +62,7 @@
 		"type" => MENU_CALLBACK,
 	);
 
-	$v2_profiles_menu_items["user/%/friends/browse"] = array(	
+	$v2_profiles_menu_items["user/%/friends/browse"] = array(
 		"access arguments" => array(1),
 		"access callback" => 'v2_profiles_access',
 		"description" => "",
@@ -72,7 +72,7 @@
 		"type" => MENU_CALLBACK,
 	);
 
-	$v2_profiles_menu_items["user/%/friends/search"] = array(	
+	$v2_profiles_menu_items["user/%/friends/search"] = array(
 		"access arguments" => array(1),
 		"access callback" => 'v2_profiles_access',
 		"description" => "",
@@ -138,10 +138,10 @@
 		if ($relationship) {
   		v2_profiles_feed_insert($u1->uid,88,95,'Feed ' . time(),'','<a href="/user/' . $u1->uid . '">' . $u1->name . '</a> has added <a href="/user/' . $u2->uid . '">' . $u2->name . '</a> as a friend.');
   		v2_profiles_feed_insert($u2->uid,88,95,'Feed ' . time(),'','<a href="/user/' . $u2->uid . '">' . $u2->name . '</a> has added <a href="/user/' . $u1->uid . '">' . $u1->name . '</a> as a friend.');
-  		
+
 			user_relationships_save_relationship($relationship,'approve');
 		}
-    
+
 		drupal_set_message('You have confirmed this user as your friend.');
 		drupal_goto('user/'.$u1->uid.'/friends/browse');
 
@@ -158,7 +158,7 @@
 		$friends = v2_profiles_friends_query($user->uid);
 
 		if ($limit > 0) {
-			$friends = array_slice($friends, 0, $limit);
+			//$friends = array_slice($friends, 0, $limit);
 		}
 
 		$data->items->requests = $requests;
@@ -170,7 +170,7 @@
 
 	}
 
-	function v2_profiles_friends_ignore($uid1,$uid2) {
+	function v2_profiles_friends_ignore($uid1, $uid2) {
 
 		$u1 = user_load($uid1);
 		$u2 = user_load($uid2);
@@ -326,7 +326,7 @@
 
 	}
 
-	function v2_profiles_friends_read($uid1,$uid2) {
+	function v2_profiles_friends_read($uid1, $uid2) {
 
 		$data = new stdClass();
 

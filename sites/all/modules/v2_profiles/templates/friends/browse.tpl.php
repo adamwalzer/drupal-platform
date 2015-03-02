@@ -21,9 +21,14 @@
 			<script>
 				$(function(){
 					$('.trigger1-source').bind('click',function(){
-						$('.block.profile').eq(1).hide();
-						$('.block.whiteboard').hide();
-						$('.trigger1-target').show();
+						$('.block.profile').eq(1).toggle();
+						$('.block.whiteboard').toggle();
+						$('.trigger1-target').toggle();
+						if($('.block.whiteboard:visible').length > 0){
+							$('.trigger1-source').html('View All');
+						}else{
+							$('.trigger1-source').html('Show Less');
+						}
 						return false;
 					});
 				});

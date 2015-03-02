@@ -1319,11 +1319,13 @@ body {
 				list-style:none;
 			}
 
-				#v2 .block.links.index .content .section ul li {
+				#v2 .block.links.index .content .section ul li > a {
 					border-top:#54c2f2 solid 1px;
 					position:relative;
 				}
+				#v2 .block.links.index .content .section ul ul li{
 
+				}
 				#v2 .block.links.index .content .section ul li:first-child {
 					border:none;
 				}
@@ -1641,6 +1643,15 @@ body {
 		#v2 .column.content .block.profile .interests .content .section .items .item.active {
 			background-position:0px -42px;
 		}
+
+#v2 .column.content .block.profile.parent-child .friends {
+	width:100%;
+}
+
+div.parent-child-whiteboard .create,
+div.parent-child-whiteboard .news-comments{
+	display: none;
+}
 
 #v2 .column.content .block.profile .friends {
 	clear:none;
@@ -2834,6 +2845,11 @@ body {
   clear: none;
 }
 
+
+.resource_center img{
+	width: 100% !important;
+	height: auto !important;
+}
 #v2 div.sidebar-toggle{
   background: url(../img/sidebar-toggle-hide.png) no-repeat center center;
   padding: 6px 6px 6px 6px;

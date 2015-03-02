@@ -12,7 +12,7 @@
 		'type' => MENU_CALLBACK,
 	);
 
-	$v2_profiles_menu_items['user/%/children/%'] = array(	
+	$v2_profiles_menu_items['user/%/children/%'] = array(
 		'access arguments' => array(1),
 		'access callback' => 'v2_profiles_access',
 		'description' => '',
@@ -22,7 +22,7 @@
 		'type' => MENU_CALLBACK,
 	);
 
-	$v2_profiles_menu_items['user/%/children/%/delete'] = array(	
+	$v2_profiles_menu_items['user/%/children/%/delete'] = array(
 		'access arguments' => array(1),
 		'access callback' => 'v2_profiles_access',
 		'description' => '',
@@ -42,7 +42,7 @@
 		'type' => MENU_CALLBACK,
 	);
 
-	$v2_profiles_menu_items['user/%/children/permissions'] = array(	
+	$v2_profiles_menu_items['user/%/children/permissions'] = array(
 		'access arguments' => array(1),
 		'access callback' => 'v2_profiles_access',
 		'description' => '',

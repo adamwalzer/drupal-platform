@@ -17,7 +17,7 @@ function v2_profiles_resource_query_all($uid) {
 		SELECT
 			n.nid
 		FROM
-			`node` AS `n` 
+			`node` AS `n`
 		WHERE
 			`n`.`type` = 'resource' AND
 			`n`.`status` = 1
@@ -37,7 +37,7 @@ function v2_profiles_resource_query_all($uid) {
   			'id'=>$result->nid,
   			'title' => $node->title,
   		);
-  		$items[] = (object)$item;  		
+  		$items[] = (object)$item;
 		}
 	}
 	return $items;
@@ -46,10 +46,12 @@ function v2_profiles_resource_query_all($uid) {
 function v2_profiles_resource_center_index() {
 	$data = new stdClass();
 
+
 	$user = user_load($uid);
 
   $view = views_get_view('resource_center');
-  
+
   $data = $view->execute_display('default');
-	return theme('v2_profiles_resource_center_index', $data);
+	//return theme('v2_profiles_resource_center_index', $data);
+  return theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon.jpg'));
 }

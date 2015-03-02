@@ -145,7 +145,8 @@ $(function(){
     //$(".subpanel").hide();$("#drupalchat li a").removeClass('active');
   });
 
-
+  //ui refresh - profile sidebar links accordian
+  //$('ul.profile-links').accordion();
   //tooltips
   //$('span.call-monitor').qtip();
   //$('[title]').qtip();
