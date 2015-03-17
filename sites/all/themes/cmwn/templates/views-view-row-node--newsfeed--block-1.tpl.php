@@ -38,17 +38,24 @@
   <?php
     $rndswitch = rand(0,1);
     
+    $random_users = db_query('select name from {users} order by RAND() limit 3');
+    
+    $users = array();
+    while ($r = db_fetch_array($random_users)){
+      $users[] = $r['name'];
+    }    
+    
     $flag = flag_get_flag('like');
     $flags = $flag->get_count($fnode->nid);
     $flagmsg = t('Be the first to like this post!');    
     switch (true){
       case $flags < 3 && $flags > 0:
-        $flagmsg = 'ArtLax20, GSparkles, SoccerC8_784357 and <em>'.$flags.' others liked this</em>';
+        $flagmsg = implode(', ',$users) . ' and <em>'.$flags.' others liked this</em>';
         break;
       case 0:
         break;
       default: // a few flags less than three
-        $flagmsg = t('ArtLax20, GSparkles, SoccerC8_784357 <em> liked this</em>');
+        $flagmsg = implode(', ',$users) . ' <em> liked this</em>';
         break;
     }
     print flag_create_link('like', $fnode->nid);

@@ -24,10 +24,12 @@
         <img style="float:left;margin:0 0 20px 0;" src="<?php print $theme_path; ?>/assets/img/new-hp/contact-us.png" />
           <p style="margin:0 0 20px 0;float:left;"><a style="font-weight:bold;color:#848077;" href="mailto:info@changemyworldnow.com">Email Us</a><br />600 Third Ave<br />2 Floor, Suite 242<br />New York, NY 10016<br />646.861.0571 </p>
         <img style="float:left;margin-right:16px" src="<?php print $theme_path; ?>/assets/img/new-hp/follow-us.png" />
+       <?php if(false):?>
         <div class="social">
           <a href="http://www.facebook.com/ChangeMyWorldNow" class="facebook" title="Friend us on Facebook">Facebook</a>
           <a href="http://twitter.com/CMyWorldNow" class="twitter" title="Follow us on Twitter">Twitter</a>
         </div>
+        <?php endif;?>
       </div>
       <div class="footer_utilities">
       <?php print $footer_utilities; ?>

@@ -145,13 +145,71 @@ $(function(){
     //$(".subpanel").hide();$("#drupalchat li a").removeClass('active');
   });
 
+
+  $('.block.links.index  > .content > .section > div.item-list li > a.active').parent().addClass('active');
+  $('.block.links.index  > .content > .section > div.item-list > ul > li > div.item-list').toggle();
+  $('.block.links.index  > .content > .section > div.item-list > ul > li > a.toggle').click(function(){
+    $(this).siblings('div.item-list').toggle().toggleClass('visible');
+    $(this).toggleClass('collapse');
+  });
+  $('.block.links.index  > .content > .section > div.item-list > ul > li > div.item-list:hidden').each(function(){
+    if($(this).find('a.active').length > 0){
+      $(this).show();
+    }
+  });
+  
+  
+  
+  //teacher profile page, flip overlay on class students
+  var class_modal_tipped = $('#v2 .column.content .block.teacher-class.browse .content .section .items .item');
+  
+  if (class_modal_tipped.length > 0) {
+  	class_modal_tipped.each(function(){
+  		var source = $(this);
+  		var content = $(this).find('.block.modal.flips.description');
+  		Tipped.create(
+  			source,
+  			content.attr('id'),{
+  				'hook':{
+  	  				'target':'rightmiddle',
+  	  				'tooltip':'leftmiddle'
+  				},
+  				'inline':true,
+  				'skin':'cmwn'
+  			}
+  		);
+  	});
+  } 
+  
+//ui refresh - greater than 3 likes overlay
+//teacher profile page, flip overlay on class students
+  var likes_modal_tipped = $('em.modal-tip');
+  
+  if (likes_modal_tipped.length > 0) {
+  	likes_modal_tipped.each(function(){
+  		var source = $(this);
+  		var content = $(this).find('div.item-list-likes');
+  		Tipped.create(
+  			source,
+  			content.attr('id'),{
+  				'hook':{
+  	  				'target':'rightmiddle',
+  	  				'tooltip':'leftmiddle'
+  				},
+  				'inline':true,
+  				'skin':'cmwn'
+  			}
+  		);
+  	});
+  }   
+   
   //ui refresh - profile sidebar links accordian
   //$('ul.profile-links').accordion();
   //tooltips
   //$('span.call-monitor').qtip();
   //$('[title]').qtip();
 
-
+  
 	/* 1.4 feed */
 
 

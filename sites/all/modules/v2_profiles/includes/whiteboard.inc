@@ -402,7 +402,9 @@
 
 		while ($result = db_fetch_object($results)) {
 			$node = node_load($result->nid);
+      $users = array();			
 			$item = new stdClass();
+			$item->nid = $node->nid;
 			$item->comments = v2_profiles_whiteboard_query_comments($node->nid);
 			$item->content = $node->body;
 			$item->id = $node->nid;
@@ -410,6 +412,31 @@
 			$item->status = $node->status;
 			$item->user = user_load($node->field_user_reference[0]['uid']);
 			$item->video = node_load($node->field_video_reference[0]['nid']);
+			
+			//pull flag content
+      $flag = flag_get_flag('like');
+      $flag_count = $flag->get_count($item->nid);
+      $flagmsg = t('Be the first to like this post!');    
+       
+      $flaggers = db_query('SELECT u.uid, u.name FROM {flag_content} fc join {users} u on u.uid = fc.uid where content_type ="node" and content_id = %d and fid = %d order by timestamp desc', array($item->nid, 12));
+      while($flagger = db_fetch_array($flaggers)){
+        $users[] = l($flagger['name'],'user/' . $uid . '/friends/' . $flagger['uid']);
+      }
+       
+      switch (true){
+        case $flag_count <= 3 && $flag_count > 0:
+          $flagmsg = implode(', ',$users) . ' <em> liked this</em>';
+          break;
+        case 0:
+        case $flag_count == null || $flag_count == false:
+          break;
+        default: //more than three
+          $flagmsg = implode(', ', (array_slice($users, 0, 3))) . ' and <em class="modal-tip" id="modal-tip-'.$node->nid.'">'. theme('item_list',array_slice($users,-2), null,'ul',array('class' => 'morelikes'), 'morelikes-' . $node->nid,'item-list-likes') . ($flag_count-3) . ' others liked this</em>';        
+          break;
+      }
+        
+      $item->flags_output = flag_create_link('like', $item->nid) . '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';
+			
 			$items[] = $item;
 		}
 

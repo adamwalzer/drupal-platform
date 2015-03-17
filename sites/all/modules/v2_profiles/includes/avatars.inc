@@ -211,7 +211,9 @@
 			}
 		}
 
-    if(!$is_child){// if it's not a child, check to see if they have overriden a selected avatar with an uploaded one.
+
+    //if(!$is_child){// if it's not a child, check to see if they have overriden a selected avatar with an uploaded one.
+    
   		$query = "
   			SELECT
   				`f`.`filepath`
@@ -228,8 +230,11 @@
   				1
   		";
   
-  		$value = db_result(db_query($query));      
-    }
+  		$custom_avatar = db_result(db_query($query));      
+  		if(strlen($custom_avatar) > 5){
+    		$value=$custom_avatar;
+  		}
+    //}
 
 		return (!empty($value))? '/'.imagecache_create_path('216x216', $value) : '/sites/all/themes/cmwn/assets/img/default/avatars/216.png';
 

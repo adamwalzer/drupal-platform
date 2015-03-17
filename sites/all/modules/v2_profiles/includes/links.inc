@@ -157,13 +157,13 @@
 			if (in_array('can_make_friends', $user->roles)) {
 				$count = v2_profiles_friends_query_requests($user->uid);
 				$count = sizeof($count);
-				$items[] = l('My Friends &amp; Requests'.(($count>0)?' <span>'.$count.'</span>':''),  'user/'.$user->uid.'/friends/browse');
+				$items[] = l('My Friends & Requests'.(($count>0)?' <span>'.$count.'</span>':''),  'user/'.$user->uid.'/friends/browse', array('html'=>true));
 			}
 
 			if (in_array('can_receive_notices', $user->roles) || in_array('can_receive_notices_via_parent', $user->roles)) {
 				//$items['notices'] = (object)array('title' => 'My Notices', 'href' => '/user/'.$user->uid.'/notices');
 				$items['notices'] = array(
-						'data' => 'My Notices',
+						'data' => '<a class="toggle">My Notices</a>',
 						'children' => array(
 								l('Posting', 'user/'.$user->uid.'/notices/posting'),
 								l('Award', 'user/'.$user->uid.'/notices/award'),
@@ -173,8 +173,8 @@
 					);
 			}
 
-			$items[] = 'My Interest Groups';
-      $items[] =l('Arcade', 'node/13120');
+			//$items[] = '<a>My Interest Groups</a>';
+      $items[] =l('Arcade', 'user/' . $user->uid . '/arcade');
 
 		} else if ($user->user_type == 'parent') {
 			$items[] = l('My Profile & Whiteboard', 'user');
@@ -190,26 +190,34 @@
 
 
 			$items['notices'] =array(
-					'data' => '<a>My Notices</a>',
+					'data' => '<a class="toggle">My Notices</a>',				
 					'children' => array(
 							l('Account', 'user/'.$user->uid.'/notices/account'),
 							array(
 								'data' => '<a>My Child</a>',
 								'children'=>$children_links,
+
 							),
 
 						),
 			);
 
-
+      $items[] = l('Resource Center', 'user/'.$user->uid.'/resources');
+      
 			$items[] = array(
 				'data'=>l('Add a Child', 'user/'.$user->uid.'/children/add'),
 				'class'=>'add-a-child'
 			);
 
 		} else {
-
-			$items[] = l('My News', 'user');
+			$items[] = l('My Profile & Whiteboard', 'user');
+			$items[] = l('My Class', 'user/'.$user->uid.'/class');
+			$items[] = l('My Notices', 'user/'.$user->uid.'/notices/account');
+			$items[] = l('Resource Center', 'user/'.$user->uid.'/resources');
+			$items[] = array(
+				'data'=>l('Add a Child', 'user/'.$user->uid.'/children/add'),
+				'class'=>'add-a-child'
+			);			
 
 		}
 

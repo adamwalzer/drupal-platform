@@ -2700,33 +2700,34 @@ div.parent-child-whiteboard .news-comments{
 }
 
 #v2 .block.whiteboard.index .items .item .actions a {
-	box-shadow:0px 0px 6px rgba(0,0,0,0.12);
-	border:#cccccc solid 1px;
+
 	display:block;
-	height:16px;
+	height:23px;
 	overflow:hidden;
 	text-indent:-999999px;
-	width:16px;
+	width:23px;
 }
 
 #v2 .block.whiteboard.index .items .item .actions a:hover {
-	border-color:#ed591f;
+	border-color: transparent;
 }
 
 #v2 .block.whiteboard.index .items .item .actions a.delete {
-	background:url(../img/button-delete.png) 0px 0px no-repeat;
+	background:url(../img/button-delete-b.png) center -3px no-repeat;
 }
 
 #v2 .block.whiteboard.index .items .item .actions a.delete:hover {
-	background-position:0px -16px;
+	background-position: 1px -27px;
 }
 
 #v2 .block.whiteboard.index .items .item .actions a.report {
-	background:url(../img/button-report.png) 0px 0px no-repeat;
+	background:url(../img/button-report-b.png) 1px 0px no-repeat;
+	display: inline-block;
+	margin-top: 5px;
 }
 
 #v2 .block.whiteboard.index .items .item .actions a.report:hover {
-	background-position:0px -16px;
+	/*background-position:0px -16px;*/
 }
 
 
@@ -2941,14 +2942,25 @@ div.block.sidebar-profile.hidden .content{
 
 
 #v2 a.like,
-#newsfeed-tab .flag-wrapper a{
+#newsfeed-tab .flag-wrapper a,
+#v2 span.flag-like-comment a,
+#v2 .flag-like a{
   padding-left: 20px;
   background: url(../img/thumbs-up.png) no-repeat left center;
   display: inline-block;
   margin-top: 15px;
   margin-bottom: 15px;
-  margin-left: -20px;
 }
+
+
+#v2 a.like.unflag-action,
+#newsfeed-tab .flag-wrapper a.unflag-action,
+span.flag-like-comment a.unflag-action,
+.flag-like a.unflag-action{
+  background: url(../img/thumbs-up-unlike.png) no-repeat left center !important;
+  color: #858585 !important;
+}
+
 
 #v2 hr{
   color: gray;
@@ -3004,3 +3016,110 @@ div.block.sidebar-profile.hidden .content{
 	position: absolute;
 	z-index: 1
 }
+
+
+#v2 .block.links.index  > .content > .section > div.item-list > ul > li div.item-list > ul > li > a{
+  padding-left: 25px;
+}
+#v2 .block.links.index  > .content > .section > div.item-list > ul > li div.item-list > ul > li > div.item-list > ul > li > a{
+  padding-left: 50px;
+}
+#v2 .block.links.index  > .content > .section > div.item-list > ul > li div.item-list li{
+  list-style: none;
+  list-style-image: none;
+}
+
+#v2 a.toggle{
+  cursor: pointer;
+  background: url(../img/profile-menu-expand.png) no-repeat center right;
+}
+
+#v2 a.toggle.collapse{
+  cursor: pointer;
+  background: url(../img/profile-menu-collapse.png) no-repeat center right;
+}
+
+span.welcome{
+  color: #beb9b9;
+  font-size: 14px;
+}
+
+img.student-flip-image{
+  float: left;
+}
+
+div.student-flip
+
+
+a.student-flip-img-left-link,
+img.student-flip-img-left-link{
+  float: left;
+  clear: none;
+  width: auto;
+  margin: 5px;
+}
+
+.student-flips.description.block.modal.flips{
+  display: none;
+  padding: 10px 10px 15px 10px !important;
+}
+
+.student-flips.description.block.modal.flips .student-flip{
+  float: left;
+  clear: both;
+  width: 100%;
+}
+
+.student-flips.description.block.modal.flips .student-flip:last-child{
+  padding-bottom: 15px;
+}
+
+.student-flips.description.block.modal.flips h2{
+  color: #54c2f2;
+  margin-bottom: 15px;
+  font-weight: normal;
+  text-align: center;
+  width: 100%;
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+.student-flip-right{
+  padding-top: 17px;
+}
+
+.student-flip-right em{
+  font-size: 11px;
+  color: #5a5a5a;
+}
+
+div.news-image img{
+  margin: 0 auto !important;
+  display: block;
+}
+
+#whiteboard-tab{
+  width: 624px;
+}
+
+ul.morelikes{
+  list-style: none;
+  padding: 12px !important;
+  margin: 0 !important;
+}
+ul.morelikes li{
+  list-style-type: none;
+  list-style-image: none;
+  padding: 0 0 5px 0 !important;
+  margin: 0 !important;
+}
+ul.morelikes li a{
+  color: #56c2f1;
+  font-size: 12px;
+}
+
+em.modal-tip > div.item-list-likes{
+  display: none;
+  padding:12px;
+}
+

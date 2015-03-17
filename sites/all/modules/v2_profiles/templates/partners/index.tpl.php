@@ -2,7 +2,7 @@
 
 <?php if ($data->user->user_type == 'child') { ?>
 
-	<?php print v2_profiles_flips_index($data->user->uid); ?>
+	<?php //print v2_profiles_flips_index($data->user->uid); ?>
 
 <?php } ?>
 
@@ -21,7 +21,7 @@
 		<div class="section">
 			<div class="items">
 				<?php foreach ($data->items as $item) { ?>
-					<div class="item" style="background:url(<?= '/'.$item->field_icon[0]['filepath']?>) 0px 0px no-repeat;">
+					<div class="item" style="background:url(<?php print '/'.$item->field_icon[0]['filepath']; ?>) 0px 0px no-repeat;">
 						<div class="title"><h2><?php print $item->title; ?></h2></div>
 						<div class="excerpt"><p><?php print strip_tags($item->body); ?></p></div>
 						<div class="more"><a href="/user/<?= $user->uid; ?>/partners/<?= $item->nid; ?>">Visit the partner's page</a></div>

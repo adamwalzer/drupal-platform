@@ -1,5 +1,16 @@
 <?php
 
+	$v2_profiles_menu_items["user/%/resources"] = array(	
+		"access arguments" => array(1),
+		"access callback" => 'v2_profiles_access',
+		"description" => "",
+		"page arguments" => array(1),
+		"page callback" => "v2_profiles_resource_center_index",
+		"title" => "News",
+		"type" => MENU_CALLBACK,
+	);
+
+
 $v2_profiles_theme_items['v2_profiles_resource_center_index'] = array(
 	'arguments' => array('data' => array()),
 	'template' => 'templates/resource_center/index'
@@ -43,9 +54,8 @@ function v2_profiles_resource_query_all($uid) {
 	return $items;
 }
 
-function v2_profiles_resource_center_index() {
+function v2_profiles_resource_center_index($uid,$type = 'parent') {
 	$data = new stdClass();
-
 
 	$user = user_load($uid);
 
@@ -53,5 +63,17 @@ function v2_profiles_resource_center_index() {
 
   $data = $view->execute_display('default');
 	//return theme('v2_profiles_resource_center_index', $data);
-  return theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon.jpg'));
+	$partners = v2_profiles_partners_index($uid);
+	if($type == 'parent'){
+    $resource = theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon.jpg'));  	
+	}elseif($type == 'teacher'){
+    $resource = theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon-teacher.jpg'));	
+	}
+
+  
+  if(arg(2) == 'resources'){
+    return $resource . $partners;
+  }else{
+    return $resource;
+  }
 }
