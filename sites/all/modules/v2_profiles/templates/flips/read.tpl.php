@@ -72,7 +72,7 @@ if($data->user->user_type=='parent') {
         <?php if(!$already_started):?>
   				<p class="start"><a class="button" href="#">I'm Ready To Start</a></p>
 				<?php else:?>
-	  			<p class="start started"><a class="button" href="#">Completed</a></p>				
+	  			<p class="start started"><a class="button" href="#">Completed</a></p>
 				<?php endif;?>
 
 			</div>
@@ -86,7 +86,10 @@ if($data->user->user_type=='parent') {
 				<div class="cms">
 					<h3><?php print $item->title; ?></h3>
 					<?php if ($item->completed == 0) { ?>
-						<?php print node_view($item->node); ?>
+						<?php
+							print '<iframe border="0" class="flip-iframe" scrolling="no" src="' . $item->node->field_action_external_url[0]['url'] . '?username=' . $data->user->name . '&avatar=' . $data->user->avatar . '"></iframe>';
+							print node_view($item->node);
+						?>
 					<?php } else { ?>
 						<?php
 							if ($item->node->webform['components']) {

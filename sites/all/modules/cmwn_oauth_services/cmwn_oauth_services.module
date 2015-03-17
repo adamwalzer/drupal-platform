@@ -4,7 +4,7 @@ module_load_include('inc','cmwn_oauth_services','includes/admin');
 module_load_include('inc','cmwn_oauth_services','includes/user');
 module_load_include('inc','cmwn_oauth_services','includes/whiteboard');
 function cmwn_oauth_services_menu() {
-  
+
   //These handle oAuth authentication token requests
   $items['cmwn_oauth_services/request'] = array(
     'page callback' => '_cmwn_oauth_services_request',
@@ -17,44 +17,56 @@ function cmwn_oauth_services_menu() {
   );
 
   $items['services/authentication/authorize'] = array(
-    //set up in user consumer admin edit screen as callback. 
+    //set up in user consumer admin edit screen as callback.
     //w/o the code in this function running, the token is never authorized
     'page callback' => '_cmwn_oauth_services_authorize',
     'access arguments' => array('access content'),
   );
 
-  
+
   //these are our custom service callbacks
   $items['services/authentication/application'] = array(
-    //set up in user consumer admin edit screen as callback. 
+    //set up in user consumer admin edit screen as callback.
     //w/o the code in this function running, the token is never authorized
     'page callback' => '_cmwn_oauth_services_application',
     'access arguments' => array('access content'),
   );
-  
+
   $items['services/get_authorized_data'] = array(
     'page callback' => '_cmwn_oauth_services_application_data',
     'access arguments' => array('access content'),
-  );  
+  );
+
+  $items['services/get_action_webform_object'] = array(
+    'page callback' => '_cmwn_oauth_action_webform_object',
+    'access arguments' => array('access content'),
+  );
 
   $items['services/user/contexts'] = array(
     'page callback' => '_cmwn_oauth_services_user_contexts',
     'access arguments' => array('access content'),
   );
-  
+
   //post image to whiteboard
   $items['services/post/whiteboard'] = array(
     'page callback' => '_cmwn_oauth_services_post_whiteboard',
     'access arguments' => array('access content'),
   );
+
+ //post image to whiteboard
+  $items['services/post/action'] = array(
+    'page callback' => '_cmwn_oauth_services_post_action',
+    'access arguments' => array('access content'),
+  );
+
   //test whiteboard post api call
   $items['services/post/whiteboard/test-form'] = array(
     'page callback' => '_cmwn_oauth_services_post_whiteboard_test',
     'access arguments' => array('access content'),
-  );    
+  );
   return $items;
 }
- 
+
 function _cmwn_oauth_services_request($consumer_key) {//from args url
   global $base_url;
   $consumer = DrupalOAuthConsumer::load($consumer_key, FALSE);
@@ -72,9 +84,9 @@ function _cmwn_oauth_services_request($consumer_key) {//from args url
   ));
   //print_r($request_token);exit();
   //$request_token->write();//this seems to create duplicate authorizations so we are commenting this out
-   
+
   $_SESSION['cmwn_oauth_services_request_key'] = $request_token->key;
-   
+
   $auth_url = $client->getAuthorizationUrl($base_url . '/oauth/authorize', array(
     'callback' => $base_url . '/cmwn_oauth_services/access',//this is not used right now
   ));
@@ -82,7 +94,7 @@ function _cmwn_oauth_services_request($consumer_key) {//from args url
 
   drupal_goto($auth_url);
 }
- 
+
 function _cmwn_oauth_services_authorize() {
   global $base_url;
   $csid = db_result(db_query("select occ.csid from {oauth_common_consumer} occ inner join {oauth_common_token} oct on oct.csid = occ.csid where oct.token_key = '%s' order by oct.tid asc limit 1", $_SESSION['cmwn_oauth_services_request_key']));//ASC OR DESC?
@@ -118,15 +130,15 @@ function _cmwn_oauth_services_application() {
 
   //use request token key to get full consumer object
   $csid = db_result(db_query("select occ.csid from {oauth_common_consumer} occ inner join {oauth_common_token} oct on oct.csid = occ.csid where oct.token_key = '%s' order by oct.tid desc limit 1", $request_token->key));//ASC OR DESC?
-  $consumer = DrupalOAuthConsumer::loadById($csid, true);//true = load provider data  
+  $consumer = DrupalOAuthConsumer::loadById($csid, true);//true = load provider data
   //$auth_url = $client->getAuthorizationUrl('http://local.cmwn.com:8888/oauth/authorize', array(
-   // 'oauth_token' =>$request_token->key, 
-  //));  
-  
+   // 'oauth_token' =>$request_token->key,
+  //));
+
   //authorize token
   //TODO: check permissions
   global $user;
-  
+
   $request_token->uid = 1;//TODO - workaround for uid enmeshment. Is this even necessary to set?
   $request_token->authorized = 1;
   $request_token->type = 1;//what is this?
@@ -153,7 +165,7 @@ function _cmwn_oauth_services_application() {
   }*/
   //print_r($request_token);exit();
   //unset($request_token->tid);
- 
+
   $request_token->write();
   db_query("DELETE  FROM {oauth_common_token} WHERE key_hash = '%s' AND csid = %d order by tid asc limit 1", sha1($request_token->key), $csid);
 
@@ -165,14 +177,14 @@ function _cmwn_oauth_services_application() {
   //no call back
   if( ! isset($_GET['callback']))
     exit($json);
-  
+
   //valid callback, jsonp
   if(cmwn_json_is_valid_callback($_GET['callback']))
     exit("{$_GET['callback']}($json)");
 
   //problem
   header('status: 400 Bad Request', true, 400);
-  
+
 }
 
 //http://local.cmwn.com:8888/services/get_authorized_data?oauth_consumer_key=kRTvDhFXFtLRa8ZgGKsGBcG6FcccmzsC&oauth_token=MFpkTxttjVg9C9fzuYY8bpAtKzYA6evj&callback=callthisback, replace last param with key from authorizations
@@ -187,16 +199,38 @@ function _cmwn_oauth_services_application_data(){//$key is consumer key from set
   //no call back
   if( ! isset($_GET['callback']))
     exit($json);
-  
+
   //valid callback, jsonp
   if(cmwn_json_is_valid_callback($_GET['callback']))
     exit("{$_GET['callback']}($json)");
 
   //problem
   header('status: 400 Bad Request', true, 400);
-  
+
 }
 
+function _cmwn_oauth_action_webform_object(){//$key is consumer key from set up in user consumer tab, $auth_token is key from authorizations
+  _cmwn_oauth_services_oauth_validate_request();//this will return unauthorized if it does not validate.
+  $callback = $_GET['callback'];
+  $node = new stdClass();
+  if(is_numeric($_GET['webform_nid'])){
+    $node= node_load($_GET['webform_nid']);
+  }
+
+  header('Content-Type: application/json; charset=utf8');
+  $json = json_encode($node);
+
+  //no call back
+  if( ! isset($_GET['callback']))
+    exit($json);
+
+  //valid callback, jsonp
+  if(cmwn_json_is_valid_callback($_GET['callback']))
+    exit("{$_GET['callback']}($json)");
+
+  //problem
+  header('status: 400 Bad Request', true, 400);
+}
 
 function _cmwn_oauth_services_oauth_validate_request($type="access token", $unsigned = 'unsigned') {
   try {
@@ -207,18 +241,18 @@ function _cmwn_oauth_services_oauth_validate_request($type="access token", $unsi
     if ($consumer == NULL) {
       throw new OAuthException('Missing consumer token');
     }else{
-      //TODO: ideally the consumer object would already have these loaded and we wouldn't have to query them. 
+      //TODO: ideally the consumer object would already have these loaded and we wouldn't have to query them.
       $csid = $consumer->csid;
       if($csid){
         //CHECK IP
-        $ip =  db_result(db_query("select ip from {oauth_common_provider_consumer} pc where pc.csid = '%d'", $csid));        
+        $ip =  db_result(db_query("select ip from {oauth_common_provider_consumer} pc where pc.csid = '%d'", $csid));
         $client_ip = $_SERVER['REMOTE_ADDR'];
         if($ip && $ip != '' && $ip != $_SERVER['REMOTE_ADDR']){
           watchdog('cmwn_oauth_validate',t('the ip address was wrong: ' . $client_ip));
           throw new OAuthException("The ip address is wrong.");
         }
         //TODO: CHECK DOMAIN
-        
+
         //CHECK IF TOKEN IS EXPIRED
         $expired = db_result(db_query("select expires from {oauth_common_token} c where token_key='%s' and token_key <> '' and expires > 0 and FROM_UNIXTIME(expires) < DATE(NOW())",$_GET['oauth_token']));
         if($expired){
@@ -253,11 +287,11 @@ function _cmwn_oauth_services_user_contexts($username = NULL, $password = NULL){
   //$_POST['username'] = $username;
   //$_POST['password'] = $password;
   //****
-  
+
   $username = $_POST['username'];
   $password = $_POST['password'];
-  
-  try{  
+
+  try{
     //test the credentials
     if (isset($username)) {
       if (user_is_blocked($username)) {
@@ -269,20 +303,20 @@ function _cmwn_oauth_services_user_contexts($username = NULL, $password = NULL){
         // denied by access controls
         $denied_msg = t('The name %name is a reserved username.', array('%name' => $username));
         throw new OAuthException($denied_msg);
-        exit;     
+        exit;
       }
-    }  
-    
+    }
+
     //authenticate user/pass
-  
+
     $account = user_load(array('name' => $username, 'pass' => trim($password), 'status' => 1));
     if ($account && drupal_is_denied('mail', $account->mail)){
       $denied_msg = t('The name %name is registered using a reserved e-mail address and therefore could not be logged in.', array('%name' => $account->name));
       throw new OAuthException($denied_msg);
     }
-  
-  
-  
+
+
+
     if (!empty($username) && !empty($password) && $account) {
       //this is a valid username and password
       //return a valid token, screen name, and context(s)
@@ -290,38 +324,38 @@ function _cmwn_oauth_services_user_contexts($username = NULL, $password = NULL){
       $avatar = v2_profiles_avatars_query($account->uid);
       //GENERATE TOKEN
       global $base_url;
- 
+
       $csid = db_result(db_query("select csid from {oauth_common_consumer} where consumer_key ='%s' order by csid desc limit 1", $_GET['oauth_consumer_key']));
       $consumer = DrupalOAuthConsumer::loadById($csid,FALSE);
-    
 
-    
+
+
       $sig_method = DrupalOAuthClient::signatureMethod();
-    
+
       $client = new DrupalOAuthClient($consumer, NULL, $sig_method);
       $request_token = $client->getRequestToken($base_url . '/oauth/request_token', array());
       $request_token->write();
-    
+
       //use request token key to get full consumer object
       $csid = db_result(db_query("select occ.csid from {oauth_common_consumer} occ inner join {oauth_common_token} oct on oct.csid = occ.csid where oct.token_key = '%s' order by oct.tid desc limit 1", $request_token->key));//ASC OR DESC?
-      $consumer = DrupalOAuthConsumer::loadById($csid, true);//true = load provider data  
-      
+      $consumer = DrupalOAuthConsumer::loadById($csid, true);//true = load provider data
+
       $request_token->uid = $account->uid;
       $request_token->authorized = 1;
       $request_token->type = 1;//what is this?
       $request_token->consumer = $consumer;
       $context = oauth_common_context_load(db_result(db_query("select context from {oauth_common_provider_consumer} pc where consumer_key ='%s'",$_GET['oauth_consumer_key'])));
-    
+
       $request_token->expires = time() + $context->authorization_options['access_token_lifetime'];
       $request_token->services = $context->authorization_options['default_authorization_levels'];
       if (!$context) {
         drupal_set_message(t("Can't find OAuth context, check the site's settings."), 'error');
         return;
       }
-    
+
       $request_token->write();
       db_query("DELETE  FROM {oauth_common_token} WHERE key_hash = '%s' AND csid = %d order by tid asc limit 1", sha1($request_token->key), $csid);
-    
+
       $keys = array('oauth_consumer_key' => $_GET['oauth_consumer_key'], 'oauth_token' => $request_token->key);
       $keys['cmwn_oauth_user_context'] = $user_context;
       $keys['screen_name'] = $account->name;
@@ -331,32 +365,32 @@ function _cmwn_oauth_services_user_contexts($username = NULL, $password = NULL){
       //dsm($avatar);return 'test';
       //$keys['consumer'] =$consumer;
       //dsm($account);exit();
-      
+
       header('Content-Type: application/json; charset=utf8');
       $json = json_encode($keys);
-    
+
       //no call back
       if( ! isset($_GET['callback']))
         exit($json);
-      
+
       //valid callback, jsonp
       if(cmwn_json_is_valid_callback($_GET['callback']))
         exit("{$_GET['callback']}($json)");
-    
+
       //problem
-      header('status: 400 Bad Request', true, 400);    
+      header('status: 400 Bad Request', true, 400);
       }
       else {
         watchdog('_cmwn_oauth_services_user_contexts', 'Services authentication attempt failed for %user.', array('%user' => $username));
         $denied_msg = t('Services authentication attempt failed for %user.', array('%user' => $username));
         throw new OAuthException($denied_msg);
       }
-   }   
+   }
   catch (OAuthException $e) {
     drupal_set_header('HTTP/1.0 401 Unauthorized: ' . $e->getMessage());
     drupal_set_header(sprintf('WWW-Authenticate: OAuth realm="%s"', url('', array('absolute' => TRUE))));
-    exit; 
-  }  
+    exit;
+  }
 }
 
 
@@ -380,11 +414,11 @@ function _cmwn_oauth_services_post_whiteboard(){
   $uid = $_POST['uid'];
   $content = $_POST['body'];
   @$account = user_load($uid);
-  
+
   //http://local.cmwn.com:8888/services/post/whiteboard?oauth_consumer_key=kRTvDhFXFtLRa8ZgGKsGBcG6FcccmzsC&oauth_token=MFpkTxttjVg9C9fzuYY8bpAtKzYA6evj&callback=callthisback, replace last param with key from authorizations
 
   _cmwn_oauth_services_oauth_validate_request();//this will return unauthorized if it does not validate.
-  
+
   //check consumer context
   if(!cmwn_oauth_services_consumer_key_has_context($_GET['oauth_consumer_key'], 'whiteboard')){
     header("HTTP/1.1 401 Unauthorized");
@@ -394,20 +428,105 @@ function _cmwn_oauth_services_post_whiteboard(){
       $post_result = cmwn_oauth_services_whiteboard_add($uid);
       header('Content-Type: application/json; charset=utf8');
       $json = json_encode($post_result);
-      
+
       //no call back
       if( ! isset($_GET['callback']))
         exit($json);
-      
+
       //valid callback, jsonp
       if(cmwn_json_is_valid_callback($_GET['callback']))
-        exit("{$_GET['callback']}($json)");    
+        exit("{$_GET['callback']}($json)");
     }else{
       //problem
-      header('status: 400 Bad Request', true, 400);    
-    }     
+      header('status: 400 Bad Request', true, 400);
+    }
   }
-  
+
+}
+
+function _cmwn_oauth_services_post_action(){
+  $uid = $_POST['uid'];
+  @$account = user_load($uid);
+
+  _cmwn_oauth_services_oauth_validate_request();//this will return unauthorized if it does not validate.
+
+  //check consumer context
+  if(!cmwn_oauth_services_consumer_key_has_context($_GET['oauth_consumer_key'], 'flips')){
+    header("HTTP/1.1 401 Unauthorized");
+  }else{
+    //programmatically submit webform.
+    module_load_include('inc', 'webform', 'webform.module');
+    module_load_include('inc', 'webform', 'includes/webform.submissions');
+
+    $nid = $_POST['nid'];
+    if(is_numeric($nid)){
+      $node = node_load($nid);
+      if($node->type == 'action'){
+        $i=1;
+        $data = array();
+        foreach($node->webform['components'] as $key => $component){
+          $data[$i] = array($_POST[$component['form_key']]);
+          $i++;
+        }
+
+        $submission = (object)array(
+          'nid' => $nid,
+          'uid' => $uid,
+          'submitted' => REQUEST_TIME,
+          'remote_addr' => ip_address(),
+          'is_draft' => 0,
+          //'serial' => $serial,
+          'data' => $data,
+        );
+        $sid = webform_submission_insert($node, $submission);
+
+    if($sid){//successfully submitted
+      //let's load up parent (flip) node and see if there is a 'next' webform sid we can send.
+      $flip_nid = $_POST['flip_nid'];
+      $next_action_nid = false;
+      if($flip_nid){
+        $flip_node = node_load($flip_nid);
+        for($i=0; $i < count($flip_node->field_actions); $i++) {
+          if($flip_node->field_actions[$i]['nid'] == $nid && isset($flip_node->field_actions[$i+1])){
+            $next_action_nid = $flip_node->field_actions[$i+1]['nid'];
+          }
+        }
+      }
+      $callback = $_GET['callback'];
+
+      $post_result = (object)array(
+        'result' => 'success',
+        'sid' => $sid,
+        'nid' => $nid,
+        'next_action_nid' => $next_action_nid,
+      );
+
+      header('Content-Type: application/json; charset=utf8');
+      $json = json_encode($post_result);
+
+      //no call back
+      if( ! isset($_GET['callback']))
+        exit($json);
+
+      //valid callback, jsonp
+      if(cmwn_json_is_valid_callback($_GET['callback']))
+        exit("{$_GET['callback']}($json)");
+    }else{
+      //problem
+      header('status: 400 Bad Request', true, 400);
+    }
+
+
+
+
+      }
+
+
+
+
+
+    }
+  }
 }
 
 function _cmwn_oauth_services_post_whiteboard_test(){

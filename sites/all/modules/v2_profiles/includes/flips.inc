@@ -210,7 +210,7 @@
 		$data = new stdClass();
 
 		$user = user_load($uid);
-
+		$user->avatar = v2_profiles_avatars_query($user->uid);
 		$node = node_load($nid);
 
 		if (!$node) drupal_access_denied();

@@ -3123,3 +3123,8 @@ em.modal-tip > div.item-list-likes{
   padding:12px;
 }
 
+iframe.flip-iframe{
+	height: 70vh;
+	width: 100%;
+	border: 0 !important;
+}
