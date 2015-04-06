@@ -13,7 +13,7 @@
 	include_once(drupal_get_path('module','webform').'/includes/webform.submissions.inc');
 
 	require_once(drupal_get_path('module','v2_profiles').'/includes/account.inc');
-	require_once(drupal_get_path('module','v2_profiles').'/includes/arcade.inc');	
+	require_once(drupal_get_path('module','v2_profiles').'/includes/arcade.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/avatars.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/children.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/class.inc');
@@ -21,6 +21,7 @@
 	require_once(drupal_get_path('module','v2_profiles').'/includes/flips.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/resource_center.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/friends.inc');
+require_once(drupal_get_path('module','v2_profiles').'/includes/import_students.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/index.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/interests.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/links.inc');
