@@ -6,7 +6,7 @@
 			<h2>Your Class: <?php print sizeof($data->students); ?></h2>
 		</div>
 
-	
+
 		<?php if ($user->uid === $data->user->uid) { ?>
 			<div class="section form">
 				<form action="/user/<?php print $data->user->uid; ?>/friends/search" method="post">
@@ -49,8 +49,8 @@
                     foreach($item->flips as $flip){
                       if($flip->progress == '100'){
                         print '<div class="student-flip">';
-                        print '<img src="'.$flip->src2.'" class="student-flip-img student-flip-img-left-link" />';         
-                          print '<div class="student-flip-right">';                        
+                        print '<img src="'.$flip->src2.'" class="student-flip-img student-flip-img-left-link" />';
+                          print '<div class="student-flip-right">';
                             print $flip->title .'<br />';
                             //find date of last submission
                             $flip_node = node_load($flip->id);
@@ -67,7 +67,7 @@
                   ?>
   							</div>
   						<?php endif;?>
-							
+
 						</div>
 					<?php } ?>
 				</div>

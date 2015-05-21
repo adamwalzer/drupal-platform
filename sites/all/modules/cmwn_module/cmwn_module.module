@@ -202,7 +202,7 @@ function cmwn_module_menu_alter(&$items) {
   $old_access_callback = $items['og/subscribe/%node']['access callback'];
   $items['og/subscribe/%node']['access callback'] = '_cmwn_module_project_node_access';
   $items['og/subscribe/%node']['access arguments'] = array(1, $old_access_callback);
-  
+
 
   $old_page_callback = $items['forum']['page callback'];
   $items['forum']['page callback'] = '_cmwn_module_forum';
@@ -335,6 +335,7 @@ function cmwn_module_theme() {
     ),
     'user_register' => array(
       'arguments' => array('form' => null),
+      'path' => 'sites/all/themes/cmwn/templates',
       'template' => 'user-register'
     ),
     'cmwn_module_viddler_video' => array(
@@ -719,10 +720,10 @@ function cmwn_module_user($op, &$edit, &$account, $category = NULL) {
           break;
       }
       break;
-      
+
       case 'login':
-       $uid = $account->uid; 
-        if(in_array('child', array_values($account->roles)) || in_array('teacher', array_values($account->roles)) || in_array('parent', array_values($account->roles)) || in_array('verified-parent', array_values($account->roles))){      
+       $uid = $account->uid;
+        if(in_array('child', array_values($account->roles)) || in_array('teacher', array_values($account->roles)) || in_array('parent', array_values($account->roles)) || in_array('verified-parent', array_values($account->roles))){
           //check to ensure this account has required $account->data->user_type variable
           $data = unserialize($account->data);
 
@@ -732,16 +733,16 @@ function cmwn_module_user($op, &$edit, &$account, $category = NULL) {
             $parent_role = variable_get('cmwn_module_parent_role','');
             $teacher_role = variable_get('cmwn_module_teacher_role','');
             $verified_parent_role = variable_get('cmwn_module_verified_parent_role','');
-            
 
-            
+
+
             switch(true){
               case array_key_exists($child_role,$account->roles):
                 $data['user_type'] = 'child';
                 break;
 
               case array_key_exists($parent_role,$account->roles):
-              case array_key_exists($verified_parent_role,$account->roles):              
+              case array_key_exists($verified_parent_role,$account->roles):
                 $data['user_type'] = 'parent';
                 break;
 
@@ -749,13 +750,13 @@ function cmwn_module_user($op, &$edit, &$account, $category = NULL) {
                 $data['user_type'] = 'teacher';
                 break;
             }
-            
+
             //save it so this is not an issue next login.
             if(isset($data['user_type'])){
-              user_save($account, $data);                          
+              user_save($account, $data);
             }
           }
-        }  
+        }
         break;
   }
 }
@@ -940,31 +941,31 @@ function template_preprocess_cmwn_module_friends(&$vars) {
 }
 
 function template_preprocess_cmwn_module_interests(&$vars) {
-  
+
 }
 
 function template_preprocess_cmwn_module_projects(&$vars) {
-  
+
 }
 
 function template_preprocess_user_register(&$vars) {
-  
+
 }
 
 function template_preprocess_cmwn_module_block_contact(&$vars) {
-  
+
 }
 
 function template_preprocess_cmwn_module_social(&$vars) {
-  
+
 }
 
 function template_preprocess_cmwn_module_viddler_video(&$vars) {
-  
+
 }
 
 if (!function_exists('flag_reset_flag')) {
-  
+
   /**
    * Remove all flagged content from a flag.
    *
@@ -981,7 +982,7 @@ if (!function_exists('flag_reset_flag')) {
       $rows[] = $row;
     }
     module_invoke_all('flag_reset', $flag, $content_id, $rows);
-  
+
     db_query("DELETE FROM {flag_content} WHERE fid = %d" . ($content_id ? " AND content_id = %d" : ''), $flag->fid, $content_id);
     return db_affected_rows();
   }

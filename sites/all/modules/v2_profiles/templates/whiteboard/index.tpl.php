@@ -7,9 +7,15 @@
     		<li class="section">
           <a href="#whiteboard-tab"><h2>Whiteboard</h2></a>
     		</li>
-    		<li class="section">
-          <a href="#newsfeed-tab" class="tab-newsfeed"><h2>News Feed</h2></a><span class="call-monitor" title="Call a Monitor"></span>
-    		</li>
+        <?php if ($user->user_type != 'teacher'): ?>
+      		<li class="section">
+            <a href="#newsfeed-tab" class="tab-newsfeed"><h2>News Feed</h2></a><span class="call-monitor" title="Call a Monitor"></span>
+      		</li>
+        <?php else:?>
+          <li class="section">
+            <a href="#class-tab" class="tab-class"><h2>My Class</h2></a><span class="call-monitor" title="Call a Monitor"></span>
+          </li>
+        <?php endif;?>
   		</ul>
 
   <div id="whiteboard-tab">
@@ -197,13 +203,21 @@
 
   	</div>
   </div>
-  <div id="newsfeed-tab">
 
-    <div class="items">
-          <?php print views_embed_view('newsfeed', 'block_1');?>
+  <?php if ($user->user_type != 'teacher')://anyone but teacher has newsfeed so far, this may change w/ platformui comps as we go ?>
+    <div id="newsfeed-tab">
+      <div class="items">
+            <?php print views_embed_view('newsfeed', 'block_1');?>
+      </div>
     </div>
+  <?php else:?>
+    <div id="class-tab">
+      <div class="items">
+            <?php print v2_profiles_class_index($user->uid);//same theme call as on class page now. Question - why is class a left sidebar item and still a nav? ?>
+      </div>
+    </div>
+  <?php endif;?>
 
-  </div>
 </div>
 
 <?php if ($_SESSION['show_post_pending_moderation']) { unset($_SESSION['show_post_pending_moderation']); ?>

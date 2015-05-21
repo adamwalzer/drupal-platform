@@ -2,7 +2,7 @@
 
 	/* 1.4 */
 
-	$v2_profiles_menu_items["user/%/school"] = array(	
+	$v2_profiles_menu_items["user/%/school"] = array(
 		"access arguments" => array(1),
 		"access callback" => 'v2_profiles_access',
 		"description" => "",

@@ -33,17 +33,17 @@
                 <?php if ($allow_registrations) : ?>
                   <a class="join-now" href="/register-choose"><img rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/join-now_off.png" /></a>
                   <a class="login" href="/user">Login</a>
-                <?php endif; ?>                
+                <?php endif; ?>
     			   <?php endif; ?>
             </div>
-  			  
+
           <div class="right-nav-wrap">
             <div class="utility-nav">
               <?php print $secondary_links; ?>
             </div>
-            <?php echo theme('cmwn_module_social'); ?>  			   
+            <?php echo theme('cmwn_module_social'); ?>
           </div>
-          
+
           <?php if ($user->uid == 0) : ?>
             <a class="pt" href="/node/11"><img rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/pt_off.png" /></a>
           <?php else : ?>
@@ -54,12 +54,12 @@
             <?php } ?>
           <?php endif; ?>
 
-  			   
-  			   
-  			   
+
+
+
           </div>
 
-          
+
           <div class="main-nav">
             <?php print $primary_links; ?>
           </div>

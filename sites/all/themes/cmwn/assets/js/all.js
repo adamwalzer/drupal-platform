@@ -157,12 +157,12 @@ $(function(){
       $(this).show();
     }
   });
-  
-  
-  
+
+
+
   //teacher profile page, flip overlay on class students
   var class_modal_tipped = $('#v2 .column.content .block.teacher-class.browse .content .section .items .item');
-  
+
   if (class_modal_tipped.length > 0) {
   	class_modal_tipped.each(function(){
   		var source = $(this);
@@ -179,12 +179,12 @@ $(function(){
   			}
   		);
   	});
-  } 
-  
+  }
+
 //ui refresh - greater than 3 likes overlay
 //teacher profile page, flip overlay on class students
   var likes_modal_tipped = $('em.modal-tip');
-  
+
   if (likes_modal_tipped.length > 0) {
   	likes_modal_tipped.each(function(){
   		var source = $(this);
@@ -201,15 +201,15 @@ $(function(){
   			}
   		);
   	});
-  }   
-   
+  }
+
   //ui refresh - profile sidebar links accordian
   //$('ul.profile-links').accordion();
   //tooltips
   //$('span.call-monitor').qtip();
   //$('[title]').qtip();
 
-  
+
 	/* 1.4 feed */
 
 
