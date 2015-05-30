@@ -1,32 +1,22 @@
 <?php /* 1.4 */ ?>
 
 <div class="block shadow whiteboard index" id="whiteboard-profile-tabs">
-
-
   		<ul class="header">
     		<li class="section">
           <a href="#whiteboard-tab"><h2>Whiteboard</h2></a>
     		</li>
-        <?php if ($user->user_type != 'teacher'): ?>
-      		<li class="section">
-            <a href="#newsfeed-tab" class="tab-newsfeed"><h2>News Feed</h2></a><span class="call-monitor" title="Call a Monitor"></span>
-      		</li>
-        <?php else:?>
-          <li class="section">
-            <a href="#class-tab" class="tab-class"><h2>My Class</h2></a><span class="call-monitor" title="Call a Monitor"></span>
-          </li>
-        <?php endif;?>
+
+    		<li class="section">
+          <a href="#newsfeed-tab" class="tab-newsfeed"><h2>News Feed</h2></a><span class="call-monitor" title="Call a Monitor"></span>
+    		</li>
   		</ul>
 
   <div id="whiteboard-tab">
   	<?php if ($user->user_type == 'child' || $user->user_type == 'parent' || $user->user_type == 'teacher') { ?>
-
   		<div class="create">
-
   			<div class="avatar">
   				<img src="<?php print v2_profiles_avatars_query($user->uid); ?>" width="84" />
   			</div>
-
   			<div class="form">
   				<form action="/user/<?php print $data->user->uid; ?>/whiteboard/add" enctype="multipart/form-data" method="post">
   					<textarea columns="60" name="content" placeholder="What's new in your world?" rows="3"></textarea>
@@ -40,22 +30,15 @@
   					<button class="button" type="submit">Post</button>
   				</form>
   			</div>
-
   		</div>
-
   	<?php } ?>
-
   	<div class="items">
-
   		<?php foreach($data->items as $item) { ?>
   			<?php if ($item->status == 1 || $item->user->uid == $user->uid) { ?>
-
   				<div class="item<?php print ($item->status == 0)? ' private' : ''; ?>">
-
   					<div class="avatar">
   						<img src="<?php print v2_profiles_avatars_query($item->user->uid); ?>" width="84" />
   					</div>
-
   					<div class="name">
   						<?php if ($user->uid == $item->user->uid) { ?>
   							<strong><a href="/user/<?php print $item->user->uid; ?>"><?php print $item->user->name; ?></a></strong>
@@ -69,7 +52,6 @@
   							<img src="/<?php print imagecache_create_path('468x',str_replace('/sites/','sites/',$item->image)); ?>" width="468" />
   						</div>
   					<?php } ?>
-
   					<?php if (!empty($item->video) && !empty($item->video->field_viddler_id[0]['value'])) { ?>
   						<div class="media">
   							<object
@@ -103,19 +85,13 @@
   						<div class="flag-wrapper">
                 <?php print $item->flags_output;?>
     				   </div>
-
-
    					</div>
-
   					<?php foreach($item->comments as $comment) { ?>
   						<?php if ($comment->status == 1 || $comment->user->uid == $user->uid) { ?>
-
   							<div class="comment<?php print ($comment->status == 0)? ' private' : ''; ?>">
-
   								<div class="avatar">
   									<img src="<?php print v2_profiles_avatars_query($comment->user->uid); ?>" width="42" />
   								</div>
-
   								<div class="name">
   									<?php if ($user->uid == $comment->user->uid) { ?>
   										<strong><a href="/user/<?php print $comment->user->uid; ?>"><?php print $comment->user->name; ?></a></strong>
@@ -123,16 +99,13 @@
   										<strong><a href="/user/<?php print $user->uid; ?>/friends/<?php print $comment->user->uid; ?>"><?php print $comment->user->name; ?></a></strong>
   									<?php } ?>
   								</div>
-
   								<div class="content">
   									<?php print $comment->content; ?>
   								</div>
-
                   <div class="like-wrapper">
                     <?php
                     $rndswitch = rand(0,1);
                     $random_users = db_query('select name from {users} order by RAND() limit 4');
-
                     $users = array();
                     while ($r = db_fetch_array($random_users)){
                       $users[] = $r['name'];
@@ -156,9 +129,6 @@
 
                     ?>
                   </div>
-
-
-
   								<div class="actions">
   									<?php if ($data->user->uid === $user->uid || $comment->user->uid === $user->uid) { ?>
   										<a class="delete" href="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/comments/<?php print $comment->id; ?>/delete" title="Remove this post">Delete</a>
@@ -168,9 +138,6 @@
   										<a class="report" href="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/comments/<?php print $comment->id; ?>/report" title="Report this post">Report</a>
   									<?php } ?>
   								</div>
-
-
-
 
   							</div>
 
@@ -204,19 +171,13 @@
   	</div>
   </div>
 
-  <?php if ($user->user_type != 'teacher')://anyone but teacher has newsfeed so far, this may change w/ platformui comps as we go ?>
-    <div id="newsfeed-tab">
-      <div class="items">
-            <?php print views_embed_view('newsfeed', 'block_1');?>
-      </div>
+
+  <div id="newsfeed-tab">
+    <div class="items">
+          <?php print views_embed_view('newsfeed', 'block_1');?>
     </div>
-  <?php else:?>
-    <div id="class-tab">
-      <div class="items">
-            <?php print v2_profiles_class_index($user->uid);//same theme call as on class page now. Question - why is class a left sidebar item and still a nav? ?>
-      </div>
-    </div>
-  <?php endif;?>
+  </div>
+
 
 </div>
 

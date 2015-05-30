@@ -3,7 +3,7 @@
 //redirect to add child form is session is set
 if($data->user->user_type == 'parent') {
 	if(isset($_SESSION['cptoken'])) {
-		header("Location: /user/4848/children/add");
+		//header("Location: /user/4848/children/add");
 	}
 }
 ?>
@@ -13,8 +13,8 @@ if($data->user->user_type == 'parent') {
 
 <?php } elseif($data->user->user_type == 'parent' || $data->user->user_type == 'verified-parent' || $data->user->user_type == 'teacher') { ?>
 
-	<?php print v2_profiles_resource_center_index($data->user->uid, $data->user->user_type); ?>
-	<?php print v2_profiles_whiteboard_index($data->user->uid); ?>  
+	<?php //print v2_profiles_resource_center_index($data->user->uid, $data->user->user_type); ?>
+	<?php print v2_profiles_whiteboard_index($data->user->uid); ?>
 	<?php print v2_profiles_news_index($data->user->uid); ?>
 	<?php //print v2_profiles_partners_index($data->user->uid); ?>
   <?php } else { ?>

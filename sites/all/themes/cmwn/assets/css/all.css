@@ -988,7 +988,7 @@ body {
 			#v2 .block.friends.browse .content .section.grid .items .item {
 				display:inline;
 				float:left;
-				margin:12px;
+				margin:11px;
 				position:relative;
 				width:126px;
 			}
@@ -2550,13 +2550,16 @@ div.parent-child-whiteboard .news-comments{
 	color:#7829bb;
 }
 
-#v2 .block.whiteboard.index .items .item {
+#v2 .block.whiteboard.index #whiteboard-tab .items .item,
+#v2 .block.whiteboard.index #newsfeed-tab .items .item {
 	border-top:#eaeaea solid 1px;
 	overflow:hidden;
 	padding:24px 24px 24px 132px;
 	position:relative;
 	width:468px;
 }
+
+/*teacher-class*/
 
 #v2 .block.whiteboard.index .items .item.private {
 	background:#fef2e6;
@@ -2895,7 +2898,8 @@ div.block.sidebar-profile.hidden .content{
   box-shadow: 12px -10px 10px -3px rgba(0,0,0,.3) inset !important;
 }
 
-.whiteboard.ui-tabs-nav li a h2{
+.whiteboard.ui-tabs-nav li a h2,
+.teacher-class.ui-tabs-nav li a h2{
   padding: 12px !important;
   letter-spacing: .02em;
 }
@@ -3127,4 +3131,44 @@ iframe.flip-iframe{
 	height: 70vh;
 	width: 100%;
 	border: 0 !important;
+}
+
+
+#v2 div.section-left,
+#v2 div.section-right{
+	width: 50%;
+	padding: 12px;
+	box-sizing: border-box;
+	border: 1px solid #eeeeee;
+}
+
+div.section-left{
+	float: left;
+}
+
+div.section-right{
+	float: right;
+}
+
+#v2 div.section-left p.class-flips-status a,
+#v2 div.section-right p.class-flips-start-new a{
+	float: right;
+	color: #883bcd;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+#v2 .class_flips.flips div.section-left img,
+#v2 .class_flips.flips div.section-right img{
+	padding: 7px;
+}
+
+#v2 div.section-left p.class-flips-status,
+#v2 div.section-right p.class-flips-start-new{
+	color: #858585;
+}
+
+#v2 .block.school.index .section{
+	background: url(../img/patterns/purple-header-block.png) no-repeat;
+	background-size: cover;
 }

@@ -11,7 +11,9 @@
 	<div class="header">
 
 		<div class="section">
-			<h2>School</h2>
+			<?php if ($data->school): ?>
+			<h2><?php print $data->school->title; ?></h2>
+		<?php endif;?>
 		</div>
 
 	</div>
@@ -20,7 +22,7 @@
 
 		<div class="section">
 			<?php if ($data->school) { ?>
-				<p><?php print $data->school->title; ?></p>
+				<div class="my-school-image"><?php print theme('image', $data->school->field_image[0]['filepath']); ?></div>
 			<?php } else { ?>
 			<div class="empty">
 				There are no schools.

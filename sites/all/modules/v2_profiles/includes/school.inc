@@ -45,7 +45,7 @@
 				`cfs`.`field_school_nid` AS `nid`
 			FROM
 				`node` AS `n` JOIN
-				`content_field_school` AS `cfs` ON `n`.`nid` = `cfs`.`nid` AND `n`.`type` = 'child_profile'
+				`content_field_school` AS `cfs` ON `n`.`nid` = `cfs`.`nid` AND (`n`.`type` = 'child_profile' or n.type = 'teacher_profile')
 			WHERE
 				`n`.`uid` = " . $user->uid . " AND
 				`n`.`status` = 1;

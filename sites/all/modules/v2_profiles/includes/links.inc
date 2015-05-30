@@ -190,7 +190,7 @@
 
 
 			$items['notices'] =array(
-					'data' => '<a class="toggle">My Notices</a>',				
+					'data' => '<a class="toggle">My Notices</a>',
 					'children' => array(
 							l('Account', 'user/'.$user->uid.'/notices/account'),
 							array(
@@ -203,21 +203,27 @@
 			);
 
       $items[] = l('Resource Center', 'user/'.$user->uid.'/resources');
-      
+
 			$items[] = array(
 				'data'=>l('Add a Child', 'user/'.$user->uid.'/children/add'),
 				'class'=>'add-a-child'
 			);
 
-		} else {
-			$items[] = l('My Profile & Whiteboard', 'user');
+		} else {//teacher
+			$items[] = l('My Profile', 'user');
 			$items[] = l('My Class', 'user/'.$user->uid.'/class');
+
+			$school = v2_profiles_school_query($uid);
+			if ($school) {
+				$items[] = l('My School',  'user/'.$user->uid.'/school');
+			}
+
 			$items[] = l('My Notices', 'user/'.$user->uid.'/notices/account');
 			$items[] = l('Resource Center', 'user/'.$user->uid.'/resources');
 			$items[] = array(
 				'data'=>l('Add a Child', 'user/'.$user->uid.'/children/add'),
 				'class'=>'add-a-child'
-			);			
+			);
 
 		}
 
