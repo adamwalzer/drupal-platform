@@ -57,16 +57,51 @@ admin/build/views/edit*
 admin/content/node-type/*
 *webform*
 EOP;
+
+//$scripts = drupal_add_js();
+//dsm($scripts);
 	if (!drupal_match_path($_GET['q'], $patterns)) {
 		$scripts = drupal_add_js();
-		$scripts['core'] = array_merge(array(
+		/*$scripts['core'] = array_merge(array(
 			drupal_get_path('theme', 'cmwn').'/assets/js/jquery.tools.min.js' => array(
 				'cache' => true,
 				'defer' => false,
 				'preprocess' => true
 			)
+		), $scripts['core']);*/
+
+		//remove old core jquery for front-end-non-views-drupal-core pages
+		unset($scripts['core']['misc/jquery.js']);
+
+		//add our updated jquery;
+		$scripts['core'] = array_merge(array(
+			//'sites/all/themes/cmwn/assets/js/jquery.min.js' => array(
+			'sites/all/themes/cmwn/assets/js/jquery-1.4.4.min.js' => array(
+				'cache' => true,
+				'defer' => false,
+				'preprocess' => true
+			)
 		), $scripts['core']);
+
 		$vars['scripts'] = drupal_get_js('header', $scripts);
+	}else{//not a core drupal js page
+
+		$scripts = drupal_add_js();
+
+		//remove old core jquery so we can update to newer one.
+		unset($scripts['core']['misc/jquery.js']);
+
+		//update to 1.3.2 for regular drupal core/views page.
+		$scripts['core'] = array_merge(array(
+			'sites/all/themes/cmwn/assets/js/jquery-1.3.2.min.js' => array(
+				'cache' => true,
+				'defer' => false,
+				'preprocess' => true
+			)
+		), $scripts['core']);
+
+		$vars['scripts'] = drupal_get_js('header', $scripts);
+
 	}
 	if ($vars['is_front']) {
 		$vars['campaign'] = views_embed_view('homepage_slideshow', 'default');
@@ -257,7 +292,7 @@ function cmwn_preprocess_forums(&$vars) {
 }
 
 function cmwn_preprocess_forum_list(&$vars) {
-	
+
 	$vars['template_files'][] = 'forum-list-'.$vars['forum_id'];
 }
 
@@ -315,17 +350,17 @@ function cmwn_tablesort_header($cell, $header, $ts) {
 }
 
 function cmwn_node_submitted($node) {
-	return t('@datetime by !username', 
+	return t('@datetime by !username',
 		array(
-		'!username' => theme('username', $node), 
+		'!username' => theme('username', $node),
 		'@datetime' => format_date($node->created, 'custom', variable_get('date_format_forum', '')),
 	));
 }
 
 function cmwn_comment_submitted($comment) {
-	return t('@datetime by !username', 
+	return t('@datetime by !username',
 		array(
-		'!username' => theme('username', $comment), 
+		'!username' => theme('username', $comment),
 		'@datetime' => format_date($comment->timestamp, 'custom', variable_get('date_format_forum', '')),
 	));
 }
