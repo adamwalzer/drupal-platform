@@ -654,7 +654,7 @@ function v2_profiles_school_import_parent($school, $student){//NOTE, $student al
 		$username = $student['Guardian First Name'] . $student['Guardian Last Name'];
 		$ctr = 1;
 		while(db_result(db_query('select name from {users} u where name = "%s" limit 1', $username))){
-			$username = $student['First Name'] . $student['Last Name'] . '_' . $ctr;
+			$username = $student['Guardian First Name'] . $student['Guardian Last Name'] . '_' . $ctr;
 			$ctr++;
 		}
 
