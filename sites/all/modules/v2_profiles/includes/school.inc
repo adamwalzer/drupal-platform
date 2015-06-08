@@ -612,6 +612,15 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
 		if($student['Grade'] == 'K') $student['Grade'] = "Kindergarten";
 		$child_profile->field_student_grade[0]['nid'] = $grades[$student['Grade']];
 
+		//birthday
+		$dob = explode('/',$student['DOB MM/DD/YYYY']);
+		$child_profile->field_dob[0] = array(
+			'value'=>$dob[2] . '-' . $dob[0] . '-' . $dob[1] . 'T00:00:00',
+			'timezone' => 'America/New_York',
+			'timezone_db' => 'America/New_York',
+			'date_type' => 'date',
+		);
+
 		//add all classes!
 		$classes = array_map('trim', explode(',', $student['Class Number']));
 		for($i = 0; $i < count($classes); $i++){
