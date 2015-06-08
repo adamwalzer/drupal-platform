@@ -26,8 +26,8 @@
 		<div class="header">
 
 			<div class="section">
-				<h2><?php 
-  				print $data->user->name; 
+				<h2><?php
+  				print $data->user->name;
   				?></h2>
 			</div>
 
@@ -41,9 +41,8 @@
 				<img alt="" height="216" src="<?php print $data->user->avatar; ?>" width="216" />
 			</div>
 			<div class="actions">
-				<?php
-  				if ($data->user->uid == $user->uid) { ?>
-					<?php if ((in_array('can_upload_media', array_values($data->user->roles)) && in_array(array('parent', 'teacher', 'senior_moderator','child'), array_values($data->user->roles))) || $data->user->uid == '1') { ?>
+				<?php if ($data->user->uid == $user->uid) { ?>
+					<?php if ((in_array('can_upload_media', array_values($data->user->roles)) && (count(array_intersect(array('parent', 'teacher', 'senior_moderator','child'), array_values($data->user->roles)))>0)) || $data->user->uid == '1') { ?>
 						<a href="/user/<?php print $data->user->uid; ?>/avatars/add">Change Photo</a>
 					<?php } else { ?>
 						<a href="/user/<?php print $data->user->uid; ?>/avatars/browse">Change Photo</a>
