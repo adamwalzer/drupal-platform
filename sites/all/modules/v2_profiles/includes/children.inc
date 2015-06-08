@@ -117,6 +117,28 @@
 
 	}
 
+	function v2_profiles_children_link_imported($puid, $cuid) {
+		$data = new stdClass();
+		$user = user_load($puid);//parent $uid
+
+		$parent = ParentUser::castAs(user_load($user->uid));
+			$child = user_load($cuid);
+			if ($child) {
+				$child = ChildUser::castAs($child);
+				if ($child) {
+					user_relationships_request_relationship($parent, $child, 2, true);
+					user_relationships_request_relationship($child, $parent, 3, true);
+					$roles = user_roles();
+					$index = variable_get('cmwn_module_approved_child_role', '');
+					if ($index) {
+						$child->roles[$index] = $roles[$index];
+						user_save($child, array('roles' => $child->roles));
+					}
+				}
+
+		}
+	}
+
 	function v2_profiles_children_delete($uid1, $uid2) {
 
 		user_delete(array(), $uid2);

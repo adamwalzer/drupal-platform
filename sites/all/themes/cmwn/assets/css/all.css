@@ -316,6 +316,32 @@ body {
 	margin:24px 0px;
 }
 
+#v2 .block.school.dashboard {
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 0;/*accommodate back to school link*/
+}
+
+#school-dashboard-tabs{
+	width: 100%;
+	box-sizing: border-box;
+	margin-top: 14px;
+	border-top: 0;
+}
+
+
+
+#school-dashboard-tabs .ui-tabs-panel{
+	border: 0;
+	border-top: 2px solid #98DAF7;
+	padding: 14px 14px 14px 14px;
+	box-sizing: border-box;
+}
+#v2 .block.school.dashboard table{
+	width: 100%;
+}
+
 	#v2 .block .header {
 		background:#54c2f2;
 		overflow:hidden;
@@ -3171,4 +3197,78 @@ div.section-right{
 #v2 .block.school.index .section{
 	background: url(../img/patterns/purple-header-block.png) no-repeat;
 	background-size: cover;
+}
+
+
+/*school dashboard tabs*/
+
+#v2 .menutabs{
+	padding-left: 14px;
+	margin-bottom: -7px;
+	display: inline-block;
+}
+
+#v2 .menutabs li {
+  /* Makes a horizontal row */
+  float: left;
+
+  /* So the psueudo elements can be
+     abs. positioned inside */
+	position: relative;
+	display:inline-block;
+	list-styling:none;
+}
+#v2 .menutabs a {
+  /* Make them block level
+     and only as wide as they need */
+  float: left;
+  padding: 5px 40px;
+  text-decoration: none;
+  font-weight: bold;
+  /* Default colors */
+
+
+
+  border: 2px solid #98daf7;
+  border-bottom: 0;
+
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+
+  color: white;
+	background: #53a5ed; /* Old browsers */
+	/* IE9 SVG, needs conditional override of 'filter' to 'none' */
+	background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzUzYTVlZCIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjE3JSIgc3RvcC1jb2xvcj0iIzUyYmRlYyIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjM0JSIgc3RvcC1jb2xvcj0iIzUxYmNlYSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9Ijk5JSIgc3RvcC1jb2xvcj0iIzJkNjg4MSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgPC9saW5lYXJHcmFkaWVudD4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSJ1cmwoI2dyYWQtdWNnZy1nZW5lcmF0ZWQpIiAvPgo8L3N2Zz4=);
+	background: -moz-linear-gradient(top,  #53a5ed 0%, #52bdec 17%, #51bcea 34%, #2d6881 99%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#53a5ed), color-stop(17%,#52bdec), color-stop(34%,#51bcea), color-stop(99%,#2d6881)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #53a5ed 0%,#52bdec 17%,#51bcea 34%,#2d6881 99%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #53a5ed 0%,#52bdec 17%,#51bcea 34%,#2d6881 99%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #53a5ed 0%,#52bdec 17%,#51bcea 34%,#2d6881 99%); /* IE10+ */
+	background: linear-gradient(to bottom,  #53a5ed 0%,#52bdec 17%,#51bcea 34%,#2d6881 99%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#53a5ed', endColorstr='#2d6881',GradientType=0 ); /* IE6-8 */
+	font-size: 15px;
+}
+
+#v2 .menutabs li{
+
+}
+
+#v2 .menutabs .ui-tabs-selected a{
+	background: white;
+	color: #54C2F2;
+}
+
+#v2 .menutabs li{
+	position: relative;
+	margin-left: -10px;
+	z-index: 0;
+	border: 0 !important;
+}
+
+#v2 .menutabs li:first-child{
+	margin-left: 0;
+}
+
+#v2 .menutabs li.ui-tabs-selected{
+	z-index: 100;
 }

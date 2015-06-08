@@ -1,15 +1,15 @@
 <?php /* 1.4 */ ?>
 
 <div class="block shadow whiteboard index" id="whiteboard-profile-tabs">
-  		<ul class="header">
-    		<li class="section">
-          <a href="#whiteboard-tab"><h2>Whiteboard</h2></a>
-    		</li>
+	<ul class="header">
+		<li class="section">
+      <a href="#whiteboard-tab"><h2>Whiteboard</h2></a>
+		</li>
 
-    		<li class="section">
-          <a href="#newsfeed-tab" class="tab-newsfeed"><h2>News Feed</h2></a><span class="call-monitor" title="Call a Monitor"></span>
-    		</li>
-  		</ul>
+		<li class="section">
+      <a href="#newsfeed-tab" class="tab-newsfeed"><h2>News Feed</h2></a><span class="call-monitor" title="Call a Monitor"></span>
+		</li>
+	</ul>
 
   <div id="whiteboard-tab">
   	<?php if ($user->user_type == 'child' || $user->user_type == 'parent' || $user->user_type == 'teacher') { ?>

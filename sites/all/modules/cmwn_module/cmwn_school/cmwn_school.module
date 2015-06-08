@@ -32,7 +32,7 @@ function cmwn_school_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     case 'school':
       if ($op == 'view' && $a4) {
         $access = false;
-        if (in_array('administrator', array_values($user->roles))) {
+        if (in_array('administrator', array_values($user->roles)) || $user->uid == $node->uid) {
           $access = true;
         }
         $child_role = get_role_from_rid(variable_get('cmwn_module_child_role', ''));
@@ -47,10 +47,10 @@ function cmwn_school_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
             }
             break;
           case $parent_role:
-            
+
             break;
           case $teacher_role:
-            
+
             break;
         }
         if (!$access) {

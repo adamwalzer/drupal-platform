@@ -62,6 +62,23 @@ require_once(drupal_get_path('module','v2_profiles').'/includes/import_students.
 
 	}
 
+  function v2_profiles_school_dashboard_access($school_id) {
+
+    global $user;
+
+   //TODO: Fill this in with fuller school access check
+    if (in_array('School Administrator', array_values($user->roles)) || in_array('administrator', array_values($user->roles))) {
+      return true;
+    }else{
+      return false;
+    }
+
+
+
+  }
+
+
+
 	function v2_profiles_authenticated_access() {
 
 		global $user;
@@ -75,6 +92,8 @@ require_once(drupal_get_path('module','v2_profiles').'/includes/import_students.
 	function v2_profiles_menu() {
 
 		global $v2_profiles_menu_items;
+
+
 
 		return $v2_profiles_menu_items;
 
@@ -259,4 +278,16 @@ require_once(drupal_get_path('module','v2_profiles').'/includes/import_students.
 
 	}
 
-?>
+function v2_profiles_views_query_alter(&$view, &$query) {
+  switch($view->name){
+    case 'school_manage_students':
+
+      //$query->add_field(NULL,'teacher here','Teacher');
+      //dsm($query->fields);
+      //unset($query->fields['node_node_data_field_teacher_classes_title']);
+      break;
+    default:
+      break;
+  }
+}
+

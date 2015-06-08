@@ -119,7 +119,8 @@ $(function(){
 
   });
 
-
+  //school dashboard tabs
+  $('#school-dashboard-tabs').tabs({collapsible: true});
   //UI Refresh Whiteboard/Newsfeed tabs
   $('#whiteboard-profile-tabs').tabs({collapsible: true});
   //UI Refresh Call Monitor

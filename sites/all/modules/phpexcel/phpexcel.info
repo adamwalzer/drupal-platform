@@ -1,0 +1,9 @@
+name = PHP Excel
+description = Provides a simple API for using the PHPExcel library
+core = 6.x
+; Information added by drupal.org packaging script on 2013-10-01
+version = "6.x-2.0+0-dev"
+core = "6.x"
+project = "phpexcel"
+datestamp = "1380623069"
+
