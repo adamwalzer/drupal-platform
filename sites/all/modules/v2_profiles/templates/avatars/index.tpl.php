@@ -51,7 +51,7 @@
 					<?php } ?>
 					&nbsp; | &nbsp;
 					<a href="/user/<?php print $data->user->uid; ?>/account">Edit Profile</a>
-				<?php } else if ($user->user_type == 'child' && in_array('can_make_friends', array_values($user->roles))) { ?>
+				<?php } else if (in_array('can_make_friends', array_values($user->roles))) { ?>
 					<?php $data->relationship = user_relationships_load(array('between' => array($user->uid, $data->user->uid))); $data->relationship = array_pop($data->relationship); ?>
 					<?php if (!$data->relationship) { ?>
 						<a class="button green small" href="/user/<?php print $user->uid; ?>/friends/<?php print $data->user->uid; ?>/add">Add Friend</a>
