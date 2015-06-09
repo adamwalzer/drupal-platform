@@ -1,8 +1,3 @@
-
-
-
-
-
 <div class="block shadow whiteboard teacher-class friends browse" id="whiteboard-profile-tabs">
 
   <ul class="header">
@@ -39,6 +34,7 @@
     	</div>
     <?php endif;?>
   	<div class="content">
+      <h6><?php print $data->class->title;?></h6>
   		<div class="section grid">
   			<?php if (sizeof($data->students) > 0) { ?>
   				<div class="items">

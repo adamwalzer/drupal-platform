@@ -451,6 +451,7 @@ function v2_profiles_school_import_teacher($school, $teacher, $classes_nodes){
 			'user_type' => 'teacher',
 			'roles' => array(
 				6 => 'teacher',
+				28 => 'can_make_friends',
 			),
 		);
 
@@ -673,6 +674,8 @@ function v2_profiles_school_import_parent($school, $student){//NOTE, $student al
 			'user_type' => 'parent',
 			'roles' => array(
 				5 => 'parent',
+				28 => 'can_make_friends',
+				12 => 'verified-parent',
 			),
 		);
 		//dsm($new_parent);
@@ -734,3 +737,23 @@ function v2_profiles_school_push_class(&$school, $class){
 	$school->field_school_classes[]['nid'] = $class->nid;
 	//return node_save($school);
 }
+/*
+//verify all parents above 5050
+$uids = db_query('select uid from users where uid > 5050');
+while($uid = db_fetch_object($uids)){
+	$u = user_load($uid->uid);
+
+	if(in_array('teacher', array_values($u->roles))){
+		//dsm($u);
+
+		//$u->roles[12] = 'verified-parent';
+		//$update
+		$update['roles'][2] = 'authenticated user';
+		$update['roles'][6] = 'teacher';
+		//$update['roles'][5] = 'parent';
+		//$update['roles'][12] = 'verified-parent';
+		$update['roles'][28] = 'can_make_friends';
+		//user_save($u,$update);
+	}
+}
+*/

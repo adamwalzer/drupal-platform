@@ -1,11 +1,11 @@
 <?php
 
 class TeacherUser extends GenericUser {
-  
+
   protected $_teacherProfile;
-  
+
   /**
-   * 
+   *
    * Enter description here ...
    * @param unknown_type $obj
    * @return TeacherUser
@@ -22,11 +22,15 @@ class TeacherUser extends GenericUser {
       return false;
     }
   }
-  
+
   public static function canHydrate($obj) {
     return isset($obj->roles) && is_array($obj->roles) && in_array(get_role_from_rid(variable_get('cmwn_module_teacher_role', '')), $obj->roles);
   }
-  
+
+  public function getTeacherProfile() {
+    return $this->_teacherProfile;
+  }
+
   public function __construct($obj) {
     if (!self::canHydrate($obj)) {
       throw new Exception('Unable to cast as TeacherUser');
@@ -34,5 +38,5 @@ class TeacherUser extends GenericUser {
     parent::__construct($obj);
     $this->_teacherProfile = content_profile_load('teacher_profile', $this->uid);
   }
-  
+
 }
