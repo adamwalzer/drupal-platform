@@ -1,5 +1,10 @@
 <?php /* 1.4 */ ?>
+<?php
+if($user->user_type =='parent'){
+  print theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon.jpg'));
+}
 
+?>
 <div class="block shadow whiteboard index" id="whiteboard-profile-tabs">
 	<ul class="header">
 		<li class="section">

@@ -82,6 +82,10 @@
                       }
                     ?>
     							</div>
+                <?php else:?>
+                  <div class="student-flips description block modal flips" id="flips-<?php print $item->uid;?>">
+                      <h2><?php print $item->name; ?> has no Flips yet.</h2>
+                  </div>
     						<?php endif;?>
   						</div>
   					<?php } ?>

@@ -220,10 +220,10 @@
 
 			$items[] = l('My Notices', 'user/'.$user->uid.'/notices/account');
 			$items[] = l('Resource Center', 'user/'.$user->uid.'/resources');
-			$items[] = array(
-				'data'=>l('Add a Child', 'user/'.$user->uid.'/children/add'),
-				'class'=>'add-a-child'
-			);
+			//$items[] = array(
+				//'data'=>l('Add a Child', 'user/'.$user->uid.'/children/add'),
+				//'class'=>'add-a-child'
+			//);
 
 		}
 
