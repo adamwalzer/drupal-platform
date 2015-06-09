@@ -149,7 +149,7 @@ if($user->user_type =='parent'){
   						<?php } ?>
   					<?php } ?>
 
-  					<?php if ($user->user_type == 'child') { ?>
+  					<?php //if ($user->user_type == 'child') {//????? ?>
 
   						<div class="form">
   							<form action="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/comments/add" method="post">
@@ -158,7 +158,7 @@ if($user->user_type =='parent'){
   							</form>
   						</div>
 
-  					<?php } ?>
+  					<?php //} ?>
 
   					<div class="actions">
   						<?php if ($data->user->uid === $user->uid || $item->user->uid === $user->uid) { ?>
