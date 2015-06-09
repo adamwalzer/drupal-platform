@@ -247,6 +247,23 @@
 
 		$user = user_load($uid);
 
+		$filter_friends = '';
+		$profile_type = 'child_profile';
+		switch($user->user_type){
+			case 'parent':
+				$filter_friends = ' and u.uid in (select uid from users_roles uri where uri.rid = 5 and uri.uid = u.uid) ';
+				$profile_type = 'parent_profile';
+				break;
+
+			case 'teacher':
+				$filter_friends = ' and u.uid in (select uid from users_roles uri where uri.rid = 6 and uri.uid = u.uid) ';
+				$profile_type = 'teacher_profile';
+				break;
+
+			default:
+				break;
+		}
+
 		$query = "
 			SELECT
 				`u`.`uid`,
@@ -254,19 +271,19 @@
 				`ur2`.`approved`
 			FROM
 				`users` AS `u` JOIN
-				`node` AS `n` ON `u`.`uid` = `n`.`uid` AND `n`.`type` = 'child_profile' JOIN
+				`node` AS `n` ON `u`.`uid` = `n`.`uid` AND `n`.`type` = '" . $profile_type ."' JOIN
 				`users_roles` AS `ur` ON `u`.`uid` = `ur`.`uid` JOIN
 				`role` AS `r` ON `ur`.`rid` = `r`.`rid` LEFT JOIN
 				`user_relationships` AS `ur2` ON `u`.`uid` = `ur2`.`requestee_id` AND `ur2`.`requester_id` = " . $user->uid . " LEFT JOIN
 				`term_node` AS `tn` ON `n`.`nid` = `tn`.`nid`
 			WHERE
-				`r`.`rid` = 28
+				`r`.`rid` = 28 " . $filter_friends . "
 				" . ((!empty($q))?"AND `u`.`name` LIKE '%%" . db_escape_string($q). "%%'":"") . "
 				" . (($tid>0)?"AND `tn`.`tid` = " . $tid:"") . "
 			ORDER BY
 				`u`.`name`;
 		";
-
+//print $query;
 		$results = db_query($query);
 
 		while ($result = db_fetch_object($results)) {
