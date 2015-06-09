@@ -188,6 +188,11 @@
 				$children_links[] = l($child->name, 'user/'.$user->uid.'/notices/child/posting/'.$child->uid);
 			}
 
+			if (in_array('can_make_friends', $user->roles)) {
+				$count = v2_profiles_friends_query_requests($user->uid);
+				$count = sizeof($count);
+				$items[] = l('My Friends & Requests'.(($count>0)?' <span>'.$count.'</span>':''),  'user/'.$user->uid.'/friends/browse', array('html'=>true));
+			}
 
 			$items['notices'] =array(
 					'data' => '<a class="toggle">My Notices</a>',
@@ -217,7 +222,11 @@
 			if ($school) {
 				$items[] = l('My School',  'user/'.$user->uid.'/school');
 			}
-
+			if (in_array('can_make_friends', $user->roles)) {
+				$count = v2_profiles_friends_query_requests($user->uid);
+				$count = sizeof($count);
+				$items[] = l('My Friends & Requests'.(($count>0)?' <span>'.$count.'</span>':''),  'user/'.$user->uid.'/friends/browse', array('html'=>true));
+			}
 			$items[] = l('My Notices', 'user/'.$user->uid.'/notices/account');
 			$items[] = l('Resource Center', 'user/'.$user->uid.'/resources');
 			//$items[] = array(
