@@ -77,12 +77,12 @@
 
 		$data = new stdClass();
 
-		$user = user_load($uid);
+		$whiteboard_owner = user_load($uid);
 
 		$items = v2_profiles_whiteboard_query($uid);
 
 		$data->items = $items;
-		$data->user = $user;
+		$data->user = $whiteboard_owner;
 
 		return theme('v2_profiles_whiteboard_index', $data);
 
@@ -290,23 +290,32 @@
 		$nid = intval($nid);
 		$cid = intval($cid);
 
-		$query = "
-			DELETE FROM
-				`comments`
-			WHERE
-				`cid` = " . $cid . " AND
-				`nid` = " . $nid . ";
-		";
-
-		db_query($query);
-
-		drupal_get_messages();
-
-		if ($user->uid == $uid) {
-			drupal_goto('user/'.$uid);
-		} else {
-			drupal_goto('user/'.$user->uid.'/friends/'.$uid);
-		}
+    $comment = _comment_load($cid);
+    
+    if(comment_access('edit', $comment)){
+      $query = "
+  			DELETE FROM
+  				`comments`
+  			WHERE
+  				`cid` = " . $cid . " AND
+  				`nid` = " . $nid . ";
+  		";
+  
+  		db_query($query);
+  
+  		drupal_get_messages();
+  
+  		
+    }else{
+      drupal_set_message(t('You do not have permission to delete this comment!'), 'error');
+    }
+    
+    if ($user->uid == $uid) {
+    	drupal_goto('user/'.$uid);
+    } else {
+    	drupal_goto('user/'.$user->uid.'/friends/'.$uid);
+    }      
+		
 
 	}
 
@@ -377,6 +386,61 @@
 		exit();
 
 	}
+	
+	function v2_profiles_whiteboard_query_fetch($user){
+  	switch($user->user_type){
+      case 'teacher':
+      case 'parent':
+        return "
+        SELECT
+        `n`.`nid`
+        FROM
+        `node` AS `n`
+        WHERE
+        `n`.`type` = 'whiteboard' AND 
+        (
+          `n`.`uid` = " . $user->uid . " OR
+          
+          (
+              n.uid in (
+                SELECT
+                `u`.`uid`
+                FROM
+                `user_relationships` AS `ur` JOIN `users` AS `u` ON `ur`.`requestee_id` = `u`.`uid`
+                WHERE
+                `ur`.`requester_id` = " . $user->uid . " AND
+                `ur`.`rtid` = 4 AND
+                `ur`.`approved` = 1
+              )
+              
+              and n.status > 0
+          )
+          
+        )
+        
+        ORDER BY
+        `n`.`created` DESC;
+        ";
+        
+        break;
+        
+      default:
+        return  "
+        SELECT
+        `n`.`nid`
+        FROM
+        `node` AS `n`
+        WHERE
+        `n`.`type` = 'whiteboard' AND
+        `n`.`uid` = " . $user->uid . "
+        ORDER BY
+        `n`.`created` DESC;
+        ";
+        break;
+  	}
+  	
+
+	}
 
 	function v2_profiles_whiteboard_query($uid) {
 
@@ -386,19 +450,9 @@
 
 		if (!$user) return $items;
 
-		$query = "
-			SELECT
-				`n`.`nid`
-			FROM
-				`node` AS `n`
-			WHERE
-				`n`.`type` = 'whiteboard' AND
-				`n`.`uid` = " . $uid . "
-			ORDER BY
-				`n`.`created` DESC;
-		";
-
-		$results = db_query($query);
+    $query = v2_profiles_whiteboard_query_fetch($user);
+		
+    $results = db_query($query);
 
 		while ($result = db_fetch_object($results)) {
 			$node = node_load($result->nid);

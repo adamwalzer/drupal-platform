@@ -216,17 +216,26 @@
 
 		} else {//teacher
 			$items[] = l('My Profile', 'user');
-			$items[] = l('My Class', 'user/'.$user->uid.'/class');
-
-			$school = v2_profiles_school_query($uid);
-			if ($school) {
-				$items[] = l('My School',  'user/'.$user->uid.'/school');
-			}
 			if (in_array('can_make_friends', $user->roles)) {
 				$count = v2_profiles_friends_query_requests($user->uid);
 				$count = sizeof($count);
 				$items[] = l('My Friends & Requests'.(($count>0)?' <span>'.$count.'</span>':''),  'user/'.$user->uid.'/friends/browse', array('html'=>true));
 			}
+
+      $school = v2_profiles_school_query($uid);
+			if ($school) {
+				$items[] = l('My School',  'user/'.$user->uid.'/school');
+			}
+
+			$items[] = l('My Class', 'user/'.$user->uid.'/class');
+
+
+
+
+
+
+			
+
 			$items[] = l('My Notices', 'user/'.$user->uid.'/notices/account');
 			$items[] = l('Resource Center', 'user/'.$user->uid.'/resources');
 			//$items[] = array(

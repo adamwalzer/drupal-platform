@@ -36,7 +36,7 @@
 
 	<?php } ?>
 
-	<?php if ($user->user_type == 'child') { ?>
+	<?php if (in_array($user->user_type, array('child','teacher','parent'))) { ?>
 
 		<?php if (in_array('can_make_friends', $user->roles)) { ?>
       <div class="sidebar-toggle hide"></div>

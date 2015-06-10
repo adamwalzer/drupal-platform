@@ -1,5 +1,6 @@
 <?php /* 1.4 */ ?>
 <?php
+
 if($user->user_type =='parent'){
   print theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon.jpg'));
 }
@@ -109,33 +110,39 @@ if($user->user_type =='parent'){
   								</div>
                   <div class="like-wrapper">
                     <?php
-                    $rndswitch = rand(0,1);
-                    $random_users = db_query('select name from {users} order by RAND() limit 4');
-                    $users = array();
-                    while ($r = db_fetch_array($random_users)){
-                      $users[] = $r['name'];
-                    }
+                      
+                      
+                        $users = array();
+                        $flag = flag_get_flag('like_comment');
+                        $flag_count = $flag->get_count($comment->id);
+                        $flagmsg = t('Be the first to like this post!');
+                  
+                        $flaggers = db_query('SELECT u.uid, u.name FROM {flag_content} fc join {users} u on u.uid = fc.uid where content_type ="comment" and content_id = %d and fid = %d order by timestamp desc', array($comment->id, 13));//13 is flag id for like_comment
+                        while($flagger = db_fetch_array($flaggers)){
+                          $users[] = l($flagger['name'],'user/' . $uid . '/friends/' . $flagger['uid']);
+                        }
+                  
+                        switch (true){
+                          case $flag_count <= 3 && $flag_count > 0:
+                            $flagmsg = implode(', ',$users) . ' <em> liked this</em>';
+                            break;
+                          case 0:
+                          case $flag_count == null || $flag_count == false:
+                            break;
+                          default: //more than three
+                            $flagmsg = implode(', ', (array_slice($users, 0, 3))) . ' and <em class="modal-tip" id="modal-tip-'.$comment->id.'">'. theme('item_list',array_slice($users,-2), null,'ul',array('class' => 'morelikes'), 'morelikes-' . $commet->id,'item-list-likes') . ($flag_count-3) . ' others liked this</em>';
+                            break;
+                        }
+                  
+                        print flag_create_link('like_comment', $comment->id) . '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';
+                                        
 
-                    $flag = flag_get_flag('like_comment');
-                    $flags = $flag->get_count($item->nid);
-                    $flagmsg = t('Be the first to like this comment!');
-                    switch (true){
-                      case $flags < 3 && $flags > 0:
-                        $flagmsg = implode(', ',$users) .' and <em class="modal-tip">'.$flags.' others liked this</em>';
-                        break;
-                      case 0:
-                        break;
-                      default: // a few flags less than three
-                        $flagmsg = implode(', ',$users) .'<em> liked this</em>';
-                        break;
-                    }
-                    print flag_create_link('like_comment', $comment->id);
-                    print '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';
-
-                    ?>
+                      ?>
                   </div>
   								<div class="actions">
-  									<?php if ($data->user->uid === $user->uid || $comment->user->uid === $user->uid) { ?>
+  									<?php 
+                      
+    									if ($item->uid === $user->uid || $comment->user->uid === $user->uid) { ?>
   										<a class="delete" href="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/comments/<?php print $comment->id; ?>/delete" title="Remove this post">Delete</a>
   									<?php }
 
