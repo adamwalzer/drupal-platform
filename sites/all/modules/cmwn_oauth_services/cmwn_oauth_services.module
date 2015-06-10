@@ -169,7 +169,8 @@ function _cmwn_oauth_services_application() {
   $request_token->write();
   db_query("DELETE  FROM {oauth_common_token} WHERE key_hash = '%s' AND csid = %d order by tid asc limit 1", sha1($request_token->key), $csid);
 
-  $keys = array('oauth_consumer_key' => $_GET['oauth_consumer_key'], 'oauth_token' => $request_token->key);
+  $expires = date('m/d/Y G:i', $request_token->expires);
+  $keys = array('oauth_consumer_key' => $_GET['oauth_consumer_key'], 'oauth_token' => $request_token->key, 'oauth_token_expiry' => $expires);
 
   header('Content-Type: application/json; charset=utf8');
   $json = json_encode($keys);
