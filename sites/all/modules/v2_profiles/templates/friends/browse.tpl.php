@@ -66,7 +66,9 @@
 								</div>
 								<div class="name">
 									<a href="<?php print $item->href; ?>"><?php print $item->name; ?></a>
+									<?php if($user->user_type == 'child'):?>
 									<span><?php print (int)$total_earned_flips; ?> Flips Earned</span>
+									<?php endif; ?>
 								</div>
 								<div class="actions">
 									<a class="button view" href="/user/<?php print $data->user->uid; ?>/friends/<?php print $item->uid; ?>">View Profile</a>
@@ -107,7 +109,9 @@
 							</div>
 							<div class="name">
 								<a href="<?php print $href; ?>"><?php print $item->name; ?></a>
+								<?php if($user->user_type == 'child'):?>
 								<span><?php print (int)$total_earned_flips; ?> Flips Earned</span>
+								<?php endif;?>
 							</div>
 							<div class="actions">
 								<a class="button small" href="<?php print $href; ?>">View Profile</a>
