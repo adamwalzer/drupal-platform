@@ -76,7 +76,7 @@
 		'template' => 'templates/whiteboard/tab'
 	);	
 
-	function v2_profiles_whiteboard_index($uid,$whiteboard_type = 'Profile') {
+	function v2_profiles_whiteboard_index($uid, $whiteboard_type = 'Profile') {
 
 		$data = new stdClass();
 
@@ -529,6 +529,22 @@
     	  break;
     	  
       case 'School':
+            
+            return "
+            SELECT
+            `n`.`nid`
+            FROM
+            `node` AS `n`  
+            
+            inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
+            
+            inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'          
+     
+            WHERE
+            `n`.`type` = 'whiteboard' and n.status > 0 and n.uid = 5034
+            ORDER BY
+            `n`.`created` DESC;
+            ";      
         break;
         
       default://'Profile'

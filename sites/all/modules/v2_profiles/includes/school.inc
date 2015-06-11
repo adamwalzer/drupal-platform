@@ -42,6 +42,10 @@
 
 		$data->school = $school;
 		$data->user = $user;
+		
+		
+		$data->items = v2_profiles_whiteboard_query($uid, 'School');
+		
 
 		return theme('v2_profiles_school_index', $data);
 

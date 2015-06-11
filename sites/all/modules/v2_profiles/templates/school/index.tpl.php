@@ -23,6 +23,8 @@
 		<div class="section">
 			<?php if ($data->school) { ?>
 				<div class="my-school-image"><?php print theme('image', $data->school->field_image[0]['filepath']); ?></div>
+				
+				<?php print theme('v2_profiles_whiteboard_tab',$data);?>
 			<?php } else { ?>
 			<div class="empty">
 				There are no schools.

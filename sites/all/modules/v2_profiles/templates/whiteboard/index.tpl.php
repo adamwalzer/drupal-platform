@@ -1,6 +1,6 @@
 <?php /* 1.4 */ ?>
 <?php
-if($user->user_type =='parent'){
+if($user->user_type =='parent' && arg(2) != 'friends'){
   print theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon.jpg'));
 }
 ?>
