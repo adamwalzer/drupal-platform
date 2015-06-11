@@ -496,7 +496,19 @@
         switch($user->user_type){
           case 'teacher':
           case 'parent':
-            return "
+          return "
+            SELECT
+            `n`.`nid`
+            FROM
+            `node` AS `n`  inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
+            inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
+            WHERE
+            `n`.`type` = 'whiteboard' AND 
+            `n`.`uid` = " . $user->uid . "
+            ORDER BY
+            `n`.`created` DESC;
+            ";
+            /*return "
             SELECT
             `n`.`nid`
             FROM
@@ -526,7 +538,7 @@
             
             ORDER BY
             `n`.`created` DESC;
-            ";
+            ";*/
             
             break;
             
