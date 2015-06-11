@@ -35,7 +35,7 @@
 			</script>
 		<?php } ?>
 
-		<?php if ($user->uid === $data->user->uid) { ?>
+		<?php if ($user->uid === $data->user->uid && $user->user_type == 'child') { ?>
 			<div class="section form">
 				<form action="/user/<?php print $data->user->uid; ?>/friends/search" method="post">
 					<input name="q" placeholder="Search Friends" type="text" />
