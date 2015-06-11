@@ -1,6 +1,6 @@
 <?php
 	$v2_profiles_menu_items["user/%/class"] = array(
-		"access arguments" => array(1),
+		"access arguments" => array(1,2),
 		"access callback" => 'v2_profiles_access',
 		"description" => "",
 		"page arguments" => array(1),
@@ -21,23 +21,17 @@
   );
 
 
-	function v2_profiles_class_index($uid) {
+	function v2_profiles_class_index($uid,$class_nid) {
+    //PROBLEM: this assumes $uid is teacher...student needs class too.
 
-
-
+    
+    //LOAD STUDENTS
 		$user = user_load($uid);
 
     $class_flips_progress = array();
     $class_flips = array();
 
 		$uids = array();
-
-    $user = TeacherUser::castAs($user);
-    $classes = $user->getTeacherProfile()->field_teacher_classes;
-    $class_nid = array_pop($classes);
-    //$all_classes = '';//ret str
-    //do class layout for each class...teacher may have more than one!
-    //foreach($classes as $class_nid){
 
       $data = new stdClass();
       $data->class = node_load($class_nid);
@@ -83,8 +77,13 @@
       $data->class_flips_progress = $class_flips_progress;
       $data->class_flips = $class_flips;
       $data->user = $user;
-      //$resources = theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon.jpg'));
-      //return $resources . theme('v2_profiles_class_index', $data);
+      
+      //LOAD CLASS WHITEBOARD POSTS
+   		$items = v2_profiles_whiteboard_query_class($class_nid);
+  
+  		$data->items = $items;
+  		$data->user = $user;
+  
       $flips_progress  = theme('v2_profiles_class_flips_progress', $data);
       return $flips_progress . theme('v2_profiles_class_index', $data);
     //}
@@ -163,3 +162,37 @@ function v2_profiles_class_unflipped_flips($completed_flip_nids = array()) {
     return $items;
 
   }
+
+
+	function v2_profiles_class_get_profile_classes($user){
+  	switch($user->user_type){
+    	case 'teacher':
+      	return content_profile_load('teacher_profile', $user->uid)->field_teacher_classes;
+    	  break;
+    	 
+      case 'child':
+      	return content_profile_load('child_profile', $user->uid)->field_student_classes;
+        break;
+      
+      default:
+        return false;
+        break;
+  	}
+	}
+	
+	function v2_profiles_has_class($user, $class_nid){
+  	
+  	$classes = v2_profiles_class_get_profile_classes($user);
+  	$class_flat = array();
+  	
+  	foreach($classes as $class){
+      $class_flat[] = $class['nid'];
+    }
+    
+    if(!in_array($class_nid,($class_flat))){
+      return false;
+    }else{
+      return true;
+    }
+    
+	}

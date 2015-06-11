@@ -70,16 +70,21 @@
 		'arguments' => array('data' => array()),
 		'template' => 'templates/whiteboard/index'
 	);
+	
+	$v2_profiles_theme_items['v2_profiles_whiteboard_tab'] = array(
+		'arguments' => array('data' => array()),
+		'template' => 'templates/whiteboard/tab'
+	);	
 
 	///
 
-	function v2_profiles_whiteboard_index($uid) {
+	function v2_profiles_whiteboard_index($uid,$whiteboard_type = 'Profile') {
 
 		$data = new stdClass();
 
 		$whiteboard_owner = user_load($uid);
 
-		$items = v2_profiles_whiteboard_query($uid);
+		$items = v2_profiles_whiteboard_query($uid, $whiteboard_type);
 
 		$data->items = $items;
 		$data->user = $whiteboard_owner;
@@ -89,10 +94,59 @@
 	}
 
 	function v2_profiles_whiteboard_add($uid) {
+		global $user;
+    
+    $whiteboard_type = 'Profile';
+    $vocabs = taxonomy_get_vocabularies('whiteboard');
+    $vocabulary = null;
+    $whiteboard_term = false;
+    while($v = array_pop($vocabs)){
+      if($v->name == 'Whiteboard Post Type'){
+        $vocabulary = $v;
+      }
+    }
+    
+    $class_nid = $_POST['content_id'];
+    
+    $terms = taxonomy_get_tree($vocabulary->vid);
+    
+    //watchdog('whiteboard_types', print_r($terms,true));
 
+    switch(true){//these are term names
+      case arg(0) == 'user' && in_array('class',array(arg(2),$_POST['type'])):
+        $whiteboard_type = 'Class';
+        //check if this user has permission to post to class
+        $classes = v2_profiles_class_get_profile_classes($user);
+        
+        
+        
+        if(!v2_profiles_has_class($user, $class_nid)){
+          drupal_set_message(t('You do not have permission to post to this class.'), 'error');
+          drupal_goto('user');
+        }
+
+        break;
+        
+      case arg(0) == 'user' && in_array('school',array(arg(2),$_POST['type'])):
+        $whiteboard_type = 'School';
+        break;
+        
+      default:
+        $whiteboard_type == 'Profile';
+        break;
+    }
+    
+    
+    foreach($terms as $term){
+      if($term->name == $whiteboard_type){
+        $whiteboard_term = $term;
+      }
+    }    
+
+    watchdog('whiteboard_term',print_r($whiteboard_term,true));
 		set_time_limit(0);
 
-		global $user;
+
 
 		$extensions = array('image'=>array('gif','jpg','JPG','jpeg','png'),'video'=>array('avi','flv','m4v','mov','mp4','mpg','wmv'));
 		$images = array();
@@ -141,6 +195,8 @@
 					$node->field_viddler_thumbnail[0]['value'] = $viddler['video']['thumbnail_url'];
 				}
 			}
+			
+			
 			$node->status = 0;
 			$node->title = $video->filename;
 			$node->type = 'video';
@@ -178,6 +234,14 @@
 		if ($video_reference > 0) {
 			$node->field_video_reference[]['nid'] = $video_reference;
 		}
+		
+		$node->taxonomy[$whiteboard_term->tid] = $whiteboard_term;
+		watchdog('whiteboard_term_node',print_r($node, true));		
+		
+		if(is_numeric($class_nid)){//already checked for valid student/teacher
+  		$node->field_class[]['nid'] = $class_nid;
+		}
+		
 		$node->status = 0;
 		$node->title = 'Whiteboard ' . time();
 		$node->type = 'whiteboard';
@@ -185,6 +249,7 @@
 		node_validate($node);
 		node_submit($node);
 		node_save($node);
+		
     $tid_feed_type = false;
 		if ($user->uid == $uid) {
 			$excerpt = '<a href="/user/' . $user->uid . '">' . $user->name . '</a> posted on his/her whiteboard.';
@@ -207,7 +272,16 @@
 		$_SESSION['show_post_pending_moderation'] = true;
 
 		if ($user->uid == $uid) {
-			drupal_goto('user/'.$uid);
+  		switch(isset($_POST['dest'])){
+    		case true:
+    		  drupal_goto($_POST['dest']);
+    		  break;
+    		  
+    		default:
+ 					drupal_goto('user/'.$uid);
+ 					break;
+  		}
+
 		} else {
 			drupal_goto('user/'.$user->uid.'/friends/'.$uid);
 		}
@@ -387,62 +461,100 @@
 
 	}
 	
-	function v2_profiles_whiteboard_query_fetch($user){
-  	switch($user->user_type){
-      case 'teacher':
-      case 'parent':
-        return "
-        SELECT
-        `n`.`nid`
-        FROM
-        `node` AS `n`
-        WHERE
-        `n`.`type` = 'whiteboard' AND 
-        (
-          `n`.`uid` = " . $user->uid . " OR
-          
-          (
-              n.uid in (
-                SELECT
-                `u`.`uid`
-                FROM
-                `user_relationships` AS `ur` JOIN `users` AS `u` ON `ur`.`requestee_id` = `u`.`uid`
-                WHERE
-                `ur`.`requester_id` = " . $user->uid . " AND
-                `ur`.`rtid` = 4 AND
-                `ur`.`approved` = 1
+
+	//type = taxonomy on whiteboard class profile etc
+	
+	function v2_profiles_whiteboard_query_fetch($user, $whiteboard_type = 'Profile'){
+  	switch($whiteboard_type){
+    	case 'Class':
+    	      //join whiteboard to whiteboard type taxonomy, join to class nid
+            return "
+            SELECT
+            `n`.`nid`
+            FROM
+            `node` AS `n`  
+            
+            inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
+            
+            inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
+            
+            inner join content_type_whiteboard ctw on n.nid = ctw.nid and n.vid = ctw.vid and ctw.field_class_nid is NOT NULL and ctw.field_class_nid = %s
+            
+            WHERE
+            `n`.`type` = 'whiteboard'
+            ORDER BY
+            `n`.`created` DESC;
+            ";
+
+
+    	  break;
+    	  
+      case 'School':
+        break;
+        
+      default://'Profile'
+        switch($user->user_type){
+          case 'teacher':
+          case 'parent':
+            return "
+            SELECT
+            `n`.`nid`
+            FROM
+            `node` AS `n`  inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
+            inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
+            WHERE
+            `n`.`type` = 'whiteboard' AND 
+            (
+              `n`.`uid` = " . $user->uid . " OR
+              
+              (
+                  n.uid in (
+                    SELECT
+                    `u`.`uid`
+                    FROM
+                    `user_relationships` AS `ur` JOIN `users` AS `u` ON `ur`.`requestee_id` = `u`.`uid`
+                    WHERE
+                    `ur`.`requester_id` = " . $user->uid . " AND
+                    `ur`.`rtid` = 4 AND
+                    `ur`.`approved` = 1
+                  )
+                  
+                  and n.status > 0
               )
               
-              and n.status > 0
-          )
-          
-        )
-        
-        ORDER BY
-        `n`.`created` DESC;
-        ";
-        
-        break;
-        
-      default:
-        return  "
-        SELECT
-        `n`.`nid`
-        FROM
-        `node` AS `n`
-        WHERE
-        `n`.`type` = 'whiteboard' AND
-        `n`.`uid` = " . $user->uid . "
-        ORDER BY
-        `n`.`created` DESC;
-        ";
+            )
+            
+            ORDER BY
+            `n`.`created` DESC;
+            ";
+            
+            break;
+            
+          default:
+            return  "
+            SELECT
+            `n`.`nid`
+            FROM
+            `node` AS `n` inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
+            inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
+            WHERE
+            `n`.`type` = 'whiteboard' AND
+            `n`.`uid` = " . $user->uid . "
+            ORDER BY
+            `n`.`created` DESC;
+            ";
+            break;
+        }
+
+      
         break;
   	}
+
   	
 
 	}
 
-	function v2_profiles_whiteboard_query($uid) {
+	function v2_profiles_whiteboard_query($uid, $whiteboard_type = 'Profile') {
 
 		$items = array();
 
@@ -452,7 +564,7 @@
 
     $query = v2_profiles_whiteboard_query_fetch($user);
 		
-    $results = db_query($query);
+    $results = db_query($query, $whiteboard_type);
 
 		while ($result = db_fetch_object($results)) {
 			$node = node_load($result->nid);
@@ -497,6 +609,63 @@
 		return $items;
 
 	}
+	
+	
+	
+	function v2_profiles_whiteboard_query_class($class_nid) {
+
+		$items = array();
+
+    $query = v2_profiles_whiteboard_query_fetch(0, 'Class');
+		
+    $results = db_query($query, array('Class', $class_nid));
+
+		while ($result = db_fetch_object($results)) {
+			$node = node_load($result->nid);
+      $users = array();
+			$item = new stdClass();
+			$item->nid = $node->nid;
+			$item->comments = v2_profiles_whiteboard_query_comments($node->nid);
+			$item->content = $node->body;
+			$item->id = $node->nid;
+			$item->image = $node->field_image[0]['filepath'];
+			$item->status = $node->status;
+			$item->user = user_load($node->field_user_reference[0]['uid']);
+			$item->video = node_load($node->field_video_reference[0]['nid']);
+
+			//pull flag content
+      $flag = flag_get_flag('like');
+      $flag_count = $flag->get_count($item->nid);
+      $flagmsg = t('Be the first to like this post!');
+
+      $flaggers = db_query('SELECT u.uid, u.name FROM {flag_content} fc join {users} u on u.uid = fc.uid where content_type ="node" and content_id = %d and fid = %d order by timestamp desc', array($item->nid, 12));
+      while($flagger = db_fetch_array($flaggers)){
+        $users[] = l($flagger['name'],'user/' . $uid . '/friends/' . $flagger['uid']);
+      }
+
+      switch (true){
+        case $flag_count <= 3 && $flag_count > 0:
+          $flagmsg = implode(', ',$users) . ' <em> liked this</em>';
+          break;
+        case 0:
+        case $flag_count == null || $flag_count == false:
+          break;
+        default: //more than three
+          $flagmsg = implode(', ', (array_slice($users, 0, 3))) . ' and <em class="modal-tip" id="modal-tip-'.$node->nid.'">'. theme('item_list',array_slice($users,-2), null,'ul',array('class' => 'morelikes'), 'morelikes-' . $node->nid,'item-list-likes') . ($flag_count-3) . ' others liked this</em>';
+          break;
+      }
+
+      $item->flags_output = flag_create_link('like', $item->nid) . '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';
+
+			$items[] = $item;
+		}
+
+		return $items;
+
+	}
+	
+	
+	
 
 	function v2_profiles_whiteboard_query_comments($nid) {
 

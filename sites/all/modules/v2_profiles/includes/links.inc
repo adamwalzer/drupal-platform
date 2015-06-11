@@ -147,6 +147,8 @@
 			if ($school) {
 				$items[] = l('My School',  'user/'.$user->uid.'/school');
 			}
+			
+      v2_profiles_links_myclasses($user, $items);
 
 			//$items[] = (object)array('title' => 'My News', 'href' => '/user/'.$user->uid.'/news');
 
@@ -223,13 +225,14 @@
 			}
 
       $school = v2_profiles_school_query($uid);
+      
 			if ($school) {
 				$items[] = l('My School',  'user/'.$user->uid.'/school');
 			}
 
-			$items[] = l('My Class', 'user/'.$user->uid.'/class');
-
-
+      
+      
+      v2_profiles_links_myclasses($user, $items);
 
 
 
@@ -255,3 +258,34 @@
 		return $items;
 
 	}
+	
+
+
+function v2_profiles_links_myclasses($user, &$items){
+ //class = if only one class, just link to my class, otherwise submenu.
+      $classes = v2_profiles_class_get_profile_classes($user);
+      switch(true){
+        case (count($classes) == 1):
+          $items[] = l('My Class', 'user/'.$user->uid.'/class/' . $classes[0]['nid']);
+          break;
+          
+        case (count($classes) > 1):
+
+          $classes_links = array();
+          foreach($classes as $class){
+            $class = node_load($class['nid']);
+            $classes_links[] = l($class->title,'user/'.$user->uid.'/class/' . $class->nid);
+          }
+
+          $items['classes'] =array(
+          		'data' => '<a class="toggle">My Classes</a>',
+          		'children' => $classes_links,
+          );
+        
+          break;
+        
+        default:
+        
+          break;
+      } 
+}

@@ -1,4 +1,4 @@
-<div class="block shadow whiteboard teacher-class friends browse" id="whiteboard-profile-tabs">
+<div class="block shadow whiteboard teacher-class index friends browse" id="whiteboard-profile-tabs">
 
   <ul class="header">
     <li class="section">
@@ -11,7 +11,9 @@
   </ul>
 
   <div id="whiteboard-tab">
-    No posts yet
+    <?php 
+      print theme('v2_profiles_whiteboard_tab', $data);
+    ?>
   </div>
 
   <div id="class-tab">
@@ -34,7 +36,7 @@
     	</div>
     <?php endif;?>
   	<div class="content">
-      <h6><?php print $data->class->title;?></h6>
+      <h4 class="class-title"><?php print $data->class->title;?></h4>
   		<div class="section grid">
   			<?php if (sizeof($data->students) > 0) { ?>
   				<div class="items">

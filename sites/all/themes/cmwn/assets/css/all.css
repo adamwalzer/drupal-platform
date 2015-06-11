@@ -1011,19 +1011,25 @@ body {
 			padding:12px;
 		}
 
-			#v2 .block.friends.browse .content .section.grid .items .item {
+			#v2 .block.friends.browse .content .section.grid .items .item,
+			#v2 .block.friends.browse #class-tab .content .section.grid .items .item{
 				display:inline;
 				float:left;
 				margin:11px;
+				padding: 0 ;
 				position:relative;
 				width:126px;
+				height: auto;
 			}
 
-				#v2 .block.friends.browse .content .section.grid .items .item .image {
+				#v2 .block.friends.browse .content .section.grid .items .item .image,
+        #v2 .block.friends.browse #class-tab .content .section.grid .items .item .image {
 					box-shadow:0px 0px 6px rgba(0,0,0,0.12);
-					height:126px;
+					height:126px !important;
 					overflow:hidden;
-					width:126px;
+					position: relative !important;
+
+					width:126px !important;
 				}
 
 				#v2 .block.friends.browse .content .section.grid .items .item .name {
@@ -2472,6 +2478,7 @@ div.parent-child-whiteboard .news-comments{
 
 #v2 .block.whiteboard.index {
 	clear:both;
+	width: 100%;
 }
 
 #v2 .block.whiteboard.index .create {
@@ -3271,4 +3278,13 @@ div.section-right{
 
 #v2 .menutabs li.ui-tabs-selected{
 	z-index: 100;
+}
+
+
+#v2 h4.class-title{
+  margin-top: 15px;
+  margin-left: 23px;
+  font-size: 24px;
+	font-family:'CMWNJadeRegular';
+	letter-spacing: .02em;
 }
