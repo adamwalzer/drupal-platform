@@ -3133,6 +3133,8 @@ img.student-flip-img-left-link{
 div.news-image img{
   margin: 0 auto !important;
   display: block;
+  width: 100%;
+  height: auto;
 }
 
 #whiteboard-tab{
@@ -3287,4 +3289,8 @@ div.section-right{
   font-size: 24px;
 	font-family:'CMWNJadeRegular';
 	letter-spacing: .02em;
+}
+
+.news-comments input[name="subject"]{
+  display: none;
 }

@@ -76,8 +76,6 @@
 		'template' => 'templates/whiteboard/tab'
 	);	
 
-	///
-
 	function v2_profiles_whiteboard_index($uid,$whiteboard_type = 'Profile') {
 
 		$data = new stdClass();
@@ -88,11 +86,52 @@
 
 		$data->items = $items;
 		$data->user = $whiteboard_owner;
+		
+		//newsfeed
+		$newsfeed_query = "select nid from {node} n where n.status = 1 and 
+		(
+		  n.type in ('news') OR
+		  (n.type in ('whiteboard') AND
+		  
+      
+              
+                  n.uid in (
+                    SELECT
+                    `u`.`uid`
+                    FROM
+                    `user_relationships` AS `ur` JOIN `users` AS `u` ON `ur`.`requestee_id` = `u`.`uid`
+                    WHERE
+                    `ur`.`requester_id` = " . $whiteboard_owner->uid . " AND
+                    `ur`.`rtid` = 4 AND
+                    `ur`.`approved` = 1
+                  )
+                  
+             
+              
+		  
+		  
+		  
+		) 
+  )
+		  
+		  order by n.created desc limit 20";
+		
+		//print $newsfeed_query;exit;
+		$newsfeed = db_query($newsfeed_query);
+    
+    $news_items = array();
+    
+    while($news = db_fetch_object($newsfeed)){
+      $news_items[] = node_load($news->nid);
+    }
+    
+    $data->news_items = $news_items;
+    
+		
 
 		return theme('v2_profiles_whiteboard_index', $data);
-
 	}
-
+	
 	function v2_profiles_whiteboard_add($uid) {
 		global $user;
     

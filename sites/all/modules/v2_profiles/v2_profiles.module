@@ -286,6 +286,16 @@ function v2_profiles_views_query_alter(&$view, &$query) {
       //dsm($query->fields);
       //unset($query->fields['node_node_data_field_teacher_classes_title']);
       break;
+    
+    case 'newsfeed':
+      /*dsm($query);
+      $query->where[] = array(
+        'clauses' = array(
+          0 => node.type in 
+        )  
+      );*/
+      break;
+    
     default:
       break;
   }
