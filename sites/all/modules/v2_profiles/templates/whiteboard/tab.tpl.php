@@ -1,4 +1,11 @@
-<?php if ($user->user_type == 'child' || $user->user_type == 'parent' || $user->user_type == 'teacher') { ?>
+<?php 
+  global $user;
+  if(!$user->user_type){
+    if(in_array('School Administrator', ($user->roles))){
+      $user->user_type = 'School Administrator';
+    }
+  }
+  if (arg(2) != 'school' && ($user->user_type == 'School Administrator' || $user->user_type == 'child' || $user->user_type == 'parent' || $user->user_type == 'teacher')) { ?>
   		<div class="create">
   			<div class="avatar">
   				<img src="<?php print v2_profiles_avatars_query($user->uid); ?>" width="84" />
@@ -13,14 +20,14 @@
   							<input name="files[media]" type="file" />
   						</span>
   					<?php } ?>
-  					<input type="hidden" name="type" value="<?php print arg(2);?>" />
-  					<input type="hidden" name="content_id" value="<?php print arg(3);?>" />
+  					<input type="hidden" name="type" value="<?php print arg(2) ? arg(2) : $user->user_type == 'School Administrator'?'School':'';?>" />
+  					<input type="hidden" name="content_id" value="<?php print arg(3)?>" />
   					<input type="hidden" name="dest" value="<?php print $_GET['q'];?>"/>
   					<button class="button" type="submit">Post</button>
   				</form>
   			</div>
   		</div>
-  	<?php } ?>
+<?php } ?>
   	<div class="items">
   		<?php foreach($data->items as $item) { ?>
   			<?php if ($item->status == 1 || $item->user->uid == $user->uid) { ?>

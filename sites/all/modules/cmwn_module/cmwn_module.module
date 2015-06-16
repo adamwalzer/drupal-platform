@@ -583,6 +583,12 @@ function cmwn_module_admin_settings() {
         '#options' => $roles,
         '#default_value' => variable_get('cmwn_module_teacher_role', '')
       ),
+      'cmwn_module_school_admin_role' => array(
+        '#type' => 'select',
+        '#title' => 'Teacher Role',
+        '#options' => $roles,
+        '#default_value' => variable_get('cmwn_module_school_admin_role', '')
+      ),      
     )
   );
   return system_settings_form($form);
@@ -684,8 +690,12 @@ function cmwn_module_user($op, &$edit, &$account, $category = NULL) {
         $account = ParentUser::castAs($account);
       } else if (in_array(get_role_from_rid(variable_get('cmwn_module_teacher_role', '')), $account->roles)) {
         $account = TeacherUser::castAs($account);
+      } else if (in_array(get_role_from_rid(variable_get('cmwn_module_school_admin_role', '')), $account->roles)) {
+        $account = GenericUser::castAs($account);        
+        $account->user_type = 'School Administrator';
       } else {
         $account = GenericUser::castAs($account);
+        
       }
       break;
     case 'view':

@@ -10,6 +10,8 @@
 		$child_role = get_role_from_rid(variable_get('cmwn_module_child_role', ''));
 		$parent_role = get_role_from_rid(variable_get('cmwn_module_parent_role', ''));
 		$teacher_role = get_role_from_rid(variable_get('cmwn_module_teacher_role', ''));
+		$school_admin_role = get_role_from_rid(variable_get('cmwn_module_school_admin_role', ''));
+		
 		switch (arg(2)) {
 			case $child_role:
 				$user_type = $child_role;
@@ -20,6 +22,9 @@
 			case $teacher_role:
 				$user_type = $teacher_role;
 				break;
+			case $school_admin_role:
+				$user_type = $school_admin_role;
+				break;				
 		}
 		$form['user_type'] = array(
 			'#type' => 'value',
@@ -68,6 +73,11 @@
 				require_once $path.'/inc/form-alter/teacher-profile-node-form.inc';
 				cmwn_module_teacher_profile_user_register($form, $form_state);
 				break;
+			case $school_admin_role:
+			  //placeholder, does not exist yst
+				//require_once $path.'/inc/form-alter/school-admin-profile-node-form.inc';
+				//cmwn_module_school_admin_profile_user_register($form, $form_state);
+				break;				
 		}
 		
 		// Add appropriate content profile node forms

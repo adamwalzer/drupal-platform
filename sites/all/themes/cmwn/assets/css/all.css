@@ -366,7 +366,8 @@ body {
 		#v2 .block .header .section {
 		}
 
-		#v2 .block .header .section h2 {
+		#v2 .block .header .section h2,
+		#v2 .block.school.index  > .content > .section label {
 			color:#ffffff;
 			display:inline;
 			font-family:'CMWNJadeRegular';
@@ -3203,11 +3204,51 @@ div.section-right{
 	color: #858585;
 }
 
-#v2 .block.school.index .section{
+#v2 .block.school.index  > .content.p{
 	background: url(../img/patterns/purple-header-block.png) no-repeat;
 	background-size: cover;
+  padding: 30px;
 }
 
+#v2 .block.school.index  > .content > .section label{
+  font-size: 24px;
+  font-weight: normal;
+  letter-spacing: .02em;
+}
+
+#v2 .block.school.index  > .content,
+#v2 .block.school.index  > .content > .section{
+}
+
+#v2 .block.school.index  > .content > .section p{
+  color: white;
+  margin: 6px 0 15px 0;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+#v2 .block.school.index  > .content > .section .school-left,
+#v2 .block.school.index  > .content > .section .school-right{
+  margin-top: 20px
+}
+
+#v2 .block.school.index  > .content > .section > *{
+  float: left;
+  clear: none;
+  margin-right: 30px;  
+  color: white;
+  font-size: 14px;
+  width: 29%;
+  box-sizing: border-box;
+}
+
+#v2 .block.school.index  > .content > .section > *:last-child{
+  margin-right: 0;
+}
+
+.my-school-image{
+  
+}
 
 /*school dashboard tabs*/
 

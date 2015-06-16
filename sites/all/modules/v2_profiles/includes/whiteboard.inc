@@ -148,8 +148,6 @@
     $class_nid = $_POST['content_id'];
     
     $terms = taxonomy_get_tree($vocabulary->vid);
-    
-    //watchdog('whiteboard_types', print_r($terms,true));
 
     switch(true){//these are term names
       case arg(0) == 'user' && in_array('class',array(arg(2),$_POST['type'])):
@@ -157,16 +155,13 @@
         //check if this user has permission to post to class
         $classes = v2_profiles_class_get_profile_classes($user);
         
-        
-        
         if(!v2_profiles_has_class($user, $class_nid)){
           drupal_set_message(t('You do not have permission to post to this class.'), 'error');
           drupal_goto('user');
         }
-
         break;
         
-      case arg(0) == 'user' && in_array('school',array(arg(2),$_POST['type'])):
+      case arg(0) == 'user' && in_array('School', array(arg(2), $_POST['type'])):
         $whiteboard_type = 'School';
         break;
         
@@ -174,7 +169,6 @@
         $whiteboard_type == 'Profile';
         break;
     }
-    
     
     foreach($terms as $term){
       if($term->name == $whiteboard_type){
@@ -184,8 +178,6 @@
 
     watchdog('whiteboard_term',print_r($whiteboard_term,true));
 		set_time_limit(0);
-
-
 
 		$extensions = array('image'=>array('gif','jpg','JPG','jpeg','png'),'video'=>array('avi','flv','m4v','mov','mp4','mpg','wmv'));
 		$images = array();
@@ -502,7 +494,6 @@
 	
 
 	//type = taxonomy on whiteboard class profile etc
-	
 	function v2_profiles_whiteboard_query_fetch($user, $whiteboard_type = 'Profile'){
   	switch($whiteboard_type){
     	case 'Class':
@@ -522,14 +513,12 @@
             WHERE
             `n`.`type` = 'whiteboard'
             ORDER BY
-            `n`.`created` DESC;
-            ";
-
-
+            `n`.`created` DESC;";
     	  break;
     	  
       case 'School':
-            
+            $school = v2_profiles_school_query($user->uid);
+           
             return "
             SELECT
             `n`.`nid`
@@ -541,79 +530,53 @@
             inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'          
      
             WHERE
-            `n`.`type` = 'whiteboard' and n.status > 0 and n.uid = 5034
+            `n`.`type` = 'whiteboard' and n.status > 0 and n.uid = ".$school->field_school_administrator[0]['uid']."
             ORDER BY
-            `n`.`created` DESC;
-            ";      
+            `n`.`created` DESC;";   
         break;
         
       default://'Profile'
         switch($user->user_type){
           case 'teacher':
           case 'parent':
-          return "
-            SELECT
-            `n`.`nid`
-            FROM
-            `node` AS `n`  inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
-            inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
-            WHERE
-            `n`.`type` = 'whiteboard' AND 
-            `n`.`uid` = " . $user->uid . "
-            ORDER BY
-            `n`.`created` DESC;
-            ";
-            /*return "
-            SELECT
-            `n`.`nid`
-            FROM
-            `node` AS `n`  inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
-            inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
-            WHERE
-            `n`.`type` = 'whiteboard' AND 
-            (
-              `n`.`uid` = " . $user->uid . " OR
-              
-              (
-                  n.uid in (
-                    SELECT
-                    `u`.`uid`
-                    FROM
-                    `user_relationships` AS `ur` JOIN `users` AS `u` ON `ur`.`requestee_id` = `u`.`uid`
-                    WHERE
-                    `ur`.`requester_id` = " . $user->uid . " AND
-                    `ur`.`rtid` = 4 AND
-                    `ur`.`approved` = 1
-                  )
-                  
-                  and n.status > 0
-              )
-              
-            )
-            
-            ORDER BY
-            `n`.`created` DESC;
-            ";*/
-            
+            return "SELECT
+              `n`.`nid`
+              FROM
+              `node` AS `n`  inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
+              inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
+              WHERE
+              `n`.`type` = 'whiteboard' AND 
+              `n`.`uid` = " . $user->uid . "
+              ORDER BY
+              `n`.`created` DESC;";
+              break;
+
+          case 'School Administrator':
+            return "SELECT
+              `n`.`nid`
+              FROM
+              `node` AS `n`  inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
+              inner join term_data td on td.tid = tn.tid and td.vid = 8 and (td.name ='Profile' OR td.name = 'School')
+              WHERE
+              `n`.`type` = 'whiteboard' AND 
+              `n`.`uid` = " . $user->uid . "
+              ORDER BY
+              `n`.`created` DESC;";            
             break;
-            
+          
           default:
-            return  "
-            SELECT
-            `n`.`nid`
-            FROM
-            `node` AS `n` inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
-            inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
-            WHERE
-            `n`.`type` = 'whiteboard' AND
-            `n`.`uid` = " . $user->uid . "
-            ORDER BY
-            `n`.`created` DESC;
-            ";
+            return  "SELECT
+              `n`.`nid`
+              FROM
+              `node` AS `n` inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
+              inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
+              WHERE
+              `n`.`type` = 'whiteboard' AND
+              `n`.`uid` = " . $user->uid . "
+              ORDER BY
+              `n`.`created` DESC;";
             break;
         }
-
-      
         break;
   	}
 
@@ -629,11 +592,11 @@
 
 		if (!$user) return $items;
 
-    $query = v2_profiles_whiteboard_query_fetch($user);
+    $query = v2_profiles_whiteboard_query_fetch($user, $whiteboard_type);
 		
     $results = db_query($query, $whiteboard_type);
-
 		while ($result = db_fetch_object($results)) {
+
 			$node = node_load($result->nid);
       $users = array();
 			$item = new stdClass();

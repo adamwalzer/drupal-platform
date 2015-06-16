@@ -17,6 +17,10 @@ if($data->user->user_type == 'parent') {
 	<?php print v2_profiles_whiteboard_index($data->user->uid); ?>
 	<?php print v2_profiles_news_index($data->user->uid); ?>
 	<?php //print v2_profiles_partners_index($data->user->uid); ?>
-  <?php } else { ?>
-  <?php print v2_profiles_partners_index($data->user->uid); ?>
-  <?php }?>
+<?php } else { ?>
+  <?php 
+    //print v2_profiles_partners_index($data->user->uid);
+    //print $data->user->user_type; 
+    print v2_profiles_whiteboard_index($data->user->uid);
+  ?>
+<?php }?>
