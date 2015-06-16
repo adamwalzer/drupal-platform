@@ -301,3 +301,23 @@ function v2_profiles_views_query_alter(&$view, &$query) {
   }
 }
 
+function v2_profiles_get_teachers_by_student_uid($uid){
+  $teachers = array();
+  $result = db_query("SELECT tu.name, tu.uid
+            FROM content_field_teacher_classes cftc
+            JOIN content_field_student_classes cfsc ON cftc.field_teacher_classes_nid = cfsc.field_student_classes_nid
+            JOIN node sn ON sn.nid = cfsc.nid
+            AND sn.uid = %d
+            JOIN node tn ON tn.nid = cftc.nid
+            AND tn.vid = cftc.vid
+            JOIN users tu ON tu.uid = tn.uid
+            LIMIT 0 , 30", $uid);
+  while($teacher = db_fetch_object($result)){
+    $teachers[] = array(
+      'uid' => $teacher->uid,
+      'name' => $teacher->name
+    );
+  }
+  
+  return $teachers;
+}
