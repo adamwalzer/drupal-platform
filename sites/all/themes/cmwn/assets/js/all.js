@@ -161,6 +161,31 @@ $(function(){
 
 
 
+
+
+  //school dashboard upload file ui
+  var SITE = SITE || {};
+   
+  SITE.fileInputs = function() {
+    var $this = $(this),
+        $val = $this.val(),
+        valArray = $val.split('\\'),
+        newVal = valArray[valArray.length-1],
+        $button = $this.parent().siblings('.button'),
+        $fakeFile = $this.siblings('.file-holder');
+    if(newVal !== '') {
+      $button.text('Spreadsheet Uploading...');
+      if($fakeFile.length === 0) {
+        //$button.after('<span class="file-holder">' + newVal + '</span>');
+      } else {
+        $fakeFile.text(newVal);
+      }
+    }
+  };
+
+  $('#edit-school-import-wrapper input[type=file]').bind('change focus click', SITE.fileInputs);
+
+
   //teacher profile page, flip overlay on class students
   var class_modal_tipped = $('#v2 .column.content .block.teacher-class.browse .content .section .items .item');
 
@@ -209,6 +234,11 @@ $(function(){
   //tooltips
   //$('span.call-monitor').qtip();
   //$('[title]').qtip();
+
+
+
+
+
 
 
 	/* 1.4 feed */

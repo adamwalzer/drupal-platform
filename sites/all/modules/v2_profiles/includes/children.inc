@@ -22,6 +22,16 @@
 		'type' => MENU_CALLBACK,
 	);
 
+	$v2_profiles_menu_items['user/%/children/%/school'] = array(
+		'access arguments' => array(1),
+		'access callback' => 'v2_profiles_access',
+		'description' => '',
+		'page arguments' => array(1, 3),
+		'page callback' => 'v2_profiles_children_school_read',
+		'title' => 'Children\'s School',
+		'type' => MENU_CALLBACK,
+	);
+
 	$v2_profiles_menu_items['user/%/children/%/delete'] = array(
 		'access arguments' => array(1),
 		'access callback' => 'v2_profiles_access',
@@ -271,4 +281,9 @@
 
 		return theme('v2_profiles_children_read', $data);
 
+	}
+	
+	function v2_profiles_children_school_read($parent_uid, $child_uid){
+    $child = user_load($child_uid);
+    print_r($child);
 	}

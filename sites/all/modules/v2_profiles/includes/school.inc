@@ -92,15 +92,19 @@
 function v2_profiles_school_import(){
 	$form = array();
 	// If this #attribute is not present, upload will fail on submit
+	
 	$form['#attributes']['enctype'] = 'multipart/form-data';
 	$form['school_import'] = array(
-		'#title' => t('Upload Spreadsheet'),
+		'#title' => t(''),
 		'#type'  => 'file',
+		'#suffix' =>'<span class="button">UPLOAD SPREADSHEET</span>',
 	);
+	
 	$form['submit_upload'] = array(
 		'#type'  =>  'submit',
-		'#value'  =>  'Upload Spreadsheet	'
+		'#value'  =>  'Upload Spreadsheet'
 	);
+	
 	return $form;
 }
 

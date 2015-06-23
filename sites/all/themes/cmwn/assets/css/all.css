@@ -1623,9 +1623,20 @@ body {
 			}
 
 				#v2 .column.content .block.profile .avatars .content .section .actions .button {
-					display:inline;
-					float:left;
+					display: inline-block;
+					float: left;					
+					width: 47%;
+					box-sizing: border-box;
+					margin-top :8px;
+					padding: 1px 5px 5px 5px;
+					white-space: nowrap;
+					margin-right: 5px;
 				}
+				
+				#v2 .column.content .block.profile .avatars .content .section .actions .button:last-child{
+  				width: 100%;
+  				box-sizing: border-box;
+				}				
 
 #v2 .column.content .block.profile .flips {
 	clear:none;
@@ -3323,7 +3334,6 @@ div.section-right{
 	z-index: 100;
 }
 
-
 #v2 h4.class-title{
   margin-top: 15px;
   margin-left: 23px;
@@ -3333,5 +3343,43 @@ div.section-right{
 }
 
 .news-comments input[name="subject"]{
+  display: none;
+}
+
+#v2-profiles-school-import{
+  float: right;
+  position: relative;  
+  cursor: pointer;
+  display: inline-block;
+  overflow: hidden;
+  position: relative;
+  width: auto;
+  float: right;
+  outline: 1px solid green;
+  width: 200px;
+  height: 29px;
+  overflow: hidden;
+}
+
+#edit-school-import-wrapper,
+#edit-school-import-wrapper input{
+  z-index: 1;
+  cursor: pointer;
+  font-size: 100px;
+  height: 100%;
+  filter: alpha(opacity=1);
+  -moz-opacity: 0.01;
+  opacity: 0.01;
+  position: absolute;
+  right: 0;
+  top: 0; 
+}
+
+#v2-profiles-school-import span.button{
+  z-index: 0;
+  display: inline-block;
+}
+
+#v2-profiles-school-import #edit-submit-upload{
   display: none;
 }

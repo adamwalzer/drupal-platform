@@ -235,7 +235,13 @@
       v2_profiles_links_myclasses($user, $items);
 
 
-
+      if(in_array('School Administrator', ($user->roles))){
+        $schools = db_query('select n.nid, n.title from {node} n join {content_field_school_administrator} cfsa on cfsa.nid = n.nid  and cfsa.vid = n.vid join {users} u on u.uid = cfsa.field_school_administrator_uid where u.uid = %d', $user->uid);
+        while($school = db_fetch_object($schools)){
+          $items[] = l( $school->title . t(' Dashboard'), 'school/'.$school->nid.'/dashboard');            
+        }
+        //print_r($user);exit();
+      }
 
 			
 

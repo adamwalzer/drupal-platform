@@ -41,26 +41,45 @@
 				<img alt="" height="216" src="<?php print $data->user->avatar; ?>" width="216" />
 			</div>
 			<div class="actions">
-				<?php if ($data->user->uid == $user->uid) { ?>
-					<?php //if ((in_array('can_upload_media', array_values($data->user->roles)) && (count(array_intersect(array('parent', 'teacher', 'senior_moderator','child'), array_values($data->user->roles)))>0)) || $data->user->uid == '1') {
-						if(true){
-					?>
-						<a href="/user/<?php print $data->user->uid; ?>/avatars/add">Change Photo</a>
-					<?php } else { ?>
-						<a href="/user/<?php print $data->user->uid; ?>/avatars/browse">Change Photo</a>
-					<?php } ?>
-					&nbsp; | &nbsp;
-					<a href="/user/<?php print $data->user->uid; ?>/account">Edit Profile</a>
-				<?php } else if (in_array('can_make_friends', array_values($user->roles))) { ?>
-					<?php $data->relationship = user_relationships_load(array('between' => array($user->uid, $data->user->uid))); $data->relationship = array_pop($data->relationship); ?>
-					<?php if (!$data->relationship) { ?>
-						<a class="button green small" href="/user/<?php print $user->uid; ?>/friends/<?php print $data->user->uid; ?>/add">Add Friend</a>
-					<?php } else if ($data->relationship->approved == 0) { ?>
-						<span class="button small disabled">Request Sent</span>
-					<?php } ?>
-				<?php } else if ($user->user_type == 'parent' && !arg(3)) { ?>
-					<a class="button small" href="/user/<?php print $user->uid; ?>/children/<?php print $data->user->uid; ?>">View Full Profile</a>
-				<?php } ?>
+				<?php 
+  				
+        global $user;
+        if ($data->user->uid == $user->uid) {
+        
+          switch(true){//every body can upload avatars per joni now.
+          	case ($data->user->uid == $user->uid):
+          	  ?><a href="/user/<?php print $data->user->uid; ?>/avatars/add">Change Photo</a>&nbsp; | &nbsp;<a href="/user/<?php print $data->user->uid; ?>/account">Edit Profile</a><?php
+          	  break;
+          }
+        
+    		}else if (in_array('can_make_friends', array_values($user->roles))){
+      		$data->relationship = user_relationships_load(array('between' => array($user->uid, $data->user->uid))); $data->relationship = array_pop($data->relationship);
+
+        		switch(true){
+              case (!$data->relationship)://no relationship, add friend button
+                ?><a class="button green small" href="/user/<?php print $user->uid; ?>/friends/<?php print $data->user->uid; ?>/add">Add Friend</a><?php
+                break;
+                
+              case ($data->relationship->approved == 0)://pending approval, show pending
+                ?><span class="button small disabled">Request Sent</span><?php
+                break;
+                
+              case ($user->user_type == 'parent' && !arg(3)):
+                ?>
+                <a class="button small" href="/user/<?php print $user->uid; ?>/children/<?php print $data->user->uid; ?>/class/<?php print $class_nid; ?>">View Class</a>
+                <a class="button small" href="/user/<?php print $user->uid; ?>/children/<?php print $data->user->uid; ?>/school">View School</a>
+                <a class="button small" href="/user/<?php print $user->uid; ?>/children/<?php print $data->user->uid; ?>">View Full Profile</a>
+                <?php
+                break;
+                
+              default:
+                break;
+        		}
+        		
+    		}
+  				
+        ?>
+		
 			</div>
 		</div>
 
