@@ -149,6 +149,10 @@
     $terms = taxonomy_get_tree($vocabulary->vid);
 
     switch(true){//these are term names
+      case arg(2) == 'friends':
+        $whiteboard_type = 'Profile';
+        break;
+        
       case arg(0) == 'user' && in_array('class',array(arg(2),$_POST['type'])):
         $whiteboard_type = 'Class';
         //check if this user has permission to post to class
@@ -163,7 +167,8 @@
       case arg(0) == 'user' && in_array('School', array(arg(2), $_POST['type'])):
         $whiteboard_type = 'School';
         break;
-        
+      
+
       default:
         $whiteboard_type == 'Profile';
         break;
@@ -494,6 +499,8 @@
 
 	//type = taxonomy on whiteboard class profile etc
 	function v2_profiles_whiteboard_query_fetch($user, $whiteboard_type = 'Profile'){
+  	
+  	
   	switch($whiteboard_type){
     	case 'Class':
     	      //join whiteboard to whiteboard type taxonomy, join to class nid

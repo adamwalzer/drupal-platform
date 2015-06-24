@@ -24,8 +24,8 @@
   							<input name="files[media]" type="file" />
   						</span>
   					<?php } ?>
-  					<input type="hidden" name="type" value="<?php print arg(2) ? arg(2) : $user->user_type == 'School Administrator' ? 'School' : '';?>" />
-  					<input type="hidden" name="content_id" value="<?php print arg(3); ?>" />
+  					<input type="hidden" name="type" value="<?php print arg(2) ? arg(2) : ($user->user_type == 'School Administrator' ? 'School' : ''); ?>" />
+  					<input type="hidden" name="content_id" value="<?php print (arg(2) !='friends')?arg(3):''; ?>" />
   					<input type="hidden" name="dest" value="<?php print $_GET['q']; ?>"/>
   					<button class="button" type="submit">Post</button>
   				</form>
@@ -57,8 +57,7 @@
   							<object
   								classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
   								height="305"
-  								width="438"
-  							>
+  								width="438">
   								<param name="movie" value="//www.viddler.com/mini/<?php print $item->video->field_viddler_id[0]['value']; ?>/"/>
   								<param name="allowScriptAccess" value="always"/>
   								<param name="allowNetworking" value="all"/>
