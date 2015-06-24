@@ -5,7 +5,11 @@
       $user->user_type = 'School Administrator';
     }
   }
-  if (($data->readonly == false) && (arg(2) != 'school' && ($user->user_type == 'School Administrator' || $user->user_type == 'child' || $user->user_type == 'parent' || $user->user_type == 'teacher'))) { ?>
+  
+  if (
+      ($data->readonly == false)
+       && 
+      (arg(2) != 'school' && ($user->user_type == 'School Administrator' || $user->user_type == 'child' || $user->user_type == 'parent' || $user->user_type == 'teacher'))) { ?>
   		<div class="create">
   			<div class="avatar">
   				<img src="<?php print v2_profiles_avatars_query($user->uid); ?>" width="84" />

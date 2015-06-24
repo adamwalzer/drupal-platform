@@ -35,7 +35,7 @@
 	function v2_profiles_school_index($uid) {
 
 		$data = new stdClass();
-
+    $data->readonly = v2_profiles_whiteboard_readonly();
 		$user = user_load($uid);
 
 		$school = v2_profiles_school_query($uid);

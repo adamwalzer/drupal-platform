@@ -35,6 +35,7 @@
 		$uids = array();
 
       $data = new stdClass();
+      $data->readonly = v2_profiles_whiteboard_readonly();
       $data->class = node_load($class_nid);
       $uids_view_array =  cmwn_views_get_view_result('students_by_class','default',$class_nid);
 

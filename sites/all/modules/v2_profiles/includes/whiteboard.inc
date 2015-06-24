@@ -81,7 +81,6 @@
 		$data = new stdClass();
     $data->readonly = v2_profiles_whiteboard_readonly();
 		$whiteboard_owner = user_load($uid);
-
 		$items = v2_profiles_whiteboard_query($uid, $whiteboard_type);
 
 		$data->items = $items;
@@ -744,6 +743,15 @@
 
 function v2_profiles_whiteboard_readonly(){
   global $user;
+  switch(true){
+    case ((arg(4) == 'school' || arg(4) == 'class' || arg(2) == 'children') && $user->user_type == 'parent'):
+    case (arg(2) == 'children' && arg(4) == 'class'):
+      return true;
+      break;
+    
+    default:
+      return false;
+  }
   if((arg(4) == 'school' || arg(4) == 'class' || arg(2) == 'children') && $user->user_type == 'parent'){
     return true;
   }else{
