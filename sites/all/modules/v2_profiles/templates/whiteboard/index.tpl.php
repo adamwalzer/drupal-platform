@@ -1,6 +1,6 @@
 <?php /* 1.4 */ ?>
 <?php
-if($user->user_type =='parent' && arg(2) != 'friends'){
+if($user->user_type =='parent' && arg(2) != 'friends' && arg(2) !='children' && arg(2) != 'class'){
   print theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon.jpg'));
 }
 ?>
@@ -45,10 +45,11 @@ if($user->user_type =='parent' && arg(2) != 'friends'){
                       ?>
                     </div>
                     <?php print '<h3 class="news-div">' . $news->title . '</h3>'; ?>
-                    
-                    <div class="actions">
-                    		<a class="delete" href="/user/<?php print arg(1);?>/news/<?php print $news->nid;?>/delete" title="Remove this news">Delete</a>
-                    </div>
+                    <?php if($data->readonly == false):?>    
+                      <div class="actions">
+                      		<a class="delete" href="/user/<?php print arg(1);?>/news/<?php print $news->nid;?>/delete" title="Remove this news">Delete</a>
+                      </div>
+                    <?php endif;?>
                     
                     <?php 
                       
@@ -78,14 +79,20 @@ if($user->user_type =='parent' && arg(2) != 'friends'){
                             $flagmsg = implode(', ', (array_slice($users, 0, 3))) . ' and <em class="modal-tip" id="modal-tip-'.$news->nid.'">'. theme('item_list',array_slice($users,-2), null,'ul',array('class' => 'morelikes'), 'morelikes-' . $news->nid,'item-list-likes') . ($flag_count-3) . ' others liked this</em>';
                             break;
                         }
-                  
-                        print flag_create_link('like', $news->nid) . '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';
+                        if($data->readonly == false){
+                          print flag_create_link('like', $news->nid) . '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';
+                        }else{
+                          print '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';
+                        }
+                        
 
                       ?>
                       <div class="news-comments">
                         <?php 
                           print comment_render($news);
-                          print drupal_get_form('comment_form', array('nid' => $news->nid), 'Comment');
+                          if($data->readonly == false){
+                            print drupal_get_form('comment_form', array('nid' => $news->nid), 'Comment');
+                          }
                         ?>
                       </div>
                       

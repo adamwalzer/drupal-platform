@@ -5,7 +5,7 @@
       $user->user_type = 'School Administrator';
     }
   }
-  if (arg(2) != 'school' && ($user->user_type == 'School Administrator' || $user->user_type == 'child' || $user->user_type == 'parent' || $user->user_type == 'teacher')) { ?>
+  if (($data->readonly == false) && (arg(2) != 'school' && ($user->user_type == 'School Administrator' || $user->user_type == 'child' || $user->user_type == 'parent' || $user->user_type == 'teacher'))) { ?>
   		<div class="create">
   			<div class="avatar">
   				<img src="<?php print v2_profiles_avatars_query($user->uid); ?>" width="84" />
@@ -20,9 +20,9 @@
   							<input name="files[media]" type="file" />
   						</span>
   					<?php } ?>
-  					<input type="hidden" name="type" value="<?php print arg(2) ? arg(2) : $user->user_type == 'School Administrator'?'School':'';?>" />
-  					<input type="hidden" name="content_id" value="<?php print arg(3)?>" />
-  					<input type="hidden" name="dest" value="<?php print $_GET['q'];?>"/>
+  					<input type="hidden" name="type" value="<?php print arg(2) ? arg(2) : $user->user_type == 'School Administrator' ? 'School' : '';?>" />
+  					<input type="hidden" name="content_id" value="<?php print arg(3); ?>" />
+  					<input type="hidden" name="dest" value="<?php print $_GET['q']; ?>"/>
   					<button class="button" type="submit">Post</button>
   				</form>
   			</div>
@@ -124,29 +124,35 @@
                             break;
                         }
                   
-                        print flag_create_link('like_comment', $comment->id) . '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';
+                        if($data->readonly == false){
+                          print flag_create_link('like_comment', $comment->id);                          
+                        }
+
+                        print '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';
                                         
 
                       ?>
                   </div>
-  								<div class="actions">
-  									<?php 
-                      
-    									if ($item->uid === $user->uid || $comment->user->uid === $user->uid) { ?>
-  										<a class="delete" href="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/comments/<?php print $comment->id; ?>/delete" title="Remove this post">Delete</a>
-  									<?php }
-
-                    if($comment->user->uid != $user->uid){ ?>
-  										<a class="report" href="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/comments/<?php print $comment->id; ?>/report" title="Report this post">Report</a>
-  									<?php } ?>
-  								</div>
-
+                  
+                  <?php if ($data->readonly == false): ?>
+    								<div class="actions">
+    									<?php 
+                        
+      									if ($item->uid === $user->uid || $comment->user->uid === $user->uid) { ?>
+    										<a class="delete" href="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/comments/<?php print $comment->id; ?>/delete" title="Remove this post">Delete</a>
+    									<?php }
+  
+                      if($comment->user->uid != $user->uid){ ?>
+    										<a class="report" href="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/comments/<?php print $comment->id; ?>/report" title="Report this post">Report</a>
+    									<?php } ?>
+    								</div>
+                  <?php endif;?>
   							</div>
 
   						<?php } ?>
   					<?php } ?>
 
-  					<?php //if ($user->user_type == 'child') {//????? ?>
+  					<?php if($data->readonly == false):?>
 
   						<div class="form">
   							<form action="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/comments/add" method="post">
@@ -154,16 +160,16 @@
   								<button class="button" type="submit">Post</button>
   							</form>
   						</div>
-
-  					<?php //} ?>
-
-  					<div class="actions">
-  						<?php if ($data->user->uid === $user->uid || $item->user->uid === $user->uid) { ?>
-  							<a class="delete" href="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/delete" title="Remove this post">Delete</a>
-  						<?php } else { ?>
-  							<a class="report" href="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/report" title="Report this post">Report</a>
-  						<?php } ?>
-  					</div>
+            
+            <?php endif; ?>
+  
+    					<div class="actions">
+    						<?php if ($data->user->uid === $user->uid || $item->user->uid === $user->uid) { ?>
+    							<a class="delete" href="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/delete" title="Remove this post">Delete</a>
+    						<?php } else { ?>
+    							<a class="report" href="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/report" title="Report this post">Report</a>
+    						<?php } ?>
+    					</div>
 
   				</div>
 

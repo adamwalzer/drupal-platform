@@ -6,7 +6,10 @@
     </li>
 
     <li class="section">
-      <a href="#class-tab" class="tab-class"><h2>My Class</h2></a><span class="call-monitor" title="Call a Monitor"></span>
+      <a href="#class-tab" class="tab-class"><h2>My Class</h2></a>
+      <?php if ($data->readonly == false): ?>
+        <span class="call-monitor" title="Call a Monitor"></span>
+      <?php endif; ?>
     </li>
   </ul>
 

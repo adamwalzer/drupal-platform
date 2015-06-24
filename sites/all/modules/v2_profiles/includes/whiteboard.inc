@@ -79,7 +79,7 @@
 	function v2_profiles_whiteboard_index($uid, $whiteboard_type = 'Profile') {
 
 		$data = new stdClass();
-
+    $data->readonly = v2_profiles_whiteboard_readonly();
 		$whiteboard_owner = user_load($uid);
 
 		$items = v2_profiles_whiteboard_query($uid, $whiteboard_type);
@@ -631,7 +631,12 @@
           break;
       }
 
-      $item->flags_output = flag_create_link('like', $item->nid) . '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';
+      if(v2_profiles_whiteboard_readonly() == false){
+        $item->flags_output = flag_create_link('like', $item->nid) . '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';  
+      }else{
+        $item->flags_output = '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';      
+      }
+      
 
 			$items[] = $item;
 		}
@@ -645,7 +650,6 @@
 	function v2_profiles_whiteboard_query_class($class_nid) {
 
 		$items = array();
-
     $query = v2_profiles_whiteboard_query_fetch(0, 'Class');
 		
     $results = db_query($query, array('Class', $class_nid));
@@ -684,8 +688,12 @@
           $flagmsg = implode(', ', (array_slice($users, 0, 3))) . ' and <em class="modal-tip" id="modal-tip-'.$node->nid.'">'. theme('item_list',array_slice($users,-2), null,'ul',array('class' => 'morelikes'), 'morelikes-' . $node->nid,'item-list-likes') . ($flag_count-3) . ' others liked this</em>';
           break;
       }
+      if(v2_profiles_whiteboard_readonly() == false){
+        $item->flags_output = flag_create_link('like', $item->nid) . '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';        
+      }else{
+        $item->flags_output = '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';      
+      }
 
-      $item->flags_output = flag_create_link('like', $item->nid) . '<span>&nbsp;&middot;&nbsp;' . $flagmsg. '</span>';
 
 			$items[] = $item;
 		}
@@ -734,4 +742,11 @@
 
 	}
 
-?>
+function v2_profiles_whiteboard_readonly(){
+  global $user;
+  if((arg(4) == 'school' || arg(4) == 'class' || arg(2) == 'children') && $user->user_type == 'parent'){
+    return true;
+  }else{
+    return false;
+  }
+}

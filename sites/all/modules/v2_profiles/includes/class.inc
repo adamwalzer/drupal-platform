@@ -23,10 +23,11 @@
 
 	function v2_profiles_class_index($uid,$class_nid) {
     //PROBLEM: this assumes $uid is teacher...student needs class too.
+    //Problem update - this code doesn't care if uid is a teacher, it doesn'te ven use it.
 
     
     //LOAD STUDENTS
-		$user = user_load($uid);
+		//$user = user_load($uid);
 
     $class_flips_progress = array();
     $class_flips = array();

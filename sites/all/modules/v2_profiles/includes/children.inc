@@ -32,6 +32,16 @@
 		'type' => MENU_CALLBACK,
 	);
 
+	$v2_profiles_menu_items['user/%/children/%/class/%'] = array(
+		'access arguments' => array(1),
+		'access callback' => 'v2_profiles_access',
+		'description' => '',
+		'page arguments' => array(1, 3, 5),
+		'page callback' => 'v2_profiles_children_class_read',
+		'title' => 'Children\'s Classes',
+		'type' => MENU_CALLBACK,
+	);
+
 	$v2_profiles_menu_items['user/%/children/%/delete'] = array(
 		'access arguments' => array(1),
 		'access callback' => 'v2_profiles_access',
@@ -285,5 +295,13 @@
 	
 	function v2_profiles_children_school_read($parent_uid, $child_uid){
     $child = user_load($child_uid);
-    print_r($child);
+    $child_profile = $child->getChildProfile();
+    $school_nid = $child_profile->field_school[0]['nid'];
+    
+    return v2_profiles_school_index($child_uid);
+    
+	}
+
+	function v2_profiles_children_class_read($parent_uid, $child_uid, $class_nid){
+    return v2_profiles_class_index($child_uid, $class_nid);        
 	}

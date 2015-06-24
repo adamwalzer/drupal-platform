@@ -66,7 +66,13 @@
                 
               case ($user->user_type == 'parent' && !arg(3)):
                 ?>
-                <a class="button small" href="/user/<?php print $user->uid; ?>/children/<?php print $data->user->uid; ?>/class/<?php print $class_nid; ?>">View Class</a>
+                
+                <?php 
+                  $child_profile = $data->user->getChildProfile();
+                  foreach($child_profile->field_student_classes as $class):?>
+                    <a class="button small" href="/user/<?php print $user->uid; ?>/children/<?php print $data->user->uid; ?>/class/<?php print $class['nid']; ?>">View Class</a>
+                <?php endforeach;?>
+                
                 <a class="button small" href="/user/<?php print $user->uid; ?>/children/<?php print $data->user->uid; ?>/school">View School</a>
                 <a class="button small" href="/user/<?php print $user->uid; ?>/children/<?php print $data->user->uid; ?>">View Full Profile</a>
                 <?php
