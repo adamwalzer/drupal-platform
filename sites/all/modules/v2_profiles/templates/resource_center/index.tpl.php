@@ -1,13 +1,2 @@
-<div class="block shadow resource_center flips browse index">
-	<div class="header">
-		<div class="section">
-			<h2>Resource Center</h2>
-		</div>
-	</div>
-
-	<div class="content">
-			<div class="section">
-        <?php print $data; ?>
-			</div>
-	</div>
-</div>
+<iframe class="block shadow" src="http://demoai.changemyworldnow.com?uid=<?php print $data->uid?>" width="100%" height="735px" frameborder="no" scrollbars
+	="none" scrolling="no"></iframe>

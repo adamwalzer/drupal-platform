@@ -1,0 +1,139 @@
+<?php
+    
+function cmwn_moderation_menu() {
+  $items = array();
+
+  $items['node/%node/approve'] = array(
+    'title' => 'Approve', 
+    'access arguments' => array('moderate content'),
+    'page callback' => 'cmwn_moderation_approve',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+    'weight' => 10,   
+  ); 
+  
+
+  $items['node/%node/approve'] = array(
+    'title' => 'Approve', 
+    'access arguments' => array('moderate content'),
+    'page callback' => 'cmwn_moderation_approve',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+    'weight' => 10,   
+  );   
+  
+  
+  $items['cmwn_moderation/remove/%/%'] = array(
+    'title' => 'Remove Due to Format', 
+    'access arguments' => array('moderate content'),
+    'page callback' => 'cmwn_moderation_process_removal',
+    'page arguments' => array(2,3),
+    'type' => MENU_CALLBACK,
+    'weight' => 10,   
+  );   
+  
+  $items['cmwn_moderation/restore/%'] = array(
+    'title' => 'Remove Due to Format', 
+    'access arguments' => array('moderate content'),
+    'page callback' => 'cmwn_moderation_killfile_restore',
+    'page arguments' => array(2),
+    'type' => MENU_CALLBACK,
+    'weight' => 10,   
+  ); 
+
+
+
+  return $items;
+}
+
+
+function cmwn_moderation_approve($nid){
+  $nid = arg(1);
+  global $user;
+  
+  $node = node_load($nid);
+  $node->status = 1;
+  
+  //@$node = node_submit($node);
+  @node_save($node);
+  //watchdog('cmwn_moderation', $user->name . ' ' . t('approved post nid') . ' ' . $nid . ' (' . $node->title . ')');
+  
+  drupal_set_message('content has been approved');
+  drupal_goto($_GET['destination']);
+
+}
+
+function cmwn_moderation_form($form_state){
+  
+  $form['#redirect'] = 'mod';
+  //$form['#action'] = 'mod';
+  
+  $form['form-title'] = array(
+    '#markup' => '<h2>Confirm reason for denial</h2>'
+  );
+  
+  $options = array(
+    'delete_inappropriate' => t('Inappropriate content'),
+    'delete_bullying' => t('Bullying'),
+    'delete_file_format' => t('Image unviewable or other format problem'),
+  );
+  $form['mod_reason'] = array(
+    '#type' => 'radios',
+    '#title' => '',
+    '#options' => $options,
+    '#required' => true,
+  );
+  
+  
+  $form['nid'] = array(
+    '#type' => 'hidden',
+    '#default_value' => arg(1),
+  );
+  
+  $form['cancel'] = array('#type' => 'button', '#value' => t('Cancel'));
+  $form['submit'] = array('#type' => 'submit', '#value' => t('   Confirm Denial   '));
+  
+  return $form;
+}
+
+function cmwn_moderation_form_submit($form, &$form_state){
+  global $user;
+  if(in_array('moderator', $user->roles)){
+
+    $nid = $form_state['values']['nid'];
+    $reason = $form_state['values']['mod_reason'];
+    drupal_goto('cmwn_moderation/remove/'.$reason.'/'.$nid);
+  }
+}
+
+function cmwn_moderation_process_removal(){
+  $node = node_load(arg(3));
+  $node->status = 0;
+  node_save($node);
+  
+  killfile_node_delete($node->nid);
+  drupal_set_message(t('Content was removed due to') . ' ' . ltrim(arg(2),'delete_'));
+  drupal_goto('mod');
+}
+
+function cmwn_moderation_killfile_restore($nid) {
+  global $user;
+  if(in_array('moderator', $user->roles)){
+    db_query('delete FROM {killfile_nodes} WHERE nid = %d', $nid);
+    $node = node_load($nid);
+    $node->status = 0;
+    node_save($node->nid);
+  }
+  drupal_set_message(t('content has been reset to moderation queue'));
+  drupal_goto('mod/denied');
+}
+
+function cmwn_moderation_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'update':
+      if($node->status == '1' && $node->type == 'whiteboard') {
+
+      }
+      break;
+      }
+}

@@ -1624,7 +1624,7 @@ body {
 
 				#v2 .column.content .block.profile .avatars .content .section .actions .button {
 					display: inline-block;
-					float: left;					
+					float: left;
 					width: 47%;
 					box-sizing: border-box;
 					margin-top :8px;
@@ -1632,11 +1632,11 @@ body {
 					white-space: nowrap;
 					margin-right: 5px;
 				}
-				
+
 				#v2 .column.content .block.profile .avatars .content .section .actions .button:last-child{
   				width: 100%;
   				box-sizing: border-box;
-				}				
+				}
 
 #v2 .column.content .block.profile .flips {
 	clear:none;
@@ -3246,7 +3246,7 @@ div.section-right{
 #v2 .block.school.index  > .content > .section > *{
   float: left;
   clear: none;
-  margin-right: 30px;  
+  margin-right: 30px;
   color: white;
   font-size: 14px;
   width: 29%;
@@ -3258,7 +3258,7 @@ div.section-right{
 }
 
 .my-school-image{
-  
+
 }
 
 /*school dashboard tabs*/
@@ -3345,10 +3345,10 @@ div.section-right{
 .news-comments input[name="subject"]{
   display: none;
 }
-
+/*
 #v2-profiles-school-import{
   float: right;
-  position: relative;  
+  position: relative;
   cursor: pointer;
   display: inline-block;
   overflow: hidden;
@@ -3372,7 +3372,7 @@ div.section-right{
   opacity: 0.01;
   position: absolute;
   right: 0;
-  top: 0; 
+  top: 0;
 }
 
 #v2-profiles-school-import span.button{
@@ -3382,4 +3382,214 @@ div.section-right{
 
 #v2-profiles-school-import #edit-submit-upload{
   display: none;
+}*/
+
+/* Moderation Dashboard */
+
+#block-menu-menu-moderation .content > ul.menu,
+#block-menu-menu-moderation .content > ul.menu li,
+#block-menu_block-1 .content > div > ul.menu,
+#block-menu_block-1 .content > div > ul.menu li{
+	list-style: none;
+	list-style-image: none;
+	display: inline-block;
+}
+
+#block-menu-menu-moderation .content > ul.menu > li{
+	margin: 0;
+	padding: 0;
+	float: left;
+}
+
+#block-menu-menu-moderation .content > ul.menu{
+	padding-left: 0;
+}
+
+#block-menu-menu-moderation .content > ul.menu > li > a {
+    background: #7829BB none repeat scroll 0% 0%;
+
+    color: #FFF;
+    padding: 28px;
+    font-size: 17px;
+    font-family: "CMWNJadeRegular";
+    box-sizing: border-box;
+    text-align: center;
+		border-right: 2px solid rgba(0, 0, 0, .5);
+    text-transform: uppercase;
+    display: inline-block;
+    overflow: hidden;
+}
+
+#block-menu-menu-moderation .content > ul.menu > li.active-trail > a{
+	background-image: -ms-linear-gradient(top, #7829BB 0%, #4F1B7A 100%);
+	background-image: -moz-linear-gradient(top, #7829BB 0%, #4F1B7A 100%);
+	background-image: -o-linear-gradient(top, #7829BB 0%, #4F1B7A 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #7829BB), color-stop(100, #4F1B7A));
+	background-image: -webkit-linear-gradient(top, #7829BB 0%, #4F1B7A 100%);
+	background-image: linear-gradient(to bottom, #7829BB 0%, #4F1B7A 100%);
+}
+
+#block-menu-menu-moderation .content > ul.menu > li:first-child > a{
+	border-radius: 15px 0 0 0;
+}
+
+#block-menu-menu-moderation .content > ul.menu > li:last-child > a{
+	border-radius: 0 15px 0 0;
+	border-right: 0;
+}
+
+
+#block-menu-menu-moderation .content > ul.menu > li:nth-child(2) > a{
+
+}
+
+#block-menu-menu-moderation .content > ul.menu > li ul{
+	display: none;
+}
+
+#block-menu_block-1 .content > div > ul.menu{
+	width: 100%;
+	background: #54C2F2;
+	padding: 15px;
+	text-align: center;
+	margin-top: -10px;
+	box-sizing: border-box;
+	margin-bottom: 40px;
+}
+
+
+#block-menu_block-1 .content > div > ul.menu > li{
+	margin: 0 20px;
+}
+
+#block-menu_block-1 .content > div > ul.menu > li > a{
+	padding: 10px 0 10px 45px;
+	color: #fff;
+	font-weight: bold;
+}
+
+#block-menu_block-1 .content > div > ul.menu > li > a.active,
+#block-menu_block-1 .content > div > ul.menu > li.active-trail > a,
+#block-menu_block-1 .content > div > ul.menu > li > a:hover{
+	color: #7829bb;
+}
+
+#block-menu_block-1 .content > div > ul.menu > li:first-child > a,
+#block-menu_block-1 .content > div > ul.menu > li:nth-child(2) > a{
+	background: url(../img/icon_unmoderated_72dpi.png) no-repeat left center;
+}
+
+#block-menu_block-1 .content > div > ul.menu > li:first-child > a.active,
+#block-menu_block-1 .content > div > ul.menu > li:first-child > a:hover,
+#block-menu_block-1 .content > div > ul.menu > li:nth-child(2) > a.active,
+#block-menu_block-1 .content > div > ul.menu > li:nth-child(2) > a:hover{
+	background: url(../img/icon_unmoderated_on.png) no-repeat left center;
+}
+
+
+
+#block-menu_block-1 .content > div > ul.menu > li:nth-child(3) > a{
+	background: url(../img/icon_approved_72dpi.png) no-repeat left center;
+}
+
+#block-menu_block-1 .content > div > ul.menu > li:nth-child(3) > a.active,
+#block-menu_block-1 .content > div > ul.menu > li:nth-child(3) > a:hover{
+	background: url(../img/icon_approved_on_72dpi.png) no-repeat left center;
+}
+
+
+#block-menu_block-1 .content > div > ul.menu > li:last-child > a{
+	background: url(../img/icon_denied_72dpi.png) no-repeat left center;
+}
+
+#block-menu_block-1 .content > div > ul.menu > li:last-child > a.active,
+#block-menu_block-1 .content > div > ul.menu > li:last-child > a:hover{
+	background: url(../img/icon_denied_on_72dpi.png) no-repeat left center;
+}
+
+.ui-dialog-content .node-type-whiteboard img{
+  width: 500px !important;
+  height: auto !important;
+}
+
+.views_view__moderation table.views-table,
+.view-moderation-approved table.views-table,
+.view-moderation-denied table.views-table{
+  width: 100%;
+}
+
+.views_view__moderation table.views-table td,
+.view-moderation-approved table.views-table td,
+.view-moderation-denied table.views-table td{
+  padding: 8px 15px;
+}
+
+#v2 .mod-deny-post,
+#v2 .mod-approve-post{
+  border-radius: 5px;
+  background: #4D4D4D;
+  color: white;
+  font-size: 18px;
+  padding: 8px 14px;
+  text-transform: uppercase;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.12);
+  margin-right: 40px;
+  display: inline-block;
+  float: none;
+}
+
+#v2 .mod-deny-post:hover{
+  color: #4D4D4D;
+  background: white;  
+}
+
+#v2 .mod-approve-post{
+  background: #56BB36;
+  color: #fff;  
+}
+
+#v2 .mod-approve-post:hover{
+  background: #fff;
+  color: #56BB36;  
+}
+
+#v2 .mod-send-to-supervisor{
+  color: #7829BB;
+  text-align: center;
+  width: 100%;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+#v2 .mod-actions{
+  text-align: center;
+  border-top: 1px solid #d3d3d3;
+}
+
+#cmwn-moderation-form > *{
+  text-align: left !important;
+}
+
+#v2 #cmwn-moderation-form input.form-submit{
+  position: relative !important;
+  background: #7829BB none repeat scroll 0% 0%;
+  width: auto !important;
+  border-radius: 5px;
+  color: white;
+  bottom: 0px;
+  height: 36px;
+  padding: 0px;
+  font-size: 12px;
+
+  text-transform: capitalize;
+}
+
+#v2 #cmwn-moderation-form input.form-submit[value="Cancel"]{
+  background: transparent !important;
+  color: #7829BB !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }

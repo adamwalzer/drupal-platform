@@ -1,6 +1,6 @@
 <?php
 
-	$v2_profiles_menu_items["user/%/resources"] = array(	
+	$v2_profiles_menu_items["user/%/resources"] = array(
 		"access arguments" => array(1),
 		"access callback" => 'v2_profiles_access',
 		"description" => "",
@@ -65,12 +65,11 @@ function v2_profiles_resource_center_index($uid,$type = 'parent') {
 	//return theme('v2_profiles_resource_center_index', $data);
 	$partners = v2_profiles_partners_index($uid);
 	if($type == 'parent'){
-    $resource = theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon.jpg'));  	
+    $resource = theme('v2_profiles_resource_center_index', $user);
 	}elseif($type == 'teacher'){
-    $resource = theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon-teacher.jpg'));	
+    $resource = theme('v2_profiles_resource_center_index',$user);
 	}
 
-  
   if(arg(2) == 'resources'){
     return $resource . $partners;
   }else{

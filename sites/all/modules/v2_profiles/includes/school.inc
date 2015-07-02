@@ -97,7 +97,7 @@ function v2_profiles_school_import(){
 	$form['school_import'] = array(
 		'#title' => t(''),
 		'#type'  => 'file',
-		'#suffix' =>'<span class="button">UPLOAD SPREADSHEET</span>',
+
 	);
 	
 	$form['submit_upload'] = array(

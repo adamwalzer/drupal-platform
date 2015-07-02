@@ -3,3 +3,4 @@ description = "Tracks certain events to notify user of with both internal and ex
 package = "CMWN"
 core = "6.x"
 dependencies[] = "cmwn_module"
+dependencies[] = "killfile"

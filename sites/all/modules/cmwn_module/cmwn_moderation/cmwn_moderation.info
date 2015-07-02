@@ -1,0 +1,7 @@
+name = "CMWN Moderation"
+description = "Moderation functionality CMWN"
+package = "CMWN"
+core = "6.x"
+dependencies[] = "cmwn_module"
+dependencies[] = "cmwn_notifications"
+dependencies[] = "killfile"

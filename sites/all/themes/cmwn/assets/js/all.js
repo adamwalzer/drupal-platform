@@ -162,10 +162,10 @@ $(function(){
 
 
 
-
+/*
   //school dashboard upload file ui
   var SITE = SITE || {};
-   
+
   SITE.fileInputs = function() {
     var $this = $(this),
         $val = $this.val(),
@@ -184,7 +184,7 @@ $(function(){
   };
 
   $('#edit-school-import-wrapper input[type=file]').bind('change focus click', SITE.fileInputs);
-
+*/
 
   //teacher profile page, flip overlay on class students
   var class_modal_tipped = $('#v2 .column.content .block.teacher-class.browse .content .section .items .item');
@@ -605,6 +605,40 @@ $(function(){
 			}
 		).show();
 	}
+
+  /* Moderation Dashboard */
+
+
+
+$('.views_view__moderation .views-field-title a, .view-moderation-denied .views-field-title a, .view-moderation-approved .views-field-title a').each(function(){
+  var ton = false;
+  $(this).click(function() {
+    $('tr.mod-ajax').remove();
+    $('#mod-this').remove();
+
+    var $link = $(this);
+    $('<a name="mod-this" id="mod-this" />').insertAfter($(this).parent().parent());
+    $('<td colspan="4"></td>').insertAfter('#mod-this')
+        .load($link.attr('href') + ' #v2', function(){
+          $('html, body').animate({scrollTop: $('#mod-this').offset().top }, 500);
+
+          $('#cmwn-moderation-form #edit-cancel').click(function(){
+            $(this).parents('tr.mod-ajax').remove();
+            return false;
+          });
+          
+        }).wrap('<tr class="mod-ajax"></tr>');
+        return false;
+  });
+});
+
+
+
+
+
+
+  /* End Moderation Dashboard */
+
 
 	/* 1.4 */
 
