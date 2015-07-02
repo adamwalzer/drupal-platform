@@ -1,4 +1,16 @@
 <?php /* 1.4 */ ?>
+
+<?php
+  
+  
+?>
+
+<?php switch(true):?>
+<?php case true:?>
+<iframe width="100%" height = "650" src="<?php print $data->node->field_instruction_1[0]['value'];?>?uid=<?php print $data->user->uid;?>" style="border: 0;width:100%;height: 650px;" scrolling="no" scrollbars="none"></iframe>
+<?php break;?>
+
+<?php case false:?>
 <?php
 if($data->user->user_type=='parent') {
 	header('Location: /user/');
@@ -139,3 +151,7 @@ if($data->user->user_type=='parent') {
 		</div>
 	</div>
 <?php } ?>
+
+<?php break;?>
+
+<?php endswitch;?>
