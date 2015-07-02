@@ -3514,13 +3514,15 @@ div.section-right{
 
 .views_view__moderation table.views-table,
 .view-moderation-approved table.views-table,
-.view-moderation-denied table.views-table{
+.view-moderation-denied table.views-table,
+.view-moderation-comments table.views-table{
   width: 100%;
 }
 
 .views_view__moderation table.views-table td,
 .view-moderation-approved table.views-table td,
-.view-moderation-denied table.views-table td{
+.view-moderation-denied table.views-table td,
+.view-moderation-comments table.views-table td{
   padding: 8px 15px;
 }
 

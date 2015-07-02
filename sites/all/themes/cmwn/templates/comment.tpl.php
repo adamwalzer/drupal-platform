@@ -25,15 +25,27 @@
  * @see theme_comment()
  */
 ?>
-<div class="comment<?php print ($comment->new) ? ' comment-new' : ''; print ' '. $status ?>">
-  <div class="content">
-    <?php echo $picture; ?>
-    <div class="body">
-      <h3><?php echo $comment->subject; ?></h3>
-      <div class="submitted"><?php echo $submitted; ?></div>
-      <?php print $content; ?>
+<?php switch($_GET['mod'] == 'process' || $_GET['mod'] == 'denied' || $_GET['mod'] == 'approved'): ?>
+<?php case true:?>
+  <?php include(drupal_get_path('theme','cmwn') . '/templates/comment.moderate.inc'); ?>
 
-  <?php print $links ?>
+  <?php break;?>
+
+
+
+<?php default: ?>
+  <div class="comment<?php print ($comment->new) ? ' comment-new' : ''; print ' '. $status ?>">
+    <div class="content">
+      <?php echo $picture; ?>
+      <div class="body">
+        <h3><?php echo $comment->subject; ?></h3>
+        <div class="submitted"><?php echo $submitted; ?></div>
+        <?php print $content; ?>
+  
+    <?php print $links ?>
+      </div>
     </div>
   </div>
-</div>
+
+  <?php break;?>
+<?php endswitch; ?>

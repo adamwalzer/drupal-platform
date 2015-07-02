@@ -97,7 +97,6 @@ function v2_profiles_school_import(){
 	$form['school_import'] = array(
 		'#title' => t(''),
 		'#type'  => 'file',
-
 	);
 	
 	$form['submit_upload'] = array(

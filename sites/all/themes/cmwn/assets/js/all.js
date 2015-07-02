@@ -610,7 +610,7 @@ $(function(){
 
 
 
-$('.views_view__moderation .views-field-title a, .view-moderation-denied .views-field-title a, .view-moderation-approved .views-field-title a').each(function(){
+$('.views_view__moderation .views-field-title a, .view-moderation-denied .views-field-title a, .view-moderation-approved .views-field-title a, .view-moderation-comments .views-field-view-comment a').each(function(){
   var ton = false;
   $(this).click(function() {
     $('tr.mod-ajax').remove();

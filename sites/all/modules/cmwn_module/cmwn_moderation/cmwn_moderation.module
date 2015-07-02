@@ -31,6 +31,15 @@ function cmwn_moderation_menu() {
     'type' => MENU_CALLBACK,
     'weight' => 10,   
   );   
+
+  $items['cmwn_moderation/comment/remove/%/%'] = array(
+    'title' => 'Remove Due to Format', 
+    'access arguments' => array('moderate content'),
+    'page callback' => 'cmwn_moderation_process_comment_removal',
+    'page arguments' => array(3, 4),
+    'type' => MENU_CALLBACK,
+    'weight' => 10,   
+  );   
   
   $items['cmwn_moderation/restore/%'] = array(
     'title' => 'Remove Due to Format', 
@@ -42,10 +51,38 @@ function cmwn_moderation_menu() {
   ); 
 
 
+  $items['cmwn_moderation/comment/%/%'] = array(
+    'title' => 'Moderate Comment', 
+    'access arguments' => array('moderate content'),
+    'page callback' => 'cmwn_moderation_comment',
+    'page arguments' => array(2, 3),
+    'type' => MENU_CALLBACK,
+    'weight' => 10,   
+  ); 
+
+  $items['cmwn_moderation/comment/delete/%'] = array(
+    'title' => 'Deny/Delete Comment', 
+    'access arguments' => array('moderate content'),
+    'page callback' => 'cmwn_moderation_comment_delete',
+    'page arguments' => array(3),
+    'type' => MENU_CALLBACK,
+    'weight' => 10,   
+  ); 
 
   return $items;
 }
 
+function cmwn_moderation_comment_delete($cid){
+  comment_delete($cid);
+  drupal_set_message(t('Comment deleted.'));
+  drupal_goto('mod/comments');
+}
+function cmwn_moderation_comment($nid, $cid){
+  $node = node_load($nid);
+  $comment = _comment_load($cid);
+//  dsm($comment);
+  return '<div id="v2">' . comment_render($node, $cid) . '</div>';
+}
 
 function cmwn_moderation_approve($nid){
   $nid = arg(1);
@@ -64,9 +101,8 @@ function cmwn_moderation_approve($nid){
 }
 
 function cmwn_moderation_form($form_state){
-  
-  $form['#redirect'] = 'mod';
-  //$form['#action'] = 'mod';
+  $comment = (arg(1) == 'comment')?true:false;
+  $form['#redirect'] = $comment?'mod/comments':'mod';
   
   $form['form-title'] = array(
     '#markup' => '<h2>Confirm reason for denial</h2>'
@@ -85,9 +121,14 @@ function cmwn_moderation_form($form_state){
   );
   
   
-  $form['nid'] = array(
+  $form[$comment==true?'cid':'nid'] = array(
     '#type' => 'hidden',
-    '#default_value' => arg(1),
+    '#default_value' => $comment?arg(3):arg(1),
+  );
+  
+  $form['type'] = array(
+    '#type' => 'hidden',
+    '#default_value' => $comment?'comment':'node',
   );
   
   $form['cancel'] = array('#type' => 'button', '#value' => t('Cancel'));
@@ -98,11 +139,23 @@ function cmwn_moderation_form($form_state){
 
 function cmwn_moderation_form_submit($form, &$form_state){
   global $user;
+//  dsm($form_state);
   if(in_array('moderator', $user->roles)){
+    switch($form_state['values']['type']){
+      case 'comment':
+        $cid = $form_state['values']['cid'];
+        $reason = $form_state['values']['mod_reason'];
+        drupal_goto('cmwn_moderation/comment/remove/'.$reason.'/'.$cid);
+      
+        break;
 
-    $nid = $form_state['values']['nid'];
-    $reason = $form_state['values']['mod_reason'];
-    drupal_goto('cmwn_moderation/remove/'.$reason.'/'.$nid);
+      case 'node':
+        $nid = $form_state['values']['nid'];
+        $reason = $form_state['values']['mod_reason'];
+        drupal_goto('cmwn_moderation/remove/'.$reason.'/'.$nid);
+            
+        break;
+    }
   }
 }
 
@@ -114,6 +167,18 @@ function cmwn_moderation_process_removal(){
   killfile_node_delete($node->nid);
   drupal_set_message(t('Content was removed due to') . ' ' . ltrim(arg(2),'delete_'));
   drupal_goto('mod');
+}
+
+
+function cmwn_moderation_process_comment_removal($reason, $cid){
+//  $comment = _comment_load($cid);
+  //$comment->status = 2;
+  //comment_save($comment);
+  require_once(drupal_get_path('module','comment') . '/comment.admin.inc');
+//  comment_delete($cid);
+  db_query('delete from {comments} where cid =%d', $cid);
+  drupal_set_message(t('Content was removed due to') . ' ' . ltrim(arg(2),'delete_'));
+  drupal_goto('mod/comments');
 }
 
 function cmwn_moderation_killfile_restore($nid) {
