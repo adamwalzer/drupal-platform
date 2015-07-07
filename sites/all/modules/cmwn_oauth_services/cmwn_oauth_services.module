@@ -64,8 +64,63 @@ function cmwn_oauth_services_menu() {
     'page callback' => '_cmwn_oauth_services_post_whiteboard_test',
     'access arguments' => array('access content'),
   );
+
+  $items['services/post/notification'] = array(
+    'page callback' => '_cmwn_oauth_services_post_notification',
+    'access arguments' => array('access content'),
+  );
+
+  $items['services/get/facepile'] = array(
+    'page callback' => '_cmwn_oauth_services_get_facepile',
+    'access arguments' => array('access content'),
+  );
+
   return $items;
 }
+
+function _cmwn_oauth_services_post_notification(){
+  
+  $uid = $_POST['uid'];
+  $content = $_POST['body'];
+  $subject = $_POST['subject'];
+  //$type = $_POST['type'];
+  @$account = user_load($uid);
+
+  //http://local.cmwn.com:8888/services/post/notification?oauth_consumer_key=kRTvDhFXFtLRa8ZgGKsGBcG6FcccmzsC&oauth_token=MFpkTxttjVg9C9fzuYY8bpAtKzYA6evj&callback=callthisback, replace last param with key from authorizations
+
+  _cmwn_oauth_services_oauth_validate_request();//this will return unauthorized if it does not validate.
+
+  //check consumer context
+  if(!cmwn_oauth_services_consumer_key_has_context($_GET['oauth_consumer_key'], 'notification')){
+    header("HTTP/1.1 401 Unauthorized");
+  }else{
+    if($account && $account->status == 1){
+      $callback = $_GET['callback'];
+      $message = array(
+          'type' => 'profile-message',
+          'subject' => $subject,
+          'body' => $content,
+          'language' => user_preferred_language($account),
+        );      
+      $post_result = messaging_message_send_user($account, $message, $method = NULL, $queue = 0);
+      header('Content-Type: application/json; charset=utf8');
+      $json = json_encode($post_result);
+
+      //no call back
+      if( ! isset($_GET['callback']))
+        exit($json);
+
+      //valid callback, jsonp
+      if(cmwn_json_is_valid_callback($_GET['callback']))
+        exit("{$_GET['callback']}($json)");
+    }else{
+      //problem
+      header('status: 400 Bad Request', true, 400);
+    }
+  }
+
+}
+
 
 function _cmwn_oauth_services_request($consumer_key) {//from args url
   global $base_url;
@@ -218,8 +273,38 @@ function _cmwn_oauth_action_webform_object(){//$key is consumer key from set up 
     $node= node_load($_GET['webform_nid']);
   }
 
+  if(!cmwn_oauth_services_consumer_key_has_context($_GET['oauth_consumer_key'], 'whiteboard')){
+    header("HTTP/1.1 401 Unauthorized");
+  }else{
+
+    header('Content-Type: application/json; charset=utf8');
+    $json = json_encode($node);
+  
+    //no call back
+    if( ! isset($_GET['callback']))
+      exit($json);
+  
+    //valid callback, jsonp
+    if(cmwn_json_is_valid_callback($_GET['callback']))
+      exit("{$_GET['callback']}($json)");
+  
+    //problem
+    header('status: 400 Bad Request', true, 400);
+  }
+}
+
+
+function _cmwn_oauth_services_get_facepile(){
+  _cmwn_oauth_services_oauth_validate_request();
+  $callback = $_GET['callback'];
+  $node = new stdClass();
+  $friends = array();
+  if(is_numeric($_GET['uid'])){
+    $friends = v2_profiles_friends_query($_GET['uid']);
+  }
+
   header('Content-Type: application/json; charset=utf8');
-  $json = json_encode($node);
+  $json = json_encode($friends);
 
   //no call back
   if( ! isset($_GET['callback']))
@@ -232,6 +317,10 @@ function _cmwn_oauth_action_webform_object(){//$key is consumer key from set up 
   //problem
   header('status: 400 Bad Request', true, 400);
 }
+
+
+
+
 
 function _cmwn_oauth_services_oauth_validate_request($type="access token", $unsigned = 'unsigned') {
   try {
@@ -417,14 +506,18 @@ function _cmwn_oauth_services_post_whiteboard(){
   @$account = user_load($uid);
 
   //http://local.cmwn.com:8888/services/post/whiteboard?oauth_consumer_key=kRTvDhFXFtLRa8ZgGKsGBcG6FcccmzsC&oauth_token=MFpkTxttjVg9C9fzuYY8bpAtKzYA6evj&callback=callthisback, replace last param with key from authorizations
-
+  watchdog('cmwn_oauth_services_whiteboard_post',print_r($_POST,true));
+  watchdog('cmwn_oauth_services_whiteboard_post', print_r($_FILES,true));
+  
+  watchdog('cmwn_oauth_services_whiteboard_post', 'call attempted to post whiteboard');
+  
   _cmwn_oauth_services_oauth_validate_request();//this will return unauthorized if it does not validate.
 
   //check consumer context
   if(!cmwn_oauth_services_consumer_key_has_context($_GET['oauth_consumer_key'], 'whiteboard')){
     header("HTTP/1.1 401 Unauthorized");
   }else{
-    if($account && $account->status == 1 && sizeof($_FILES) > 0){
+    if($account && $account->status == 1){
       $callback = $_GET['callback'];
       $post_result = cmwn_oauth_services_whiteboard_add($uid);
       header('Content-Type: application/json; charset=utf8');
@@ -473,7 +566,7 @@ function _cmwn_oauth_services_post_action(){
         $submission = (object)array(
           'nid' => $nid,
           'uid' => $uid,
-          'submitted' => REQUEST_TIME,
+          'submitted' => time(),
           'remote_addr' => ip_address(),
           'is_draft' => 0,
           //'serial' => $serial,

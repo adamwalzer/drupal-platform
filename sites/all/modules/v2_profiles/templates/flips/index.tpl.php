@@ -1,7 +1,7 @@
 <?php /* 1.4 */ ?>
 
 <iframe class="block shadow" height="221px" width="100%" src="http://aiselector.changemyworldnow.com?uid=<?php print $data->user->uid;?>" border="0" scrolling="no" scrollbars="none" frameborder="0"></iframe>
-
+<?php if(false):?>
 <div class="block shadow flips browse index">
 
 	<div class="header">
@@ -96,3 +96,4 @@
 	</div>
 
 </div>
+<?php endif;?>

@@ -1,3 +1,14 @@
+<?php  switch(true):?>
+<?php case true:?>
+<iframe class="block shadow" src="http://demoai.changemyworldnow.com?uid=<?php print $data->uid?>&BrowseType=Child" width="100%" height="735px" frameborder="no" scrollbars
+	="none" scrolling="no"></iframe>
+
+<?php break;?>
+
+
+<?php case false:?>
+
+
 <?php /* 1.4 */ ?>
 
 <div class="block shadow flips browse">
@@ -57,3 +68,6 @@
 	</div>
 
 </div>
+<?php break;?>
+
+<?php endswitch;?>

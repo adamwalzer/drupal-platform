@@ -165,8 +165,22 @@ function cmwn_moderation_process_removal(){
   node_save($node);
   
   killfile_node_delete($node->nid);
+  
+  
+  //manually call this nodeapi hook
+  cmwn_notifications_nodeapi($node, 'delete');
+  
+  
   drupal_set_message(t('Content was removed due to') . ' ' . ltrim(arg(2),'delete_'));
   drupal_goto('mod');
+}
+
+function cmwn_notifications_comment(&$a1, $op) {
+  if ($op == 'insert' || $op == 'update') {
+//    $nid = $a1['nid'];
+  }
+
+  cache_clear_all_like(drupal_url(array('id' => $nid)));
 }
 
 

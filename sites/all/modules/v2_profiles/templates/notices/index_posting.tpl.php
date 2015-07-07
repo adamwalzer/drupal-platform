@@ -21,7 +21,7 @@
         <div class="section">
             <div class="empty">
                 <?php
-                print cmwn_notifications_messaging_get($data->user,array('Inappropriate Content', 'File Error', 'Bullying Warning'));
+                print cmwn_notifications_messaging_get($data->user,array('Inappropriate Content', 'File Error', 'Bullying Warning', 'Services Notification'));
                 ?>
             </div>
         </div>
