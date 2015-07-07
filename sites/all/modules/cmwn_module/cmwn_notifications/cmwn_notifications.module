@@ -217,6 +217,52 @@ function cmwn_notifications_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       break;
   }
 }  
+
+function cmwn_notifications_comment(&$a1, $op) {
+  switch($op){
+    case 'delete':
+      $node = node_load($a1->nid);
+      if(($node->type == 'whiteboard' || $node->type == 'video')){
+        module_load_include('inc', 'comment', 'comment.admin');
+        $post_user = user_load($a1->uid);
+        @$body  = '"' . $a1->comment . '"';
+        $post_identifier = $body; 
+        @$parent_uid = db_result(db_query('select requester_id from {user_relationships} where requestee_id = %d and approved = 1  and rtid =2', array($post_user->uid)));       
+        $user_warnings = variable_get('cmwn_notifications_' . $poser_user->uid, array('bullying' => 0,'inappropriate' => 0));
+        switch (true){
+          case (arg(3) == 'delete_format'):
+            //moderator deleting post due to format issue
+            cmwn_notifications_rejected_content($post_user, $post_identifier, 'format');
+            break;
+          case (arg(3) == 'delete_bullying'):
+            //moderator deleting post due to bullying
+            $user_warnings['bullying']++;
+            variable_set('cmwn_notifications_' . $post_user->uid, $user_warnings);            
+            cmwn_notifications_rejected_content($post_user, $post_identifier, 'bullying');
+            //check if this child has a parent.
+            if($parent_uid){
+              $parent_account = user_load($parent_uid);
+              cmwn_notifications_rejected_content_parent($parent_account, $post_identifier, $post_user,'bullying');                        
+            }
+      
+            break;
+                    
+          case (arg(3) == 'delete_inappropriate'):
+            //moderator deleting post not their own, presume due to inappropriate content
+            $user_warnings['inappropriate']++;
+            variable_set('cmwn_notifications_' . $post_user->uid, $user_warnings);
+            cmwn_notifications_rejected_content($post_user, $post_identifier,'inappropriate');
+            //check if this child has a parent.
+            if($parent_uid){
+              $parent_account = user_load($parent_uid);
+              cmwn_notifications_rejected_content_parent($parent_account, $post_identifier, $post_user,'inappropriate');                        
+            }
+            break;
+        }
+      }      
+      break;
+  }
+}
   
 //appears not to be used due to v2 profiles account.inc not invoking hook_user :(  
 function cmwn_notifications_user($op, &$edit, &$account, $category = NULL) {
