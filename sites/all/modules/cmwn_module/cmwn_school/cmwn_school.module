@@ -61,3 +61,42 @@ function cmwn_school_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       break;
   }
 }
+
+//returns true if they go to different schools. returns false if same school or both children not associated with any school.
+function cmwn_school_students_different_school($user1, $user2){
+
+  $school1 = false;
+  $is_student1 = false;
+  $child1 = false;
+  if (ChildUser::canHydrate($user1)) {
+    $child1 = ChildUser::castAs($user1);
+    if ($school1 = $child1->getSchool()) {
+      $is_student = true;
+    }
+  }
+  
+  $school2 = false;
+  $is_student2 = false;
+  $child2 = false;
+  if (ChildUser::canHydrate($user2)) {
+    $child2 = ChildUser::castAs($user2);
+    if ($school2 = $child2->getSchool()) {
+      $is_student2 = true;
+    }
+  }
+  
+  if(!$school1 && !$school2){
+    return false;
+  }
+  
+  if(($school1 && !$school2) || (!$school1 && $school2)){
+    return true;
+  }
+  
+  if($school1->nid == $school2->nid){
+    return false;
+  }
+  
+  return true;
+   
+}

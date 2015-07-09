@@ -228,17 +228,20 @@
 		$results = db_query($query);
 
 		while ($result = db_fetch_object($results)) {
-			$item = array(
-				'href' => '/user/'.$user->uid.'/friends/'.$result->uid,
-				'name' => $result->name,
-				'src' => v2_profiles_avatars_query($result->uid),
-				'uid' => $result->uid,
-			);
-			$items[] = (object)$item;
+      $diff_schools = cmwn_school_students_different_school($user,user_load($result->uid));
+      
+      if(!$diff_schools){
+  			$item = array(
+  				'href' => '/user/'.$user->uid.'/friends/'.$result->uid,
+  				'name' => $result->name,
+  				'src' => v2_profiles_avatars_query($result->uid),
+  				'uid' => $result->uid,
+  			);
+  			$items[] = (object)$item;        
+      }
 		}
-
 		return $items;
-
+		
 	}
 
 	function v2_profiles_friends_query_all($uid, $q = '', $tid = 0) {
@@ -292,15 +295,20 @@
 			if ($result->approved == 1) continue;
 			$relationship = user_relationships_load(array('between' => array($result->uid , $user->uid)));
 			$relationship = array_pop($relationship);
-			$item = array(
-				'href' => '/user/'.$user->uid.'/friends/'.$result->uid,
-				'name' => $result->name,
-				'src' => v2_profiles_avatars_query($result->uid),
-				'relationship' => $relationship,
-				'requested' => ($result->approved == '')?0:1,
-				'uid' => $result->uid,
-			);
-			$items[] = (object)$item;
+
+      $diff_schools = cmwn_school_students_different_school($user,user_load($result->uid));
+
+      if(!$diff_schools){				
+  			$item = array(
+  				'href' => '/user/'.$user->uid.'/friends/'.$result->uid,
+  				'name' => $result->name,
+  				'src' => v2_profiles_avatars_query($result->uid),
+  				'relationship' => $relationship,
+  				'requested' => ($result->approved == '')?0:1,
+  				'uid' => $result->uid,
+  			);
+  			$items[] = (object)$item;
+  		}
 		}
 
 		return $items;

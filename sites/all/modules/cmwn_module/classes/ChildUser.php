@@ -74,7 +74,7 @@ FROM {node} n
 INNER JOIN {content_field_school} cfs ON cfs.vid = n.vid
 INNER JOIN {node} n2 ON cfs.field_school_nid = n2.nid
 
-WHERE n.uid = %d
+WHERE n.uid = %d limit 1
 EOSQL;
     $nid = db_result(db_query($sql, $this->uid));
     return node_load($nid);
