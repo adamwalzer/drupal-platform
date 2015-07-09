@@ -21,7 +21,7 @@
 		<div class="section">
 			<div class="empty">
 				<?php
-  				print cmwn_notifications_messaging_get($data->user,'Flip Award');
+  				print cmwn_notifications_messaging_get($data->user,cmwn_notifications_award_notices_subjects());
 				?>
 			</div>
 		</div>

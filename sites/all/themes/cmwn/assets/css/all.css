@@ -1393,6 +1393,10 @@ body {
 							right:6px;
 							top:4px;
 						}
+						
+            #v2 .block.links.index .content .section ul li a.my-notices span{
+              right: 26px
+            }
 
 			#v2 .block.links.index .content .section ul li.add-a-child {
 				border-top: 0;

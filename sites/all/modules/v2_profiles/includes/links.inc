@@ -164,10 +164,16 @@
 
 			if (in_array('can_receive_notices', $user->roles) || in_array('can_receive_notices_via_parent', $user->roles)) {
 				//$items['notices'] = (object)array('title' => 'My Notices', 'href' => '/user/'.$user->uid.'/notices');
+				$messages_count_all = count(cmwn_notificiations_get_all($uid));
+				$messages_count_posting = count(cmwn_notificiations_get_all($uid,cmwn_notifications_posting_notices_subjects()));
+				$messages_count_award = count(cmwn_notificiations_get_all($uid,cmwn_notifications_award_notices_subjects()));				
+				$messages_count_action = count(cmwn_notificiations_get_all($uid,cmwn_notifications_action_notices_subjects()));				
+				$messages_count_account = count(cmwn_notificiations_get_all($uid,cmwn_notifications_account_notices_subjects()));								
+								
 				$items['notices'] = array(
-						'data' => '<a class="toggle">My Notices</a>',
+						'data' => '<a class="toggle my-notices">My Notices'.(($messages_count_all>0)?'<span>'.$messages_count_all.'</span>':'') . '</a>',
 						'children' => array(
-								l('Posting', 'user/'.$user->uid.'/notices/posting'),
+								l('Posting'.(($messages_count_posting>0)?'<span>'.$messages_count_posting.'</span>':''), 'user/'.$user->uid.'/notices/posting', array('html'=>true)),
 								l('Award', 'user/'.$user->uid.'/notices/award'),
 								l('Action', 'user/'.$user->uid.'/notices/action'),
 								l('Account', 'user/'.$user->uid.'/notices/account'),

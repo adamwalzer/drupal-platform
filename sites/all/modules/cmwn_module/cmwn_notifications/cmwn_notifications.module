@@ -481,3 +481,30 @@ function cmwn_notifications_ordinal($num) {
   }
   return $num.'th';
 } 
+
+function cmwn_notificiations_get_all($uid, $subect = array()){
+
+  if(count($subject) > 0){
+    return messaging_store('get',array('subject' => $subject, 'method' => 'simple', 'uid' => $uid), array('mqid DESC'), 100, 20, false);    
+  }else{
+    return messaging_store('get',array('method' => 'simple', 'uid' => $uid), array('mqid DESC'), 100, 20, false);    
+  }
+  
+}
+
+function cmwn_notifications_posting_notices_subjects(){
+  return array('Inappropriate Content', 'File Error', 'Bullying Warning', 'Services Notification');  
+}
+
+function cmwn_notifications_award_notices_subjects(){
+  return array('Inappropriate Content', 'File Error', 'Bullying Warning', 'Services Notification');  
+}
+
+function cmwn_notifications_action_notices_subjects(){
+  return array('Inappropriate Content', 'File Error', 'Bullying Warning', 'Services Notification');  
+}
+
+function cmwn_notifications_account_notices_subjects(){
+  return array('Inappropriate Content', 'File Error', 'Bullying Warning', 'Services Notification');  
+}
+
