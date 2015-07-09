@@ -227,10 +227,9 @@
 
 		$results = db_query($query);
 
-		while ($result = db_fetch_object($results)) {
-      $diff_schools = cmwn_school_students_different_school($user,user_load($result->uid));
+		while ($result = db_fetch_object($results)){
       
-      if(!$diff_schools){
+      if(!cmwn_school_different_schools($user,user_load($result->uid))){
   			$item = array(
   				'href' => '/user/'.$user->uid.'/friends/'.$result->uid,
   				'name' => $result->name,
@@ -296,9 +295,7 @@
 			$relationship = user_relationships_load(array('between' => array($result->uid , $user->uid)));
 			$relationship = array_pop($relationship);
 
-      $diff_schools = cmwn_school_students_different_school($user,user_load($result->uid));
-
-      if(!$diff_schools){				
+      if(!cmwn_school_different_schools($user,user_load($result->uid))){			
   			$item = array(
   				'href' => '/user/'.$user->uid.'/friends/'.$result->uid,
   				'name' => $result->name,
@@ -399,29 +396,45 @@
 		if (arg(4)) {
 			$tid = intval(arg(4));
 		}
+		
 		$tids = array();
-		$child = ChildUser::castAs($user);
-		if ($child) {
-			foreach ($child->getChildProfile()->taxonomy as $term) {
-				$tids[] = $term->tid;
-			}
-		}
-		$interests = array();
-		$terms = taxonomy_get_tree(3);
-		foreach ($terms as $term) {
-			$interest = new stdClass();
-			$interest->class = 'id-'.str_pad($term->tid,3,'0',STR_PAD_LEFT).((in_array($term->tid,$tids))?' active':'');
-			$interest->href = '/user/'.$uid.'/friends/search/'.$term->tid;
-			$interest->title = $term->name;
-			$interests[] = $interest;
-		}
-
-		$items = v2_profiles_friends_query_all($user->uid, $q, $tid);
-
-		$data->interests = $interests;
-		$data->items = $items;
-		$data->user = $user;
-
+		$child = false;
+    if (ChildUser::canHydrate($user)) {		
+  		$child = ChildUser::castAs($user);
+  		if ($child) {
+  			foreach ($child->getChildProfile()->taxonomy as $term) {
+  				$tids[] = $term->tid;
+  			}
+  		}
+    }
+    
+    switch($child){
+      case false:
+    		$items = v2_profiles_friends_query_all($user->uid, $q, 0);
+    
+    		$data->interests = $interests;
+    		$data->items = $items;
+    		$data->user = $user;       
+        break;
+      default://child
+    		$interests = array();
+    		$terms = taxonomy_get_tree(3);
+    		foreach ($terms as $term) {
+    			$interest = new stdClass();
+    			$interest->class = 'id-'.str_pad($term->tid,3,'0',STR_PAD_LEFT).((in_array($term->tid,$tids))?' active':'');
+    			$interest->href = '/user/'.$uid.'/friends/search/'.$term->tid;
+    			$interest->title = $term->name;
+    			$interests[] = $interest;
+    		}
+    
+    		$items = v2_profiles_friends_query_all($user->uid, $q, $tid);
+    
+    		$data->interests = $interests;
+    		$data->items = $items;
+    		$data->user = $user; 
+        break;
+    }
+    
 		return theme('v2_profiles_friends_search', $data);
 
 	}

@@ -71,14 +71,15 @@
 
 </div>
 
-<div class="block friends modal interests" id="friends-interests" style="display:none;">
 
-	<div class="section">
-		<ul>
-			<?php foreach ($data->interests as $item) { ?>
-				<li class="<?php print $item->class; ?>"><a href="<?php print $item->href; ?>"><?php print $item->title; ?></a></li>
-			<?php } ?>
-		</ul>
-	</div>
-
-</div>
+<?php if(is_array($data->interests)):?>
+  <div class="block friends modal interests" id="friends-interests" style="display:none;">
+  	<div class="section">
+  		<ul>
+  			<?php foreach ($data->interests as $item) { ?>
+  				<li class="<?php print $item->class; ?>"><a href="<?php print $item->href; ?>"><?php print $item->title; ?></a></li>
+  			<?php } ?>
+  		</ul>
+  	</div>
+  </div>
+<?php endif;?>

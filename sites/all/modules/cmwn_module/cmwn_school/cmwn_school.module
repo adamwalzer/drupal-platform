@@ -63,26 +63,53 @@ function cmwn_school_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 }
 
 //returns true if they go to different schools. returns false if same school or both children not associated with any school.
-function cmwn_school_students_different_school($user1, $user2){
-
+function cmwn_school_different_schools($user1, $user2){
+  return false;
   $school1 = false;
-  $is_student1 = false;
-  $child1 = false;
-  if (ChildUser::canHydrate($user1)) {
-    $child1 = ChildUser::castAs($user1);
-    if ($school1 = $child1->getSchool()) {
-      $is_student = true;
-    }
-  }
+  $school_user1 = false;
+  $user1_has_school = true;
   
   $school2 = false;
-  $is_student2 = false;
-  $child2 = false;
-  if (ChildUser::canHydrate($user2)) {
-    $child2 = ChildUser::castAs($user2);
-    if ($school2 = $child2->getSchool()) {
-      $is_student2 = true;
-    }
+  $school_user2 = false;  
+  $user2_has_school = true;
+  
+  switch($user1->user_type){
+    case 'child':
+      $school_user1 = ChildUser::castAs($user1);
+      $school1 = $user1->getSchool();    
+      break;
+    case 'teacher':
+      $school_user1 = TeacherUser::castAs($user1);
+      $school1 = $user1->getSchool();    
+      break;
+    case 'parent':
+      $school_user1 = ParentUser::castAs($user1);
+      $school1 = $user1->getSchool();    
+      break;
+    default:
+      $user1_has_school = false;
+
+  }
+  
+  switch($user2->user_type){
+    case 'child':
+      $school_user2 = ChildUser::castAs($user2);
+      $school2 = $user2->getSchool();    
+      break;
+    case 'teacher':
+      $school_user2 = TeacherUser::castAs($user2);
+      $school2 = $user2->getSchool();    
+      break;
+    case 'parent':
+      $school_user2 = ParentUser::castAs($user2);
+      $school2 = $user2->getSchool();    
+      break;
+    default:
+      $user2_has_school = false;      
+  }
+
+  if(($user1_has_school == $user2_has_school) && ($user1_has_school == false)){
+    return false;//not different schools as they have no school
   }
   
   if(!$school1 && !$school2){
@@ -97,6 +124,5 @@ function cmwn_school_students_different_school($user1, $user2){
     return false;
   }
   
-  return true;
-   
+  return true;  
 }

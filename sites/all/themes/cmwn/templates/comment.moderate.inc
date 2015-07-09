@@ -39,6 +39,7 @@
               
               <a href="/node/<?php print $node->nid; ?>/approve?destination=mod" class="mod-approve-post">Approve Comment</a>    
               <a href="#" class="mod-send-to-supervisor">or send to supervisor for review</a>
+              
             </div>
           <?php endif;?>          
         </div>

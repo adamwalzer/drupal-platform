@@ -39,4 +39,20 @@ class TeacherUser extends GenericUser {
     $this->_teacherProfile = content_profile_load('teacher_profile', $this->uid);
   }
 
+  public function getSchool() {
+    $sql = <<<EOSQL
+SELECT
+	n2.nid
+FROM {node} n
+INNER JOIN {content_field_school} cfs ON cfs.vid = n.vid
+INNER JOIN {node} n2 ON cfs.field_school_nid = n2.nid
+
+WHERE n.uid = %d limit 1
+EOSQL;
+    $nid = db_result(db_query($sql, $this->uid));
+    return node_load($nid);
+  }
+  
+
+
 }
