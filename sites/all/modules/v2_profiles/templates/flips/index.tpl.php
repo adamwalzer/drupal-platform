@@ -5,7 +5,7 @@
 #loadImg div{display:table-cell;width:100%;height:20px;top: 20px;text-align:center;vertical-align:middle;box-sizing: border-box;padding: 40px;}
 </style>
 <div id="loadImg"><div><img src="/sites/all/themes/cmwn/assets/img/CMW2.gif" style="width: auto;height: 200px;opacity: .5;" /></div></div>
-<iframe name="iframe" class="block shadow" height="221px" width="100%" src="http://aiselector.changemyworldnow.com?uid=<?php print $data->user->uid;?>" border="0" scrolling="no" scrollbars="none" frameborder="0" onload="document.getElementById('loadImg').style.display='none';"></iframe>
+<iframe name="iframe" class="block shadow" height="221px" width="100%" src="http://aiselector.changemyworldnow.com?uid=<?php print $data->user->uid;?>&rand=<?php print rand(1,10000);?>" border="0" scrolling="no" scrollbars="none" frameborder="0" onload="document.getElementById('loadImg').style.display='none';"></iframe>
 
 
 
