@@ -1,0 +1,3 @@
+<?php
+
+include_once('cmwn_moderation_features.features.inc');
