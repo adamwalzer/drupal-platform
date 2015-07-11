@@ -11,7 +11,7 @@ if($user->user_type =='parent' && arg(2) != 'friends' && arg(2) !='children' && 
 		</li>
 
 		<li class="section">
-      <a href="#newsfeed-tab" class="tab-newsfeed"><h2>News Feed</h2></a><span class="call-monitor" title="Call a Monitor"></span>
+      <a href="#newsfeed-tab" class="tab-newsfeed"><h2>News Feed</h2></a><?php if ($data->user->user_type =='child'):?><span class="call-monitor" title="Call a Monitor"></span><?php endif;?> 
 		</li>
 	</ul>
 
@@ -34,8 +34,6 @@ if($user->user_type =='parent' && arg(2) != 'friends' && arg(2) !='children' && 
                             print taxonomy_image_display($tid->tid);
                             break;
                           default:
-  //                          print_r($news);
-                            //whiteboard author
                       			print '<img alt="" height="84" src="'. (v2_profiles_avatars_query($news->field_user_reference[0]['uid'])) . '" width="84" />';
                       			 unset($news->title);
                              $author = user_load($news->field_user_reference[0]['uid']);
