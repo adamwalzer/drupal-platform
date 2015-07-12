@@ -4,7 +4,7 @@ $(function(){
 
 
   $('#whiteboard-tab form').submit(function(){
-    $(this).find(':submit').attr('disabled','disabled');
+    $(this).find(':submit').atttr('disabled','disabled');
     $(this).find('button.button').attr('disabled','disabled');    
   });
 
@@ -549,7 +549,7 @@ $(function(){
 		target.text('');
 		target.next().find('span').text('Add Media');
 		if (source.val() != '') {
-			var allowed = ['gif','jpg','JPG','jpeg','png','avi','flv','m4v','mov','mp4','mpg','wmv'];
+			var allowed = ['gif','jpg','JPG','jpeg','png','avi','flv','m4v','mov','MOV','mp4','MP4','mpg','MPG','wmv','WMV','wma','WMA'];
 			var name = source.val().replace("C:\\fakepath\\", "");
 			var extension = name.split('.').pop();
 			if (jQuery.inArray(extension, allowed) != -1) {
