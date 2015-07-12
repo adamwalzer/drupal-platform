@@ -400,8 +400,8 @@
 		$cid = intval($cid);
 
     $comment = _comment_load($cid);
-    
-    if(comment_access('edit', $comment)){
+    //if(comment_access('edit', $comment)){
+    if(user_access('delete own comments', $user) && $comment->uid == $user->uid){
       $query = "
   			DELETE FROM
   				`comments`
