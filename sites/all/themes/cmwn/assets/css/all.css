@@ -3599,3 +3599,8 @@ div.section-right{
   border: 0 !important;
   box-shadow: none !important;
 }
+
+
+#block-menu_block-1 h2{
+  display: none;
+}
