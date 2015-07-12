@@ -85,8 +85,10 @@
   
   		$data->items = $items;
   		$data->user = $user;
-  
-      $flips_progress  = theme('v2_profiles_class_flips_progress', $data);
+      if($data->user->user_type == 'child'){
+        $flips_progress  = theme('v2_profiles_class_flips_progress', $data);        
+      }
+
       return $flips_progress . theme('v2_profiles_class_index', $data);
     //}
 
