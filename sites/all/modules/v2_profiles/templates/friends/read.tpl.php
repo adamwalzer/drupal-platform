@@ -4,7 +4,8 @@
 
 	<?php print v2_profiles_avatars_index($data->user->uid); ?>
 
-	<?php print v2_profiles_flips_index($data->user->uid); ?>
+	<?php print $data->user->user_type == 'child'?v2_profiles_flips_index($data->user->uid):''; ?>
+	<?php print ($data->user->user_type == 'teacher' || $data->user->user_type == 'parent')?v2_profiles_friends_browse($data->user->uid,4):''; ?>
 
 </div>
 
@@ -12,9 +13,9 @@
 
 	<div class="block profile" style="clear:both;">
 
-		<?php print v2_profiles_interests_index($data->user->uid); ?>
+		<?php print $data->user->user_type == 'child'?v2_profiles_interests_index($data->user->uid):''; ?>
 
-		<?php print v2_profiles_friends_browse($data->user->uid,4); ?>
+		<?php print $data->user->user_type == 'child'?v2_profiles_friends_browse($data->user->uid,4):''; ?>
 
 	</div>
 

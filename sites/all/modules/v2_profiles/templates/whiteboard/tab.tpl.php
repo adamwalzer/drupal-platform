@@ -156,9 +156,9 @@
   					<?php } ?>
 
   					<?php if($data->readonly == false):?>
-
+              <?php //print_r($data); ?>
   						<div class="form">
-  							<form action="/user/<?php print $data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/comments/add" method="post">
+  							<form action="/user/<?php print arg(1);//print arg(1);//$data->user->uid; ?>/whiteboard/<?php print $item->id; ?>/comments/add" method="post">
   								<input name="content" placeholder="Comment..." type="text" />
   								<button class="button" type="submit">Post</button>
   							</form>

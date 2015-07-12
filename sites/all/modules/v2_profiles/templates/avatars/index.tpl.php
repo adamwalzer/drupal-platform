@@ -54,13 +54,13 @@
         
     		}else if (in_array('can_make_friends', array_values($user->roles))){
       		$data->relationship = user_relationships_load(array('between' => array($user->uid, $data->user->uid))); $data->relationship = array_pop($data->relationship);
-
+            $can_friend = cmwn_school_can_friend($user, $data->user);
         		switch(true){
-              case (!$data->relationship)://no relationship, add friend button
+              case (!$data->relationship && $can_friend)://no relationship, add friend button
                 ?><a class="button green small" href="/user/<?php print $user->uid; ?>/friends/<?php print $data->user->uid; ?>/add">Add Friend</a><?php
                 break;
                 
-              case ($data->relationship->approved == 0)://pending approval, show pending
+              case ($data->relationship->approved == 0 && $can_friend)://pending approval, show pending
                 ?><span class="button small disabled">Request Sent</span><?php
                 break;
                 

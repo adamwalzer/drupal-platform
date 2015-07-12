@@ -262,7 +262,9 @@
 				$profile_type = 'teacher_profile';
 				break;
 
-			default:
+			default://child
+				$filter_friends = ' and u.uid in (select uid from users_roles uri where uri.rid = 4 and uri.uid = u.uid) ';
+				$profile_type = 'child_profile';			
 				break;
 		}
 
@@ -282,8 +284,7 @@
 				`r`.`rid` = 28 " . $filter_friends . "
 				" . ((!empty($q))?"AND `u`.`name` LIKE '%%" . db_escape_string($q). "%%'":"") . "
 				" . (($tid>0)?"AND `tn`.`tid` = " . $tid:"") . "
-			ORDER BY
-				`u`.`name`;
+			ORDER BY RAND();
 		";
 //print $query;
 		$results = db_query($query);
@@ -411,7 +412,6 @@
     switch($child){
       case false:
     		$items = v2_profiles_friends_query_all($user->uid, $q, 0);
-    
     		$data->interests = $interests;
     		$data->items = $items;
     		$data->user = $user;       

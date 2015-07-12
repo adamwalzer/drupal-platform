@@ -64,7 +64,14 @@ function cmwn_school_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 
 //returns true if they go to different schools. returns false if same school or both children not associated with any school.
 function cmwn_school_different_schools($user1, $user2){
-  return false;
+  
+  $debug = false;
+  
+  //if($user2->uid == '5022'){
+    //$debug = true;
+  //}
+  
+  //return false;
   $school1 = false;
   $school_user1 = false;
   $user1_has_school = true;
@@ -76,15 +83,15 @@ function cmwn_school_different_schools($user1, $user2){
   switch($user1->user_type){
     case 'child':
       $school_user1 = ChildUser::castAs($user1);
-      $school1 = $user1->getSchool();    
+      $school1 = $school_user1->getSchool();    
       break;
     case 'teacher':
       $school_user1 = TeacherUser::castAs($user1);
-      $school1 = $user1->getSchool();    
+      $school1 = $school_user1->getSchool();    
       break;
     case 'parent':
       $school_user1 = ParentUser::castAs($user1);
-      $school1 = $user1->getSchool();    
+      $school1 = $school_user1->getSchool();    
       break;
     default:
       $user1_has_school = false;
@@ -94,15 +101,15 @@ function cmwn_school_different_schools($user1, $user2){
   switch($user2->user_type){
     case 'child':
       $school_user2 = ChildUser::castAs($user2);
-      $school2 = $user2->getSchool();    
+      $school2 = $school_user2->getSchool();    
       break;
     case 'teacher':
       $school_user2 = TeacherUser::castAs($user2);
-      $school2 = $user2->getSchool();    
+      $school2 = $school_user2->getSchool();    
       break;
     case 'parent':
       $school_user2 = ParentUser::castAs($user2);
-      $school2 = $user2->getSchool();    
+      $school2 = $school_user2->getSchool();    
       break;
     default:
       $user2_has_school = false;      
@@ -125,4 +132,9 @@ function cmwn_school_different_schools($user1, $user2){
   }
   
   return true;  
+}
+
+
+function cmwn_school_can_friend($user1,$user2){
+  return (!cmwn_school_different_schools($user1, $user2) && ($user1->user_type == $user2->user_type));
 }

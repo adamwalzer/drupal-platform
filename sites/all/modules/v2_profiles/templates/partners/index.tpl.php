@@ -24,7 +24,7 @@
 					<div class="item" style="background:url(<?php print '/'.$item->field_icon[0]['filepath']; ?>) 0px 0px no-repeat;">
 						<div class="title"><h2><?php print $item->title; ?></h2></div>
 						<div class="excerpt"><p><?php print strip_tags($item->body); ?></p></div>
-						<div class="more"><a href="/user/<?= $user->uid; ?>/partners/<?= $item->nid; ?>">Visit the partner's page</a></div>
+						<?php if(false):?><div class="more"><a href="/user/<?= $user->uid; ?>/partners/<?= $item->nid; ?>">Visit the partner's page</a></div><?php endif;?>
 					</div>
 				<?php } ?>
 			</div>

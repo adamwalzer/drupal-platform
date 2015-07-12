@@ -2,6 +2,12 @@ $(function(){
 
 	/* 1.4 global */
 
+
+  $('#whiteboard-tab form').submit(function(){
+    $(this).find(':submit').attr('disabled','disabled');
+    $(this).find('button.button').attr('disabled','disabled');    
+  });
+
 	jQuery.extend(Tipped.Skins,{
 		'cmwn':{
 			background:'#ffffff',
