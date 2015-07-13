@@ -1,7 +1,7 @@
 <?php /* 1.4 */ ?>
 <?php
 if($user->user_type =='parent' && arg(2) != 'friends' && arg(2) !='children' && arg(2) != 'class'){
-  print theme('v2_profiles_resource_center_index', theme('image', 'sites/all/themes/cmwn/assets/img/resource-center-coming-soon.jpg'));
+//  print theme('v2_profiles_resource_center_index', $data->user);
 }
 ?>
 <div class="block shadow whiteboard index" id="whiteboard-profile-tabs">

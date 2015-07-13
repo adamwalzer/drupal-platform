@@ -1,5 +1,4 @@
 <?php
-  //print_r($data);
   $u = $data->getBaseProfile();
   $user_data = unserialize($u->data);
   //print_r($user_data['user_type']);

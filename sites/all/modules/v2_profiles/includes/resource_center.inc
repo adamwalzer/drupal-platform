@@ -67,7 +67,7 @@ function v2_profiles_resource_center_index($uid,$type = 'parent') {
 	if($type == 'parent'){
     $resource = theme('v2_profiles_resource_center_index', $user);
 	}elseif($type == 'teacher'){
-    $resource = theme('v2_profiles_resource_center_index',$user);
+    $resource = theme('v2_profiles_resource_center_index', $user);
 	}
 
   if(arg(2) == 'resources'){
