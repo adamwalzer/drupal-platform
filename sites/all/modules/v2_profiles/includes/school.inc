@@ -433,7 +433,24 @@ function v2_profiles_school_import_teacher($school, $teacher, $classes_nodes){
 	//user account per email address.
 	$teacher_existing = user_load(array('mail'=> $teacher['Email Address']));
 	if($teacher_existing){//hope this teacher has a profile.
+  	
+  	//let's at least update school nid, save, then return student.
+  	$teacher_profile = node_load(array('uid' => $teacher_existing->uid,'type' => 'teacher_profile'));
+
+  	if($teacher_profile){
+			$teacher_profile->field_school[0]['nid'] = $school->nid;
+  			  			
+      //add all classes!
+      $classes = array_map('trim', explode(',', $teacher['Class Number']));
+      for($i = 0; $i < count($classes); $i++){
+        $teacher_profile->field_teacher_classes[$i]['nid'] = $classes_nodes[$classes[$i]]->nid;
+      }
+      // save new teacher profile
+			node_save($teacher_profile);
+  	}  	
+  	
 		return $teacher_existing;
+		
 	}else{//create new teacher account.
 		//find unique username
 		$username = $teacher['First Name'] . $teacher['Last Name'];
@@ -534,11 +551,42 @@ function v2_profiles_grade_array(){
 //TODO: link student profiles to classes.
 function v2_profiles_school_import_student($school, $student, $classes_nodes, $grades){//NOTE, $student also contains guardian info which needs to be dealt with also.
 	$student_existing = user_load(array('mail'=> $student['Email Address']));
+
 	if($student_existing){//hope this student has a profile.
   	//let's at least update school nid, save, then return student.
   	$child_profile = node_load(array('uid' => $student_existing->uid,'type' => 'child_profile'));
+    
   	if($child_profile){
 			$child_profile->field_school[0]['nid'] = $school->nid;
+  			  			
+  		//grade node ref
+  		if($student['Grade'] == 'PK') $student['Grade'] = "Pre-Kindergarten";
+  		if($student['Grade'] == 'K') $student['Grade'] = "Kindergarten";
+  		if($student['Grade'] == 'First Grade') $student['Grade'] = "1";
+  		if($student['Grade'] == 'Second Grade') $student['Grade'] = "2";
+  		if($student['Grade'] == 'Third Grade') $student['Grade'] = "3";
+  		if($student['Grade'] == 'Fourth Grade') $student['Grade'] = "4";
+  		if($student['Grade'] == 'Fifth Grade') $student['Grade'] = "5";
+  		if($student['Grade'] == 'Sixth Grade') $student['Grade'] = "6";
+  		if($student['Grade'] == 'Seventh Grade') $student['Grade'] = "7";
+  		if($student['Grade'] == 'Eighth Grade') $student['Grade'] = "8";
+  		if($student['Grade'] == 'Ninth Grade') $student['Grade'] = "9";
+  		if($student['Grade'] == 'Tenth Grade') $student['Grade'] = "10";
+  		if($student['Grade'] == 'Eleventh Grade') $student['Grade'] = "11";
+  		if($student['Grade'] == 'Twelfth Grade') $student['Grade'] = "12";
+  		
+  		
+ 
+  		$child_profile->field_student_grade[0]['nid'] = $grades[trim($student['Grade'])];
+
+  
+  		//add all classes!
+  		unset($child_profile->field_student_classes);
+  		$classes = array_map('trim', explode(',', $student['Class Number']));
+  		for($i = 0; $i < count($classes); $i++){
+  			$child_profile->field_student_classes[]['nid'] = $classes_nodes[$classes[$i]]->nid;
+  		}
+
 			node_save($child_profile);
   	}
 		return $student_existing;
