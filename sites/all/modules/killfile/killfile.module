@@ -202,6 +202,7 @@ function killfile_node_operations() {
  * Implementation of hook_db_rewrite_sql().
  */
 function killfile_db_rewrite_sql($query, $primary_table, $primary_field, $args) {
+
   switch ($primary_field) {
     case 'nid': // a node query
       // Add a JOIN and a WHERE clause to all node listing queries in order

@@ -534,9 +534,15 @@ function v2_profiles_grade_array(){
 //TODO: link student profiles to classes.
 function v2_profiles_school_import_student($school, $student, $classes_nodes, $grades){//NOTE, $student also contains guardian info which needs to be dealt with also.
 	$student_existing = user_load(array('mail'=> $student['Email Address']));
-	if($student_existing){//hope this teacher has a profile.
+	if($student_existing){//hope this student has a profile.
+  	//let's at least update school nid, save, then return student.
+  	$child_profile = node_load(array('uid' => $student_existing->uid,'type' => 'child_profile'));
+  	if($child_profile){
+			$child_profile->field_school[0]['nid'] = $school->nid;
+			node_save($child_profile);
+  	}
 		return $student_existing;
-	}else{//create new teacher account.
+	}else{//create new student account.
 		//find unique username
 		$username = $student['First Name'] . $student['Last Name'];
 		$ctr = 1;

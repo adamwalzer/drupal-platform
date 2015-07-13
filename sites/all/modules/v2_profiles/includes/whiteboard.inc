@@ -87,7 +87,10 @@
 		$data->user = $whiteboard_owner;
 		
 		//newsfeed
-		$newsfeed_query = "select nid from {node} n where n.status = 1 and 
+		$newsfeed_query = "select nid from {node} n";
+		  
+		$newsfeed_query = db_rewrite_sql($newsfeed_query,'node','nid');
+		$newsfeed_query .= " and  n.status = 1 and 
 		(
 		  n.type in ('news') OR
 		  (n.type in ('whiteboard') AND
@@ -104,20 +107,13 @@
                     `ur`.`rtid` = 4 AND
                     `ur`.`approved` = 1
                   )
-                  
-             
-              
-		  
-		  
-		  
+
 		) 
   )
 		  
 		  order by n.created desc limit 20";
-		
-		//print $newsfeed_query;exit;
+		//print_r($newsfeed_query);exit;
 		$newsfeed = db_query($newsfeed_query);
-    
     $news_items = array();
     
     while($news = db_fetch_object($newsfeed)){
