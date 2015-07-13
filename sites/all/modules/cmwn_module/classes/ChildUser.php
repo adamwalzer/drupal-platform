@@ -66,7 +66,7 @@ class ChildUser extends GenericUser {
     return false;
   }
   
-  public function getSchool() {
+  public function getSchools() {
     $sql = <<<EOSQL
 SELECT
 	n2.nid
@@ -77,7 +77,7 @@ INNER JOIN {node} n2 ON cfs.field_school_nid = n2.nid
 WHERE n.uid = %d limit 1
 EOSQL;
     $nid = db_result(db_query($sql, $this->uid));
-    return node_load($nid);
+    return array($nid=>node_load($nid));
   }
   
   public function getFriends() {

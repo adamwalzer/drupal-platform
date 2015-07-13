@@ -40,7 +40,8 @@ function cmwn_module_video_node_form(&$form, &$form_state) {
     if ($school = node_load($nid)) {
       if (ChildUser::canHydrate($user)) {
         $child = ChildUser::castAs($user);
-        $childSchool = $child->getSchool();
+        $childSchool = $child->getSchools();
+        $childSchool = array_pop($childSchool);
         if ($school && $school->nid == $childSchool->nid) {
           $form['field_school']['#default_value'] = array('nid' => $school->nid);
           $form['field_school']['#value'] = array('nid' => $school->nid);

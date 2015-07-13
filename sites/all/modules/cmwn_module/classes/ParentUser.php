@@ -55,5 +55,18 @@ class ParentUser extends GenericUser {
     }
     return $children;
   }
+
+  public function getSchools() {
+    $schools = array();
+    $children = $this->getChildren();
+    foreach($children as $child){
+      $school = $child->getSchools();
+      $school = array_pop($school);
+      $schools[$school->nid] = $school;
+    }
+    
+    return $schools;
+  }
+
   
 }

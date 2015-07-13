@@ -3604,3 +3604,8 @@ div.section-right{
 #block-menu_block-1 h2{
   display: none;
 }
+
+div.parent-resource-center img{
+  width: 100%;
+  height: auto;
+}

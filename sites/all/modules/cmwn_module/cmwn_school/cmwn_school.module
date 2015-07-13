@@ -18,7 +18,8 @@ function cmwn_school_view() {
   global $user;
   if (ChildUser::canHydrate($user)) {
     $child = ChildUser::castAs($user);
-    if ($school = $child->getSchool()) {
+    if ($school = $child->getSchools()) {
+      $school = array_pop($school);
       return node_view($school, false, true);
     }
   }
@@ -83,15 +84,15 @@ function cmwn_school_different_schools($user1, $user2){
   switch($user1->user_type){
     case 'child':
       $school_user1 = ChildUser::castAs($user1);
-      $school1 = $school_user1->getSchool();    
+      $school1 = array_pop($school_user1->getSchools());
       break;
     case 'teacher':
       $school_user1 = TeacherUser::castAs($user1);
-      $school1 = $school_user1->getSchool();    
+      $school1 = array_pop($school_user1->getSchools());
       break;
     case 'parent':
       $school_user1 = ParentUser::castAs($user1);
-      $school1 = $school_user1->getSchool();    
+      $school1 = $school_user1->getSchools();    
       break;
     default:
       $user1_has_school = false;
@@ -101,15 +102,28 @@ function cmwn_school_different_schools($user1, $user2){
   switch($user2->user_type){
     case 'child':
       $school_user2 = ChildUser::castAs($user2);
-      $school2 = $school_user2->getSchool();    
+      $school2 = array_pop($school_user2->getSchools());
       break;
     case 'teacher':
       $school_user2 = TeacherUser::castAs($user2);
-      $school2 = $school_user2->getSchool();    
+      $school2 = array_pop($school_user2->getSchools());    
       break;
     case 'parent':
+      //return false;
       $school_user2 = ParentUser::castAs($user2);
-      $school2 = $school_user2->getSchool();    
+      $school2 = $school_user2->getSchools();    
+      
+      //ok at this point we have two arrays of schools for parents....if there's any overlap, return true otherwise return false........
+      if((count($school2) == 0 && count($school1) == 0) || (!is_array($school2) || !is_array($school1))){
+        return false;//no schools, so return false, tehy can be friends
+      }
+
+      $dup = array_intersect(array_keys($school1), array_keys($school2));
+
+      if(count($dup) > 0){
+        return false;
+      }
+      
       break;
     default:
       $user2_has_school = false;      
