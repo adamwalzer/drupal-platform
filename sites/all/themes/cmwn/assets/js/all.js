@@ -4,8 +4,7 @@ $(function(){
 
 
   $('#whiteboard-tab form').submit(function(){
-    $(this).find(':submit').atttr('disabled','disabled');
-    $(this).find('button.button').attr('disabled','disabled');    
+    $('#whiteboard-tab form button').attr('disabled', 'disabled');
   });
 
 	jQuery.extend(Tipped.Skins,{
