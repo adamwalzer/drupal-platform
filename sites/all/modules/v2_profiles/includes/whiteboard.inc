@@ -89,7 +89,7 @@
 		//newsfeed
 		$newsfeed_query = "select nid from {node} n";
 		  
-		$newsfeed_query = db_rewrite_sql($newsfeed_query,'node','nid');
+		$newsfeed_query = db_rewrite_sql($newsfeed_query,'n','nid');
 		$newsfeed_query .= " and  n.status = 1 and 
 		(
 		  n.type in ('news') OR
@@ -500,8 +500,7 @@
   	switch($whiteboard_type){
     	case 'Class':
     	      //join whiteboard to whiteboard type taxonomy, join to class nid
-            return "
-            SELECT
+            return db_rewrite_sql("SELECT
             `n`.`nid`
             FROM
             `node` AS `n`  
@@ -510,7 +509,7 @@
             
             inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
             
-            inner join content_type_whiteboard ctw on n.nid = ctw.nid and n.vid = ctw.vid and ctw.field_class_nid is NOT NULL and ctw.field_class_nid = %s
+            inner join content_type_whiteboard ctw on n.nid = ctw.nid and n.vid = ctw.vid and ctw.field_class_nid is NOT NULL and ctw.field_class_nid = %s",'n','nid') . "
             
             WHERE
             `n`.`type` = 'whiteboard'
@@ -521,17 +520,16 @@
       case 'School':
             $school = v2_profiles_school_query($user->uid);
            
-            return "
-            SELECT
+            return db_rewrite_sql("SELECT
             `n`.`nid`
             FROM
             `node` AS `n`  
             
             inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
             
-            inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'          
+            inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'",'n','nid')."          
      
-            WHERE
+            and
             `n`.`type` = 'whiteboard' and n.status > 0 and n.uid = ".$school->field_school_administrator[0]['uid']."
             ORDER BY
             `n`.`created` DESC;";   
@@ -541,12 +539,12 @@
         switch($user->user_type){
           case 'teacher':
           case 'parent':
-            return "SELECT
+            return db_rewrite_sql("SELECT
               `n`.`nid`
               FROM
               `node` AS `n`  inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
-              inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
-              WHERE
+              inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'",'n','nid')."
+              and
               `n`.`type` = 'whiteboard' AND 
               `n`.`uid` = " . $user->uid . "
               ORDER BY
@@ -554,12 +552,12 @@
               break;
 
           case 'School Administrator':
-            return "SELECT
+            return db_rewrite_sql("SELECT
               `n`.`nid`
               FROM
               `node` AS `n`  inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
-              inner join term_data td on td.tid = tn.tid and td.vid = 8 and (td.name ='Profile' OR td.name = 'School')
-              WHERE
+              inner join term_data td on td.tid = tn.tid and td.vid = 8 and (td.name ='Profile' OR td.name = 'School')",'n','nid')."
+              and
               `n`.`type` = 'whiteboard' AND 
               `n`.`uid` = " . $user->uid . "
               ORDER BY
@@ -567,12 +565,12 @@
             break;
           
           default:
-            return  "SELECT
+            return  db_rewrite_sql("SELECT
               `n`.`nid`
               FROM
               `node` AS `n` inner join term_node tn on n.nid = tn.nid and n.vid=tn.vid 
-              inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
-              WHERE
+              inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'",'n','nid')."
+              and
               `n`.`type` = 'whiteboard' AND
               `n`.`uid` = " . $user->uid . "
               ORDER BY
