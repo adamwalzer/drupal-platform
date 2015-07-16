@@ -7,7 +7,7 @@
 
 <?php switch(true):?>
 <?php case true:?>
-<iframe width="100%" height = "650" src="<?php print $data->node->field_instruction_1[0]['value'];?>?uid=<?php print $data->user->uid;?>" style="border: 0;width:100%;height: 650px;" scrolling="no" scrollbars="none"></iframe>
+<iframe width="100%" height = "650" src="<?php print $data->node->field_instruction_1[0]['value'];?>?uid=<?php print $data->user->uid;?>&redirect=/user/<?php print $data->user->uid;?>/flips/<?php print arg(3);?>" style="border: 0;width:100%;height: 650px;" scrolling="no" scrollbars="none"></iframe>
 <?php break;?>
 
 <?php case false:?>
