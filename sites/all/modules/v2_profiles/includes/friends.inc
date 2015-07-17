@@ -259,6 +259,7 @@
 			case 'parent':
 				$filter_friends = ' and u.uid in (select uid from users_roles uri where uri.rid = 5 and uri.uid = u.uid) ';
 				$profile_type = 'parent_profile';
+				$limit = '';
 				break;
 
 			case 'teacher':
