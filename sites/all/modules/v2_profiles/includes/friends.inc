@@ -193,7 +193,7 @@
 
 		$user = user_load($uid);
 
-		$all = v2_profiles_friends_query_all($user->uid, 10); shuffle($all);
+		$all = v2_profiles_friends_query_all($user->uid, null, null, 1000); shuffle($all);
 		$friends = v2_profiles_friends_query($user->uid);
 
 		// TODO: filter things out
@@ -244,10 +244,11 @@
 	}
 
 	function v2_profiles_friends_query_all($uid, $q = '', $tid = 0, $limit = '') {
-    if(is_numeric($limit)){
-      $limit = ' limit ' . $limit;
-    }
-    
+
+    //drupal_set_message('limit');
+   // drupal_set_message($limit);
+   // print $limit;
+   // print 'test';exit;
 		$items = array();
 
 		$user = user_load($uid);
@@ -263,11 +264,19 @@
 			case 'teacher':
 				$filter_friends = ' and u.uid in (select uid from users_roles uri where uri.rid = 6 and uri.uid = u.uid) ';
 				$profile_type = 'teacher_profile';
+        if(is_numeric($limit)){
+          $limit = ' LIMIT ' . $limit . ' ';
+        }				
+				
 				break;
 
 			default://child
 				$filter_friends = ' and u.uid in (select uid from users_roles uri where uri.rid = 4 and uri.uid = u.uid) ';
 				$profile_type = 'child_profile';			
+        if(is_numeric($limit)){
+          $limit = ' LIMIT ' . $limit . ' ';
+        }				
+				
 				break;
 		}
 
@@ -286,10 +295,17 @@
 			WHERE
 				`r`.`rid` = 28 " . $filter_friends . "
 				" . ((!empty($q))?"AND `u`.`name` LIKE '%%" . db_escape_string($q). "%%'":"") . "
-				" . (($tid>0)?"AND `tn`.`tid` = " . $tid:"") . "
-			ORDER BY RAND();
-		" . $limit;
-//print $query;
+				" . (($tid>0)?"AND `tn`.`tid` = " . $tid:"");
+    //print_r($user)				;exit;
+    $schools = implode(',',array_keys($user->getSchools()));
+    if(strlen($schools) > 3){
+      $query .=' inner join content_field_school cfs on n.nid = cfs.nid and n.vid = cfs.vid and cfs.field_school_nid in ('.$schools.') ';
+    }
+    
+		
+				
+		$query .= " ORDER BY RAND() " . $limit;
+
 		$results = db_query($query);
 
 		while ($result = db_fetch_object($results)) {
@@ -298,18 +314,35 @@
 			if ($result->approved == 1) continue;
 			$relationship = user_relationships_load(array('between' => array($result->uid , $user->uid)));
 			$relationship = array_pop($relationship);
+      switch($user->user_type){
+        case 'parent':
+          if(!cmwn_school_different_schools($user,user_load($result->uid))){			
+      			$item = array(
+      				'href' => '/user/'.$user->uid.'/friends/'.$result->uid,
+      				'name' => $result->name,
+      				'src' => v2_profiles_avatars_query($result->uid),
+      				'relationship' => $relationship,
+      				'requested' => ($result->approved == '')?0:1,
+      				'uid' => $result->uid,
+      			);
+      			$items[] = (object)$item;
+      		}        
+          break;
+        
+        
+        default://teacher, child
+    			$item = array(
+    				'href' => '/user/'.$user->uid.'/friends/'.$result->uid,
+    				'name' => $result->name,
+    				'src' => v2_profiles_avatars_query($result->uid),
+    				'relationship' => $relationship,
+    				'requested' => ($result->approved == '')?0:1,
+    				'uid' => $result->uid,
+    			);
+    			$items[] = (object)$item;        
+          break;
+      }
 
-      if(!cmwn_school_different_schools($user,user_load($result->uid))){			
-  			$item = array(
-  				'href' => '/user/'.$user->uid.'/friends/'.$result->uid,
-  				'name' => $result->name,
-  				'src' => v2_profiles_avatars_query($result->uid),
-  				'relationship' => $relationship,
-  				'requested' => ($result->approved == '')?0:1,
-  				'uid' => $result->uid,
-  			);
-  			$items[] = (object)$item;
-  		}
 		}
 
 		return $items;
