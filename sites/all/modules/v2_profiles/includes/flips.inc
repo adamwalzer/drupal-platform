@@ -91,8 +91,8 @@
 	function v2_profiles_flips_index($uid) {
 
 		$data = new stdClass();
-
-		$user = user_load($uid);
+    $data->user->uid = $uid;
+		/*$user = user_load($uid);
 
 		$all = v2_profiles_flips_query_all($uid);
 		$new = $all;
@@ -112,6 +112,7 @@
 		$data->items->new = $new;
 		$data->items->started = $started;
 		$data->user = $user;
+		*/
 
 		return theme('v2_profiles_flips_index', $data);
 
@@ -210,12 +211,12 @@
 		$data = new stdClass();
 
 		$user = user_load($uid);
-		$user->avatar = v2_profiles_avatars_query($user->uid);
+		//$user->avatar = v2_profiles_avatars_query($user->uid);
 		$node = node_load($nid);
 
 		if (!$node) drupal_access_denied();
 
-		$partner = node_load($node->field_brand_partner[0]['nid']);
+		/*$partner = node_load($node->field_brand_partner[0]['nid']);
 
 		$node->color = $node->field_color[0]['value'];
 		$node->completed = 1;
@@ -252,7 +253,7 @@
 				$node->new = 0;
 				break;
 			}
-		}
+		}*/
 
 		$data->node = $node;
 		$data->user = $user;

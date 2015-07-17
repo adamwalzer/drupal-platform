@@ -110,7 +110,7 @@ function cmwn_flip_feed() {
     //print preg_replace('/[{}]/', '',$query_union);exit;
     $count_query = "SELECT COUNT(*) FROM (" . $query_union . ") AS count_query";
     
-    $feed_items = pager_query($query_union, 13, 0, $count_query, $args);//careful here, $args must work for count query and main query or this wont work.
+    $feed_items = pager_query($query_union, 6, 0, $count_query, $args);//careful here, $args must work for count query and main query or this wont work.
 
     while($f = db_fetch_object($feed_items)){
       $item = new stdClass();

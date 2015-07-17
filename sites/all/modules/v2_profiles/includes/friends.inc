@@ -193,7 +193,7 @@
 
 		$user = user_load($uid);
 
-		$all = v2_profiles_friends_query_all($user->uid); shuffle($all);
+		$all = v2_profiles_friends_query_all($user->uid, 10); shuffle($all);
 		$friends = v2_profiles_friends_query($user->uid);
 
 		// TODO: filter things out
@@ -243,8 +243,11 @@
 		
 	}
 
-	function v2_profiles_friends_query_all($uid, $q = '', $tid = 0) {
-
+	function v2_profiles_friends_query_all($uid, $q = '', $tid = 0, $limit = '') {
+    if(is_numeric($limit)){
+      $limit = ' limit ' . $limit;
+    }
+    
 		$items = array();
 
 		$user = user_load($uid);
@@ -285,7 +288,7 @@
 				" . ((!empty($q))?"AND `u`.`name` LIKE '%%" . db_escape_string($q). "%%'":"") . "
 				" . (($tid>0)?"AND `tn`.`tid` = " . $tid:"") . "
 			ORDER BY RAND();
-		";
+		" . $limit;
 //print $query;
 		$results = db_query($query);
 
