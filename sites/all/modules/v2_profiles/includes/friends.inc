@@ -192,8 +192,8 @@
 		$data = new stdClass();
 
 		$user = user_load($uid);
-
-		$all = v2_profiles_friends_query_all($user->uid, null, null, 1000); shuffle($all);
+    $limit = $user->user_type == 'parent'?1000:10;
+		$all = v2_profiles_friends_query_all($user->uid, null, null, $limit); shuffle($all);
 		$friends = v2_profiles_friends_query($user->uid);
 
 		// TODO: filter things out
@@ -259,7 +259,7 @@
 			case 'parent':
 				$filter_friends = ' and u.uid in (select uid from users_roles uri where uri.rid = 5 and uri.uid = u.uid) ';
 				$profile_type = 'parent_profile';
-				$limit = '';
+				$limit = ' ';
 				break;
 
 			case 'teacher':
@@ -281,6 +281,7 @@
 				break;
 		}
 
+    
 		$query = "
 			SELECT
 				`u`.`uid`,
@@ -292,20 +293,31 @@
 				`users_roles` AS `ur` ON `u`.`uid` = `ur`.`uid` JOIN
 				`role` AS `r` ON `ur`.`rid` = `r`.`rid` LEFT JOIN
 				`user_relationships` AS `ur2` ON `u`.`uid` = `ur2`.`requestee_id` AND `ur2`.`requester_id` = " . $user->uid . " LEFT JOIN
-				`term_node` AS `tn` ON `n`.`nid` = `tn`.`nid`
-			WHERE
+				`term_node` AS `tn` ON `n`.`nid` = `tn`.`nid`";
+      $nonstudentwhere = '';
+      $schools = false;
+      if($user->user_type == 'parent' || $user->user_type == 'teacher' || $user->user_type == 'child'){
+        if($user->user_type != 'parent'){//parent has no schoool field!
+          $schools = implode(',',array_keys($user->getSchools()));
+          if($schools && strlen($schools) > 3){
+            $query .=' inner join content_field_school cfs on n.nid = cfs.nid and n.vid = cfs.vid and cfs.field_school_nid in ('.$schools.') ';
+          }else{
+            $nonstudentwhere = ' (n.nid not in (select nid from content_field_school cfs where cfs.nid = n.nid and cfs.vid = n.vid and cfs.field_school_nid is not null )) and ';
+          }   
+        }				     
+      }
+				
+			$query .=" WHERE " . $nonstudentwhere . " 
 				`r`.`rid` = 28 " . $filter_friends . "
 				" . ((!empty($q))?"AND `u`.`name` LIKE '%%" . db_escape_string($q). "%%'":"") . "
 				" . (($tid>0)?"AND `tn`.`tid` = " . $tid:"");
     //print_r($user)				;exit;
-    $schools = implode(',',array_keys($user->getSchools()));
-    if(strlen($schools) > 3){
-      $query .=' inner join content_field_school cfs on n.nid = cfs.nid and n.vid = cfs.vid and cfs.field_school_nid in ('.$schools.') ';
-    }
     
 		
 				
 		$query .= " ORDER BY RAND() " . $limit;
+		
+		//print $query;
 
 		$results = db_query($query);
 
@@ -331,7 +343,7 @@
           break;
         
         
-        default://teacher, child
+        default://teacher, child = our query adjus
     			$item = array(
     				'href' => '/user/'.$user->uid.'/friends/'.$result->uid,
     				'name' => $result->name,
