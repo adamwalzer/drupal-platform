@@ -2,16 +2,15 @@
     
 function cmwn_moderation_menu() {
   $items = array();
-
-  $items['node/%node/approve'] = array(
+  drupal_set_message('cmwn_moderation_menu()');
+  $items['cmwn_moderation/approve/comment/%'] = array(
     'title' => 'Approve', 
     'access arguments' => array('moderate content'),
-    'page callback' => 'cmwn_moderation_approve',
-    'page arguments' => array(1),
+    'page callback' => 'cmwn_moderation_approve_comment',
+    'page arguments' => array(3),
     'type' => MENU_CALLBACK,
     'weight' => 10,   
   ); 
-  
 
   $items['node/%node/approve'] = array(
     'title' => 'Approve', 
@@ -40,7 +39,7 @@ function cmwn_moderation_menu() {
     'type' => MENU_CALLBACK,
     'weight' => 10,   
   );   
-  
+  //wtf
   $items['cmwn_moderation/restore/%'] = array(
     'title' => 'Remove Due to Format', 
     'access arguments' => array('moderate content'),
@@ -95,6 +94,15 @@ function cmwn_moderation_approve($nid){
   @node_save($node);
   //watchdog('cmwn_moderation', $user->name . ' ' . t('approved post nid') . ' ' . $nid . ' (' . $node->title . ')');
   
+  drupal_set_message('content has been approved');
+  drupal_goto($_GET['destination']);
+
+}
+
+function cmwn_moderation_approve_comment($cid){
+
+  
+  db_query('UPDATE {comments} SET status = '. COMMENT_PUBLISHED .' WHERE cid = %d',$cid);
   drupal_set_message('content has been approved');
   drupal_goto($_GET['destination']);
 

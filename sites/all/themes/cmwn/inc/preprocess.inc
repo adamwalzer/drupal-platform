@@ -36,7 +36,7 @@ function cmwn_preprocess_page(&$vars) {
 	$nid = variable_get('cmwn_survey_interest_survey_nid', '');
 	if (!(arg(0) == 'node' && arg(1) == $nid) && ChildUser::canHydrate($user)) {
   	$child = ChildUser::castAs($user);
-    @$schools = array_filter(ChildUser::castAs($user)->getSchools());
+    @$schools = array_filter($child->getSchools());
     //$schools = array();
 		if (!$child->hasCompletedInterestSurvey() && empty($schools)) {
 			//drupal_set_message(t("Don't forget to <a href=\"!url\">complete your interest survey!</a>", array('!url' => url('node/'.$nid))));
