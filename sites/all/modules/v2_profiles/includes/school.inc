@@ -88,6 +88,30 @@
 
 	}
 
+function v2_profiles_school_wipe(){
+	$form = array();
+	// If this #attribute is not present, upload will fail on submit
+
+	$form['wipe_school'] = array(
+		'#type'  =>  'submit',
+		'#value'  =>  'Wipe School',
+    '#attributes' => array('onclick' => 'if(!confirm("You are about to seriously delete everyone in this school and all their information and reimport from scratch. Whiteboard posts, videos, comments will all be lost even if you reimport these accounts. Continue?")){return false;}'),		
+	);
+	
+	return $form;  
+}
+
+
+function v2_profiles_school_wipe_submit($form, &$form_state){
+  
+  global $user;
+  
+  //get the $school node of the currently logged in School Administrator.
+  $school_nid = db_result(db_query('select nid from {node} n where type="school" and uid = %d order by nid desc', $user->uid));
+  
+  v2_profiles_import_wipe_batch($school_nid);
+  
+}
 
 function v2_profiles_school_import(){
 	$form = array();
@@ -101,7 +125,7 @@ function v2_profiles_school_import(){
 	
 	$form['submit_upload'] = array(
 		'#type'  =>  'submit',
-		'#value'  =>  'Upload Spreadsheet'
+		'#value'  =>  'Upload Spreadsheet',		
 	);
 	
 	return $form;
@@ -109,6 +133,8 @@ function v2_profiles_school_import(){
 
 
 function v2_profiles_school_import_submit($form, &$form_state) {
+  
+  global $user;
 
   $validators = array();
   $dest = 'sites/default/files/school_bulk_imports';
@@ -139,6 +165,11 @@ function v2_profiles_school_import_submit($form, &$form_state) {
 				drupal_set_message(t('*** The spreadsheet you uploaded has errors. Import has been aborted and no new records were created or updated. Please review the above errors, correct the spreadsheet, and try again.'), 'error');
 			}else{//dry run passed - go ahead and make and/or update the records.
 				drupal_set_message(t('Spreadsheet format passed validation.'));
+
+				global $user;
+				//get the $school node of the currently logged in School Administrator.
+				$school_nid = db_result(db_query('select nid from {node} n where type="school" and uid = %d order by nid desc', $user->uid));
+				
 				//keep track of nodes and users created in case (gasp) we want to roll back
 				//node creation. This won't save updated nodes.
 				$new_nodes = array();
@@ -157,9 +188,7 @@ function v2_profiles_school_import_submit($form, &$form_state) {
 				//$result[0] = Classes
 				//$result[1] = Teachers
 				//$result[2] = Students
-				global $user;
-				//get the $school node of the currently logged in School Administrator.
-				$school_nid = db_result(db_query('select nid from {node} n where type="school" and uid = %d order by nid desc', $user->uid));
+
 				$school = node_load($school_nid);
 				//dsm($school);
 				//$school has the node object of existing school in db.
@@ -818,3 +847,82 @@ while($uid = db_fetch_object($uids)){
 	}
 }
 */
+
+function v2_profiles_import_wipe_batch($school_nid){
+  //wipe all user data if spreadsheet passed validation and checkbox to wipe was checked.
+  $batch = array(
+    'title' => t('Wiping School'),
+    'operations' => array(
+      array('v2_profiles_import_wipe', array($school_nid)),
+    ),
+    'init_message' => t('Importing...it may take some time.'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('School Wipe has encountered an error.'),    
+    'finished' => '',
+  );
+  batch_set($batch);
+  batch_process('school/' . $school_nid . '/dashboard');
+}
+
+function v2_profiles_import_wipe($school_nid = false){
+  
+  if(is_numeric($school_nid)){
+    //load all users assigned to this school.
+    $uids_deletion =  v2_profiles_school_get_uids($school_nid);
+      
+    $uids_in = implode(',',$uids_deletion);
+    //before we get ahead of ourselves and delete these uids, we need to delete their content first...and comments.
+    
+    //1. delete comments.
+    //delete parent comments
+    $cids = db_query("select cid from {comments} c where c.uid  in ($uids_in) and pid = 0 order by cid asc");
+    module_load_include('inc', 'comment','comment.admin');
+    while($cid = db_fetch_object($cids)){
+      _comment_delete_thread($cid);
+    }
+    
+    //2. delete all nodes of any type belonging to the user. Sadly we must use the api and not delete directly from db.
+    $nodes = db_query("select nid from {node} n where uid in ($uids_in)"); 
+    //note, because students are restricted to other students from the school we do not need to check the user reference field to see if it's another person.  
+    //If this changes then we have to update this.
+    while($node = db_fetch_object($nodes)){
+      node_delete($node->nid);
+    }
+    
+    foreach($uids_deletion as $uid){
+      user_delete(array(), $uid);
+    }
+    
+  }
+}
+
+function v2_profiles_school_get_uids($school_nid){
+  $student_uids = array();
+  $teacher_uids = array();
+  $parent_uids = array();
+  //teacher and student profiles have field_school_nid field.
+  $students = db_query('SELECT n.uid FROM content_field_school cfs join node n on n.nid = cfs.nid and n.vid = cfs.vid WHERE cfs.field_school_nid = %d and n.type in ("child_profile")', $school_nid);
+  
+  $teachers = db_query('SELECT n.uid FROM content_field_school cfs join node n on n.nid = cfs.nid and n.vid = cfs.vid WHERE cfs.field_school_nid = %d and n.type in ("teacher_profile")', $school_nid);
+  
+  while($teacher_uid = db_fetch_object($teachers)){
+    $teacher_uids[] = $teacher_uid->uid;
+  }
+
+  //parent's dont. So we get them through user relationship with student uids previously queried.
+  while($student_uid = db_fetch_object($students)){
+    $student_uids[] = $student_uid->uid;
+    $relationships = user_relationships_load(array('user' => $student_uid->uid, 'name' => 'child'));
+    //var_dump($relationships);die;
+    foreach ($relationships as $relationship) {
+      if ($relationship->rtid == 3 && $relationship->approved) {
+        $parent_uids[] = $relationship->requestee_id;
+      }
+    }    
+  }
+
+  $uids_deletion = array_merge($student_uids, $teacher_uids, $parent_uids);
+  
+  return $uids_deletion;
+
+}

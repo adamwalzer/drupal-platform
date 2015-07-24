@@ -14,6 +14,7 @@
 		</div>
 
 		<?php print drupal_get_form('v2_profiles_school_import'); ?>
+		<?php print drupal_get_form('v2_profiles_school_wipe'); ?>
 
 		<div class="content" id="school-dashboard-tabs">
 			<ul class="menutabs group">
