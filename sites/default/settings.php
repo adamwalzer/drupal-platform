@@ -292,7 +292,7 @@ switch ($_SERVER['HTTP_HOST']) {
     }
 		break;
   case 'local.cmwn.com:8888':
-    $db_url = 'mysql://root:root@localhost/ginasink_drp';
+    $db_url = 'mysql://root:root@localhost/ginasink_drp_broken';
     break;
 	case 'localhost.site-name':
 	default:
@@ -312,16 +312,35 @@ $cli = (php_sapi_name() == 'cli');
 
 
 
-//if (isset($_SERVER['PANTHEON_ENVIRONMENT'])) {
-//  switch ($_SERVER['PANTHEON_ENVIRONMENT']) {
-//    case 'test':
-//     $base_url = 'http://test-cmwn.gotpantheon.com'; // NO trailing slash!
-//     break;
-//    case 'dev':
-//      $base_url = 'http://dev-cmwn.gotpantheon.com'; // NO trailing slash!
-//      break;
-//    case 'live':
-//      $base_url = 'http://live-cmwn.gotpantheon.com'; // NO trailing slash!
-//      break;
-//  }
-//}
+if (isset($_SERVER['PANTHEON_ENVIRONMENT'])) {
+  switch ($_SERVER['PANTHEON_ENVIRONMENT']) {
+    case 'test':
+     $base_url = 'http://test-cmwn.gotpantheon.com'; // NO trailing slash!
+     break;
+    case 'dev':
+      $base_url = 'http://dev-cmwn.gotpantheon.com'; // NO trailing slash!
+      break;
+    case 'live':
+      $base_url = 'http://changemyworldnow.education'; // NO trailing slash!
+      break;
+  }
+
+}
+
+
+
+$conf['cache_inc'] = 'sites/all/modules/cache_backport/cache.inc';
+
+
+// All Pantheon Environments.
+if (defined('PANTHEON_ENVIRONMENT')) {
+  // Use Redis for caching.
+  $conf['redis_client_interface'] = 'PhpRedis';
+  $conf['cache_backends'][] = 'sites/all/modules/redis/redis.autoload.inc';
+  $conf['cache_default_class'] = 'Redis_Cache';
+  $conf['cache_prefix'] = array('default' => 'pantheon-redis');
+  // Do not use Redis for cache_form (no performance difference).
+  $conf['cache_class_cache_form'] = 'DrupalDatabaseCache';
+  // Use Redis for Drupal locks (semaphore).
+  $conf['lock_inc'] = 'sites/all/modules/redis/redis.lock.inc';
+}

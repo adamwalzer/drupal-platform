@@ -2,11 +2,11 @@
 
 	/* 1.4 */
 
-	$v2_profiles_menu_items['user/%/links'] = array(
+	$v2_profiles_menu_items['user/%/links/%'] = array(
 		'access arguments' => array(1),
 		'access callback' => 'v2_profiles_access',
 		'description' => '',
-		'page arguments' => array(1),
+		'page arguments' => array(1,3),
 		'page callback' => 'v2_profiles_links_index',
 		'title' => 'Links',
 		'type' => MENU_CALLBACK,
@@ -17,7 +17,7 @@
 		'template' => 'templates/links/index'
 	);
 
-	function v2_profiles_links_index($uid) {
+	function v2_profiles_links_index($uid, $print = false) {
 
 		$data = new stdClass();
 
@@ -47,8 +47,12 @@
 
 		$data->interests = $interests;
 		$data->items = $items;
-
-		return theme('v2_profiles_links_index', $data);
+    
+    if($print){
+      print theme('v2_profiles_links_index', $data);exit;
+    }else{
+  		return theme('v2_profiles_links_index', $data);      
+    }
 
 	}
 

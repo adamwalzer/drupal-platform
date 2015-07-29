@@ -1,0 +1,12 @@
+name = Cache Backport
+description = Provide cache.inc replacement that uses D7 cache handling instead. Enabling this module is not mandatory, you can use the provided cache.inc file as-is without the module. Enabling it will only provide some configuration overview screens.
+core = 6.x
+php = 5.2
+package = Performance and scalability
+
+; Information added by Drupal.org packaging script on 2015-06-26
+version = "6.x-1.0-rc4"
+core = "6.x"
+project = "cache_backport"
+datestamp = "1435320486"
+
