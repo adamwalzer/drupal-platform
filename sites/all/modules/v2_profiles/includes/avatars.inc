@@ -2,11 +2,11 @@
 
 	/* 1.4 */
 
-	$v2_profiles_menu_items['user/%/avatars'] = array(	
+	$v2_profiles_menu_items['user/%/avatars/%'] = array(	
 		'access arguments' => array(1),
 		'access callback' => 'v2_profiles_access',
 		'description' => '',
-		'page arguments' => array(1),
+		'page arguments' => array(1,3),
 		'page callback' => 'v2_profiles_avatars_index',
 		'title' => 'avatars',
 		'type' => MENU_CALLBACK,
@@ -162,7 +162,7 @@
 
 	}
 
-	function v2_profiles_avatars_index($uid) {
+	function v2_profiles_avatars_index($uid, $print = false) {
 
 		$data = new stdClass();
 
@@ -172,8 +172,14 @@
 
 		$data->user = $user;
 		$data->user->avatar = $avatar;
+		
+		if($print){
+  		print theme('v2_profiles_avatars_index', $data); exit;
+		}else{
+  		return theme('v2_profiles_avatars_index', $data);  		
+		}
 
-		return theme('v2_profiles_avatars_index', $data);
+
 
 	}
 

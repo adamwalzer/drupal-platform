@@ -2,7 +2,7 @@
 
 	/* 1.4 */
 
-	$v2_profiles_menu_items["user/%/whiteboard"] = array(
+	$v2_profiles_menu_items["user/%/whiteboard/"] = array(
 		"access arguments" => array(1),
 		"access callback" => 'v2_profiles_access',
 		"description" => "",
@@ -11,6 +11,17 @@
 		"title" => "Whiteboard",
 		"type" => MENU_CALLBACK,
 	);
+
+	$v2_profiles_menu_items["user/%/whiteboard/print"] = array(
+		"access arguments" => array(1),
+		"access callback" => 'v2_profiles_access',
+		"description" => "",
+		"page arguments" => array(1),
+		"page callback" => "v2_profiles_whiteboard_index_print",
+		"title" => "Whiteboard",
+		"type" => MENU_CALLBACK,
+	);
+
 
 	$v2_profiles_menu_items["user/%/whiteboard/%/comments/%/delete"] = array(
 		"access arguments" => array("access content"),
@@ -75,7 +86,12 @@
 		'arguments' => array('data' => array()),
 		'template' => 'templates/whiteboard/tab'
 	);	
-
+  
+  function v2_profiles_whiteboard_index_print($uid){
+    print v2_profiles_whiteboard_index($uid, 'Profile'); 
+    exit;
+  }
+  
 	function v2_profiles_whiteboard_index($uid, $whiteboard_type = 'Profile') {
 
 		$data = new stdClass();
@@ -87,9 +103,10 @@
 		$data->user = $whiteboard_owner;
 		
 		//newsfeed
-		$newsfeed_query = "select nid from {node} n";
+		$newsfeed_query = "select n.nid from {node} n";
 		  
 		$newsfeed_query = db_rewrite_sql($newsfeed_query,'n','nid');
+		//print $newsfeed_query;exit;
 		$newsfeed_query .= " and  n.status = 1 and 
 		(
 		  n.type in ('news') OR
@@ -509,9 +526,9 @@
             
             inner join term_data td on td.tid = tn.tid and td.vid = 8 and td.name ='%s'
             
-            inner join content_type_whiteboard ctw on n.nid = ctw.nid and n.vid = ctw.vid and ctw.field_class_nid is NOT NULL and ctw.field_class_nid = %s",'n','nid') . "
+            inner join content_type_whiteboard ctw on n.nid = ctw.nid and n.vid = ctw.vid and ctw.field_class_nid is NOT NULL and ctw.field_class_nid = %d",'n','nid') . "
             
-            WHERE
+            AND
             `n`.`type` = 'whiteboard'
             ORDER BY
             `n`.`created` DESC;";
@@ -651,7 +668,7 @@
 
 		$items = array();
     $query = v2_profiles_whiteboard_query_fetch(0, 'Class');
-		
+//    print $query;exit;		
     $results = db_query($query, array('Class', $class_nid));
 
 		while ($result = db_fetch_object($results)) {

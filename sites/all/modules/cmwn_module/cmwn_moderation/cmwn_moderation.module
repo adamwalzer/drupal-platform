@@ -2,7 +2,7 @@
     
 function cmwn_moderation_menu() {
   $items = array();
-  drupal_set_message('cmwn_moderation_menu()');
+//  drupal_set_message('cmwn_moderation_menu()');
   $items['cmwn_moderation/approve/comment/%'] = array(
     'title' => 'Approve', 
     'access arguments' => array('moderate content'),

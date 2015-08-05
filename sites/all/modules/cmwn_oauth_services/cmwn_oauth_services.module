@@ -75,8 +75,23 @@ function cmwn_oauth_services_menu() {
     'access arguments' => array('access content'),
   );
 
+  $items['services_get_header_js_css'] = array(
+    'page callback' => 'cmwn_oatuth_services_get_header_js_css',
+    'access arguments' => array('access content'),    
+    
+  );
   return $items;
 }
+
+
+function cmwn_oatuth_services_get_header_js_css(){
+  $current_js = drupal_get_js();  
+  $current_css = drupal_get_css();
+  print_r($current_js);
+  print $current_css . $current_js;exit;
+}
+
+
 
 function _cmwn_oauth_services_post_notification(){
   

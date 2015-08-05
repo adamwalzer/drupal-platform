@@ -2,11 +2,21 @@
 
 	/* 1.4 */
 
-	$v2_profiles_menu_items["user/%/friends"] = array(
+	$v2_profiles_menu_items["user/%/friends/"] = array(
 		"access arguments" => array(1),
 		"access callback" => 'v2_profiles_access',
 		"description" => "",
 		"page arguments" => array(1),
+		"page callback" => "v2_profiles_friends_index",
+		"title" => "Friends",
+		"type" => MENU_CALLBACK,
+	);
+
+	$v2_profiles_menu_items["user/%/friends/print"] = array(
+		"access arguments" => array(1),
+		"access callback" => 'v2_profiles_access',
+		"description" => "",
+		"page arguments" => array(1,3),
 		"page callback" => "v2_profiles_friends_index",
 		"title" => "Friends",
 		"type" => MENU_CALLBACK,
@@ -187,7 +197,7 @@
 
 	}
 
-	function v2_profiles_friends_index($uid) {
+	function v2_profiles_friends_index($uid, $print = false) {
 
 		$data = new stdClass();
 
@@ -200,8 +210,13 @@
 
 		$data->items->all = array_slice($all, 0, 10);
 		$data->items->friends = $friends;
+    if($print){
+      print theme('v2_profiles_friends_index', $data);
+      exit;
+    }else{
+  		return theme('v2_profiles_friends_index', $data);      
+    }
 
-		return theme('v2_profiles_friends_index', $data);
 
 	}
 
@@ -302,7 +317,7 @@
           if($schools && strlen($schools) > 3){
             $query .=' inner join content_field_school cfs on n.nid = cfs.nid and n.vid = cfs.vid and cfs.field_school_nid in ('.$schools.') ';
           }else{
-            $nonstudentwhere = ' (n.nid not in (select nid from content_field_school cfs where cfs.nid = n.nid and cfs.vid = n.vid and cfs.field_school_nid is not null )) and ';
+            $nonstudentwhere = ' (n.nid not in (select cfs.nid from content_field_school cfs where cfs.nid = n.nid and cfs.vid = n.vid and cfs.field_school_nid is not null )) and ';
           }   
         }				     
       }

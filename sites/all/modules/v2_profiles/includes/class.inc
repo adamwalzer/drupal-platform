@@ -23,7 +23,7 @@
 
 	function v2_profiles_class_index($uid,$class_nid) {
     //PROBLEM: this assumes $uid is teacher...student needs class too.
-    //Problem update - this code doesn't care if uid is a teacher, it doesn'te ven use it.
+    //Problem update - this code doesn't care if uid is a teacher, it doesn't even use it.
 
     
     //LOAD STUDENTS
@@ -154,7 +154,7 @@ function v2_profiles_class_unflipped_flips($completed_flip_nids = array()) {
     $items = array();
 
     //TODO update with proper db_placeholders()
-    $query = "select nid from {node} n where nid not in (" . implode(',',$completed_flip_nids) . ") and n.status > 0 and n.type='flip' limit 4";
+    $query = "select n.nid from {node} n where nid not in (" . implode(',',$completed_flip_nids) . ") and n.status > 0 and n.type='flip' limit 4";
     //print $query;exit;
     $results = db_query($query);
 

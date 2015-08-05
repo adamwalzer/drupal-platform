@@ -464,7 +464,7 @@ function heartbeat_cron() {
     // Activity Ids that can not be removed (latest activity per user)
     $keep_uaids = array(0 => 0);
 
-    $unlimited_templates = variable_get('heartbeat_activity_templates_unlimited', array());
+    $unlimited_templates = variable_get('heartbeat_activity_templates_unlimited', array(0));
 
     // Calculate the latest activity for each user.
     $arguments = array_merge($unlimited_templates, array($keep_latest_number));
