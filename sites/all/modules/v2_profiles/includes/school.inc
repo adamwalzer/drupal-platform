@@ -757,7 +757,7 @@ function v2_profiles_school_import_parent($school, $student){//NOTE, $student al
 		$new_parent = array(
 			'name' => $username,
 			//'pass' => $pwd,
-			'pass' => 'test',
+			'pass' => 'Cmwn2015',
 			'mail' => $student['Guardian Email Address'],
 			'access' => '0',
 			'status' => 1,
