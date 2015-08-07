@@ -16,7 +16,9 @@
 
 </div>
 
-<div class="block links modal interests" id="links-interests" style="display:none;">
+
+<?php if(false):?>
+<div class="block links modal interests" id="links-interests">
 
 	<div class="section">
 		<ul>
@@ -27,3 +29,4 @@
 	</div>
 
 </div>
+<?php endif;?>

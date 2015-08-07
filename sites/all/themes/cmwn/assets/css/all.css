@@ -3463,7 +3463,7 @@ div.section-right{
 
 
 #block-menu_block-1 .content > div > ul.menu > li{
-	margin: 0 20px;
+	margin: 0 4px;
 }
 
 #block-menu_block-1 .content > div > ul.menu > li > a{
@@ -3519,7 +3519,8 @@ div.section-right{
 .views_view__moderation table.views-table,
 .view-moderation-approved table.views-table,
 .view-moderation-denied table.views-table,
-.view-moderation-comments table.views-table{
+.view-moderation-comments table.views-table,
+.view-moderation-avatars table.views-table{
   width: 100%;
 }
 

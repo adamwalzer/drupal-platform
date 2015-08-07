@@ -23,17 +23,18 @@
 
 		$user = user_load($uid);
 
-		$tids = array();
+		/*$tids = array();
 		if ($user->user_type == 'child') {
 			$child = ChildUser::castAs($user);
 			if ($child) {
-				foreach ($child->getChildProfile()->taxonomy as $term) {
+  			$profile = $child->getChildProfile(); 
+				foreach ($profile->taxonomy as $term) {
 					$tids[] = $term->tid;
 				}
 			}
-		}
+		}*/
 
-		$interests = array();
+		/*$interests = array();
 		$terms = taxonomy_get_tree(3);
 		foreach ($terms as $term) {
 			$interest = new stdClass();
@@ -41,11 +42,11 @@
 			$interest->href = '/user/'.$uid.'/friends/search/'.$term->tid;
 			$interest->title = $term->name;
 			$interests[] = $interest;
-		}
+		}*/
 
 		$items = v2_profiles_links_query_all($uid);
 
-		$data->interests = $interests;
+		//$data->interests = $interests;
 		$data->items = $items;
     
     if($print){
