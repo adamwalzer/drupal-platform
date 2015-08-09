@@ -497,7 +497,7 @@ function v2_profiles_school_import_teacher($school, $teacher, $classes_nodes){
 		$new_teacher = array(
 			'name' => $username,
 			//'pass' => $pwd,
-			'pass' => 'test',
+			'pass' => 'Cmwn2015',
 			'mail' => $teacher['Email Address'],
 			'access' => '0',
 			'status' => 1,
@@ -636,7 +636,7 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
 		$new_student = array(
 			'name' => $username,
 			//'pass' => $pwd,
-			'pass' => 'test',
+			'pass' => 'Cmwn2015',
 			'mail' => $student['Email Address'],
 			'parent_email' => $student['Guardian Email Address'],
 			'access' => '0',
