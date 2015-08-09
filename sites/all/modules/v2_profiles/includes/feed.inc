@@ -41,7 +41,8 @@
 	}
 
 	function v2_profiles_feed_insert($uid,$tid,$tid_feed_type,$title,$content,$excerpt,$brand_nid = null) {
-
+  	//this is pumping our node table full of crap we are not using. 
+/*
 		$node = new stdClass();
 		$node->body = $content;
 		$node->field_excerpt[0]['value'] = $excerpt;
@@ -57,13 +58,15 @@
 		node_validate($node);
 		node_submit($node);
 		node_save($node);
+		*/
 
 	}
 
 	function v2_profiles_feed_query_all($uid) {
 
 		$items = array();
-
+    //this function is killing the site; return nothing
+    return $items;
 		$user = user_load($uid);
 
 		if (!$user) return $items;

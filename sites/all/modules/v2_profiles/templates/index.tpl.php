@@ -24,3 +24,6 @@ if($data->user->user_type == 'parent') {
     print v2_profiles_whiteboard_index($data->user->uid);
   ?>
 <?php }?>
+
+  
+<?php  //print_r(debug_backtrace()); ?>
