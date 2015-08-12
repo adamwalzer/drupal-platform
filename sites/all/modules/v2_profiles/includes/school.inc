@@ -482,12 +482,7 @@ function v2_profiles_school_import_teacher($school, $teacher, $classes_nodes){
 		
 	}else{//create new teacher account.
 		//find unique username
-		$username = $teacher['First Name'] . $teacher['Last Name'];
-		$ctr = 1;
-		while(db_result(db_query('select name from {users} u where name = "%s" limit 1', $username))){
-			$username = $teacher['First Name'] . $teacher['Last Name'] . '_' . $ctr;
-			$ctr++;
-		}
+		$username = v2_profiles_unique_username($teacher['First Name'] . $teacher['Last Name']);
 
 		//generate password
 		$bytes = openssl_random_pseudo_bytes(2);
@@ -621,12 +616,7 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
 		return $student_existing;
 	}else{//create new student account.
 		//find unique username
-		$username = $student['First Name'] . $student['Last Name'];
-		$ctr = 1;
-		while(db_result(db_query('select name from {users} u where name = "%s" limit 1', $username))){
-			$username = $student['First Name'] . $student['Last Name'] . '_' . $ctr;
-			$ctr++;
-		}
+		$username = v2_profiles_unique_username($student['First Name'] . $student['Last Name']);
 
 		//generate password
 		$bytes = openssl_random_pseudo_bytes(2);
@@ -742,12 +732,7 @@ function v2_profiles_school_import_parent($school, $student){//NOTE, $student al
 		return $parent_existing;
 	}else{//create new teacher account.
 		//find unique username
-		$username = $student['Guardian First Name'] . $student['Guardian Last Name'];
-		$ctr = 1;
-		while(db_result(db_query('select name from {users} u where name = "%s" limit 1', $username))){
-			$username = $student['Guardian First Name'] . $student['Guardian Last Name'] . '_' . $ctr;
-			$ctr++;
-		}
+		$username = v2_profiles_unique_username($student['Guardian First Name'] . $student['Guardian Last Name']);
 
 		//generate password
 		$bytes = openssl_random_pseudo_bytes(2);
@@ -925,4 +910,35 @@ function v2_profiles_school_get_uids($school_nid){
   
   return $uids_deletion;
 
+}
+
+function v2_profiles_unique_username($name, $uid = 0) {
+
+  // Strip illegal characters.
+  $name = preg_replace('/[^\x{80}-\x{F7} a-zA-Z0-9@_.\'-]/', '', $name);
+ 
+  // Strip leading and trailing spaces.
+  $name = trim($name);
+ 
+  // Convert any other series of spaces to a single underscore.
+  $name = preg_replace('/ +/', '_', $name);
+ 
+  // If there's nothing left use a default.
+  $name = ('' === $name) ? t('user') : $name;
+ 
+  // Truncate to reasonable size.
+  $name = (drupal_strlen($name) > (14)) ? drupal_substr($name, 0, 14) : $name;
+ 
+  // Iterate until we find a unique name.
+
+  $found = db_result(db_query("SELECT uid from {users} WHERE uid <> %d AND name = '%s' limit 1",  $uid, $name));
+
+  $i = 0;
+  do {
+   $random_suffix = rand(100,999);
+   $new_name = empty($i) ? $name : drupal_substr($name, 0, 11) . $random_suffix;
+   $found = db_result(db_query("SELECT uid from {users} WHERE uid <> %d AND name = '%s' limit 1",  $uid, $new_name));
+   $i++;
+  } while (!empty($found));
+  return $new_name;
 }
