@@ -1,14 +1,10 @@
 <?php
 
-	///
-
 	global $v2_profiles_menu_items;
 	global $v2_profiles_theme_items;
 
 	$v2_profiles_menu_items = array();
 	$v2_profiles_theme_items = array();
-
-	///
 
 	include_once(drupal_get_path('module','webform').'/includes/webform.submissions.inc');
 
@@ -21,7 +17,7 @@
 	require_once(drupal_get_path('module','v2_profiles').'/includes/flips.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/resource_center.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/friends.inc');
-require_once(drupal_get_path('module','v2_profiles').'/includes/import_students.inc');
+  require_once(drupal_get_path('module','v2_profiles').'/includes/import_students.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/index.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/interests.inc');
 	require_once(drupal_get_path('module','v2_profiles').'/includes/links.inc');
@@ -42,11 +38,6 @@ require_once(drupal_get_path('module','v2_profiles').'/includes/import_students.
 
     drupal_add_css(drupal_get_path('module', 'jquery_ui') . '/jquery.ui/themes/default/ui.all.css');
   }
-  //qtip
- // drupal_add_js(drupal_get_path('theme', 'cmwn') . '/assets/js/jquery.qtip.custom/jquery.qtip.min.js'); // Within a theme
-  //drupal_add_css(drupal_get_path('theme', 'cmwn') . '/assets/js/jquery.qtip.custom/jquery.qtip.min.css'); // Within a theme
-
-	//
 
 	function v2_profiles_access($uid) {
 
@@ -93,8 +84,6 @@ require_once(drupal_get_path('module','v2_profiles').'/includes/import_students.
 
 		global $v2_profiles_menu_items;
 
-
-
 		return $v2_profiles_menu_items;
 
 	}
@@ -121,7 +110,7 @@ require_once(drupal_get_path('module','v2_profiles').'/includes/import_students.
 
 	}
 
-	///
+
 
 	function render_description($item) { ?>
 

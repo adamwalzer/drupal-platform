@@ -38,10 +38,16 @@
 
 					if (!empty($_password1)) {
 						if ($_password1 === $_password2) {
-							db_query("UPDATE `users` SET `pass` = '" . db_escape_string(md5($_password1)) . "' WHERE `uid` = " . $user->uid . ";");
-							drupal_set_message('Your profile was successfully updated.');
-              cmwn_notifications_password_change($user);							
-							drupal_goto('user/'.$user->uid.'/account');
+  						$error = function_exists('_password_policy_constraint_validate')?_password_policy_constraint_validate($_password1, $user):null;
+              if ($error) {
+                drupal_set_message(t('Your password has not met the following requirement(s):') . '<ul><li>' . implode('</li><li>', $error) . '</li></ul>');
+              }else{
+  							db_query("UPDATE `users` SET `pass` = '" . db_escape_string(md5($_password1)) . "' WHERE `uid` = " . $user->uid . ";");
+  							drupal_set_message('Your profile was successfully updated.');
+                cmwn_notifications_password_change($user);							
+  							drupal_goto('user/'.$user->uid.'/account');                
+              }
+
 						} else {
 							drupal_set_message('Your passwords must match.', 'error');
 						}
