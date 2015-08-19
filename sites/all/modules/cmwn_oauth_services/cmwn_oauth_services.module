@@ -589,51 +589,42 @@ function _cmwn_oauth_services_post_action(){
         );
         $sid = webform_submission_insert($node, $submission);
 
-    if($sid){//successfully submitted
-      //let's load up parent (flip) node and see if there is a 'next' webform sid we can send.
-      $flip_nid = $_POST['flip_nid'];
-      $next_action_nid = false;
-      if($flip_nid){
-        $flip_node = node_load($flip_nid);
-        for($i=0; $i < count($flip_node->field_actions); $i++) {
-          if($flip_node->field_actions[$i]['nid'] == $nid && isset($flip_node->field_actions[$i+1])){
-            $next_action_nid = $flip_node->field_actions[$i+1]['nid'];
+        if($sid){//successfully submitted
+          //let's load up parent (flip) node and see if there is a 'next' webform sid we can send.
+          $flip_nid = $_POST['flip_nid'];
+          $next_action_nid = false;
+          if($flip_nid){
+            $flip_node = node_load($flip_nid);
+            for($i=0; $i < count($flip_node->field_actions); $i++) {
+              if($flip_node->field_actions[$i]['nid'] == $nid && isset($flip_node->field_actions[$i+1])){
+                $next_action_nid = $flip_node->field_actions[$i+1]['nid'];
+              }
+            }
           }
+          $callback = $_GET['callback'];
+    
+          $post_result = (object)array(
+            'result' => 'success',
+            'sid' => $sid,
+            'nid' => $nid,
+            'next_action_nid' => $next_action_nid,
+          );
+    
+          header('Content-Type: application/json; charset=utf8');
+          $json = json_encode($post_result);
+    
+          //no call back
+          if( ! isset($_GET['callback']))
+            exit($json);
+    
+          //valid callback, jsonp
+          if(cmwn_json_is_valid_callback($_GET['callback']))
+            exit("{$_GET['callback']}($json)");
+        }else{
+          //problem
+          header('status: 400 Bad Request', true, 400);
         }
       }
-      $callback = $_GET['callback'];
-
-      $post_result = (object)array(
-        'result' => 'success',
-        'sid' => $sid,
-        'nid' => $nid,
-        'next_action_nid' => $next_action_nid,
-      );
-
-      header('Content-Type: application/json; charset=utf8');
-      $json = json_encode($post_result);
-
-      //no call back
-      if( ! isset($_GET['callback']))
-        exit($json);
-
-      //valid callback, jsonp
-      if(cmwn_json_is_valid_callback($_GET['callback']))
-        exit("{$_GET['callback']}($json)");
-    }else{
-      //problem
-      header('status: 400 Bad Request', true, 400);
-    }
-
-
-
-
-      }
-
-
-
-
-
     }
   }
 }
