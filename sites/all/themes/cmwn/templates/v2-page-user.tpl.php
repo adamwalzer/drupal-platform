@@ -2,6 +2,19 @@
 
 <?php include 'page/header.tpl.php'; ?>
 
+
+<?php 
+  $uid = $user->uid;
+  $current_user = true;
+	if(arg(0) == 'user' && arg(1) != $user->uid && is_numeric(arg(1)) && arg(2) == 'edit'){
+    $uid =  arg(1);
+    $current_user = false;
+  }
+  
+  $isedit = (arg(2) == 'edit');
+
+  
+?>
 <div class="section-wrap">
 
 	<?php print $messages; ?>
@@ -12,19 +25,23 @@
 
 			<div class="column sidebar">
         <?php if(function_exists('v2_profiles_name_index')):?>
-				<?php print v2_profiles_name_index($user->uid); ?>
+				<?php print v2_profiles_name_index($uid); ?>
 				<?php endif;?>
 				
 				<?php if(function_exists('v2_profiles_avatars_index')):?>
-				<?php print v2_profiles_avatars_index($user->uid); ?>
+				<?php print v2_profiles_avatars_index($uid); ?>
 				<?php endif;?>
+
+				<?php if(!$isedit):?>
+  				
+          <?php if(function_exists('v2_profiles_links_index')):?>
+  				<?php print v2_profiles_links_index($uid); ?>
+  				<?php endif;?>
+  				
+  				<?php if(function_exists('v2_profiles_friends_index')):?>
+  				<?php print v2_profiles_friends_index($uid); ?>
+  				<?php endif;?>
 				
-        <?php if(function_exists('v2_profiles_links_index')):?>
-				<?php print v2_profiles_links_index($user->uid); ?>
-				<?php endif;?>
-				
-				<?php if(function_exists('v2_profiles_friends_index')):?>
-				<?php print v2_profiles_friends_index($user->uid); ?>
 				<?php endif;?>
 
 			</div>
@@ -33,6 +50,7 @@
         <?php
           //tabs were specifically removed from this user page template, however, the authorization tab is needed for our cmwn services oauth api
           global $user;
+          //if(user_access('administer users')){
           if($user->uid ==1){
             print $variables['tabs'];
           }

@@ -31,6 +31,10 @@
 		'arguments' => array('data' => array()),
 		'template' => 'templates/school/dashboard'
 	);
+	
+	function v2_profiles_perm() {
+
+  }
 
 	function v2_profiles_school_index($uid) {
 
@@ -50,6 +54,49 @@
 		return theme('v2_profiles_school_index', $data);
 
 	}
+		
+	function v2_profiles_is_school_admin_of_user($account){//$account is user we are checking to make sure it is related to school of current user
+    global $user;
+    
+    $is_school_admin_of_user = false;
+    
+    if(in_array('School Administrator', array_values($user->roles))){
+      //this is a school admin. If this is not a student in this School Administrator's school, do not let him edit the user
+      //1. find the school administrator's school.
+      $admin_school = db_result(db_query('select nid from {content_field_school_administrator} cfsa where field_school_administrator_uid = %d', $user->uid));
+      $user_school = false;
+      switch(true){
+        case (in_array('teacher', array_values($account->roles))):
+        case (in_array('child', array_values($account->roles))):   
+        case (in_array('parent', array_values($account->roles))):             
+          //2. Get the school of the user being edited.
+          @$user_school = $account->getSchools();
+          //if it's the same school, he can edit.
+          if($user_school && in_array($admin_school, array_keys($user_school))){
+            $is_school_admin_of_user = true;
+          }
+          break;           
+          
+        default://school admin cannot edit users from other schools or no school.
+          $is_school_admin_of_user = false;
+          break;
+      }      
+    }    	
+    return $is_school_admin_of_user;
+	}
+	
+  function v2_profiles_user($op, &$edit, &$account, $category = NULL) {
+    if ($op == 'form' && $category == 'account') {
+      global $user;  
+      $restricted = ($account->uid == $user->uid)?false:!v2_profiles_is_school_admin_of_user($account);
+      if($restricted){
+        drupal_set_message(t('You do not have sufficient CMWN privileges to edit this user. Attempts to edit users from other schools are reported to the site administrator.'), 'error');
+        watchdog('v2_profiles', 'user ' . $user->uid . ' ('. $user->mail . ') attempted to edit user . ' . $account->uid . '(' . $account->mail . ') without sufficient permission.');   
+        drupal_goto($_GET['destination']?$_GET['destination']:'<front>');
+      }
+      return $form;
+    }
+  }
 
 	function v2_profiles_school_dashboard($school_id){
 		$data = new stdClass();
