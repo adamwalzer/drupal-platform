@@ -661,6 +661,14 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
 
 			node_save($child_profile);
   	}
+  	
+    //Import Parent
+		$parent = v2_profiles_school_import_parent($school, $student);
+
+		//Add Parent!
+		v2_profiles_children_link_imported($parent->uid, $student_existing->uid);  	
+  	
+  	
 		return $student_existing;
 	}else{//create new student account.
 		//find unique username
