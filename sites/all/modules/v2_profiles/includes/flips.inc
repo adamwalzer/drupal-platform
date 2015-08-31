@@ -92,7 +92,7 @@
 
 		$data = new stdClass();
     $data->user->uid = $uid;
-		/*$user = user_load($uid);
+		$user = user_load($uid);
 
 		$all = v2_profiles_flips_query_all($uid);
 		$new = $all;
@@ -112,7 +112,7 @@
 		$data->items->new = $new;
 		$data->items->started = $started;
 		$data->user = $user;
-		*/
+		
 
 		return theme('v2_profiles_flips_index', $data);
 
