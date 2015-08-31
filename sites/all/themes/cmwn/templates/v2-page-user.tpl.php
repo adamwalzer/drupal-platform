@@ -1,8 +1,5 @@
 <?php /* 1.4 */ ?>
-
 <?php include 'page/header.tpl.php'; ?>
-
-
 <?php 
   $uid = $user->uid;
   $current_user = true;
@@ -12,8 +9,6 @@
   }
   
   $isedit = (arg(2) == 'edit');
-
-  
 ?>
 <div class="section-wrap">
 
@@ -62,7 +57,7 @@
 
 		</div>
     <?php if(function_exists('v2_profiles_feed_index')):?>
-		<?php print v2_profiles_feed_index($user->uid); ?>
+		<?php //print v2_profiles_feed_index($user->uid); ?>
 		<?php endif;?>
 
 

@@ -1,4 +1,3 @@
-<?php /* 1.4 */ ?>
 <?php
 if($user->user_type =='parent' && arg(2) != 'friends' && arg(2) !='children' && arg(2) != 'class'){
 //  print theme('v2_profiles_resource_center_index', $data->user);
@@ -6,18 +5,20 @@ if($user->user_type =='parent' && arg(2) != 'friends' && arg(2) !='children' && 
 ?>
 <div class="block shadow whiteboard index" id="whiteboard-profile-tabs">
 	<ul class="header">
+		<?php if(false):?>
 		<li class="section">
       <a href="#whiteboard-tab"><h2>Whiteboard</h2></a>
 		</li>
-
+    <?php endif;?>
 		<li class="section">
       <a href="#newsfeed-tab" class="tab-newsfeed"><h2>News Feed</h2></a><?php if ($data->user->user_type =='child'):?><span class="call-monitor" title="Call a Monitor"></span><?php endif;?> 
 		</li>
 	</ul>
-
-  <div id="whiteboard-tab">
-  	<?php print theme('v2_profiles_whiteboard_tab',$data); ?>
-  </div>
+	<?php if(false):?>
+    <div id="whiteboard-tab">
+    	<?php print theme('v2_profiles_whiteboard_tab',$data); ?>
+    </div>
+  <?php endif;?>
 
   <div id="newsfeed-tab">
     <div class="items">

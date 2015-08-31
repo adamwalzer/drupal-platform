@@ -145,7 +145,7 @@
 
 		if ($user->user_type == 'child') {
 
-			$items[] = l('My Profile & Whiteboard', 'user');
+			$items[] = l('My Profile', 'user');
 
 			$school = v2_profiles_school_query($uid);
 

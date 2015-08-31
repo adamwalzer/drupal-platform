@@ -97,9 +97,9 @@
 		$data = new stdClass();
     $data->readonly = v2_profiles_whiteboard_readonly();
 		$whiteboard_owner = user_load($uid);
-		$items = v2_profiles_whiteboard_query($uid, $whiteboard_type);
+		//$items = v2_profiles_whiteboard_query($uid, $whiteboard_type);
 
-		$data->items = $items;
+		//$data->items = $items;
 		$data->user = $whiteboard_owner;
 		
 		//newsfeed
