@@ -10,7 +10,7 @@ if ($user->uid === 0 && arg(1) !== 'password' && arg(1) !== 'reset') {
       </div>
       <?php print $messages; ?>
       <?php print $help; ?>
-      <?php if ($tabs && in_array('moderator', $user->roles)): ?>
+      <?php if ($tabs && (in_array('moderator', $user->roles) || in_array('School Administrator', $user->roles))): ?>
       <div class="tabs"><?php print $tabs; ?></div>
       <?php endif; ?>
       <?php print $content_top; ?>

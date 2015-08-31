@@ -89,7 +89,7 @@
     if ($op == 'form' && $category == 'account') {
       global $user;  
       $restricted = ($account->uid == $user->uid)?false:!v2_profiles_is_school_admin_of_user($account);
-      if($restricted){
+      if($restricted && $user->uid != '1'){
         drupal_set_message(t('You do not have sufficient CMWN privileges to edit this user. Attempts to edit users from other schools are reported to the site administrator.'), 'error');
         watchdog('v2_profiles', 'user ' . $user->uid . ' ('. $user->mail . ') attempted to edit user . ' . $account->uid . '(' . $account->mail . ') without sufficient permission.');   
         drupal_goto($_GET['destination']?$_GET['destination']:'<front>');
@@ -601,8 +601,9 @@ function v2_profiles_school_import_teacher($school, $teacher, $classes_nodes){
 			$teacher_profile->field_teacher_classes[$i]['nid'] = $classes_nodes[$classes[$i]]->nid;
 		}
 		// save new teacher profile
-		$teacher_profile = node_submit($teacher_profile);
-		$teacher_profile = node_save($teacher_profile);
+		//$teacher_profile = node_submit($teacher_profile);
+		//$teacher_profile = 
+		node_save($teacher_profile);
 
 		return $new_teacher;
 	}
@@ -840,8 +841,8 @@ function v2_profiles_school_import_parent($school, $student){//NOTE, $student al
 		$parent_profile->moderate = 0;
 		$parent_profile->sticky = 0;
 
-		$parent_profile = node_submit($parent_profile);
-		$parent_profile = node_save($parent_profile);
+		//$parent_profile = node_submit($parent_profile);
+		node_save($parent_profile);
 
 		return $new_parent;
 	}

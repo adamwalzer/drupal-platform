@@ -3610,3 +3610,21 @@ div.parent-resource-center img{
   width: 100%;
   height: auto;
 }
+
+#v2 h1.h1o{
+  font-size: 21px !important;
+  margin: 15px 0 !important;
+  floaT: left;
+  clear: both;
+}
+
+#v2-profiles-school-import,
+#edit-school-import-wrapper{
+  float: left;
+  clear: none;
+}
+
+#v2-profiles-school-wipe{
+  float: right;
+  clear: none;
+}

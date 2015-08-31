@@ -51,7 +51,7 @@
           //tabs were specifically removed from this user page template, however, the authorization tab is needed for our cmwn services oauth api
           global $user;
           //if(user_access('administer users')){
-          if($user->uid ==1){
+          if($user->uid == 1 || in_array('School Administrator', $user->roles)){
             print $variables['tabs'];
           }
           
