@@ -551,8 +551,6 @@ function v2_profiles_school_import_teacher($school, $teacher, $classes_nodes){
 		);
 
 		$new_teacher = user_save(NULL, $new_teacher, NULL);
-		//print_r($new_teacher->uid);exit;
-		//drupal_set_message('school id: ' . $school->nid);
 		v2_profiles_school_push_teacher($school, $new_teacher);
 		node_save($school);
 
@@ -575,8 +573,6 @@ function v2_profiles_school_import_teacher($school, $teacher, $classes_nodes){
 		$base_profile->field_gender[0]['value'] = $teacher['Gender'];
 
 		// save new profile
-		//$base_profile = node_submit($base_profile);
-		//$base_profile =
 		node_save($base_profile);
 
 		//Teacher Profile
@@ -601,8 +597,6 @@ function v2_profiles_school_import_teacher($school, $teacher, $classes_nodes){
 			$teacher_profile->field_teacher_classes[$i]['nid'] = $classes_nodes[$classes[$i]]->nid;
 		}
 		// save new teacher profile
-		//$teacher_profile = node_submit($teacher_profile);
-		//$teacher_profile = 
 		node_save($teacher_profile);
 
 		return $new_teacher;
@@ -668,7 +662,6 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
 		//Add Parent!
 		v2_profiles_children_link_imported($parent->uid, $student_existing->uid);  	
   	
-  	
 		return $student_existing;
 	}else{//create new student account.
 		//find unique username
@@ -723,10 +716,7 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
 		$base_profile->field_gender[0]['value'] = $student['Gender'];
 
 		// save new profile
-		//$base_profile = node_submit($base_profile);
-		//$base_profile =
 		node_save($base_profile);
-
 
 		//Child Profile
 		$child_profile = (object) NULL;
@@ -762,20 +752,15 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
 		$classes = array_map('trim', explode(',', $student['Class Number']));
 		for($i = 0; $i < count($classes); $i++){
 			$child_profile->field_student_classes[]['nid'] = $classes_nodes[$classes[$i]]->nid;
-			//drupal_set_message($classes_nodes[$classes[$i]]->nid);
-			//drupal_set_message($classes[$i]);
 		}
 
 		// save new child profile
-		//$child_profile = node_submit($child_profile);
-		//drupal_set_message('child profile before node save: ' . print_r($child_profile,true));
 		node_save($child_profile);
-		//drupal_set_message('child profile after node save: ' . print_r($child_profile,true));
 
 		//Import Parent
 		$parent = v2_profiles_school_import_parent($school, $student);
 
-		//Add Parent!
+		//Add Parent, note this will link existing parent to new child if parent already exists (keyed on email)
 		v2_profiles_children_link_imported($parent->uid, $new_student->uid);
 
 		return $new_student;
@@ -831,10 +816,7 @@ function v2_profiles_school_import_parent($school, $student){//NOTE, $student al
 		$base_profile->field_gender[0]['value'] = $student['Guardian Gender'];
 
 		// save new profile
-		//$base_profile = node_submit($base_profile);
-		//$base_profile =
 		node_save($base_profile);
-
 
 		//Parent Profile
 		$parent_profile = (object) NULL;
