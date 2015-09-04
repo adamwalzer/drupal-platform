@@ -178,7 +178,6 @@ function v2_profiles_school_import(){
 	return $form;
 }
 
-
 function v2_profiles_school_import_submit($form, &$form_state) {
   
   global $user;
@@ -249,6 +248,7 @@ function v2_profiles_school_import_submit($form, &$form_state) {
 				$teachers = $result[1];
 				$teachers_users = array();
 				foreach($teachers as $teacher){
+  				$teacher['Email Address'] = v2_profiles_email_pretreat($teacher['Email Address']);
 					$teachers_users[$teacher['Email Address']] = v2_profiles_school_import_teacher($school, $teacher, $classes_nodes);
 				}
 
@@ -259,6 +259,7 @@ function v2_profiles_school_import_submit($form, &$form_state) {
 				$students = $result[2];
 				$students_users = array();
 				foreach($students as $student){
+  				$student['Email Address'] = v2_profiles_email_pretreat($student['Email Address']);
 					$students_users[$student['Email Address']] = v2_profiles_school_import_student($school, $student, $classes_nodes, $grades);
 				}
 			}
@@ -310,7 +311,9 @@ function v2_profiles_school_import_spreadsheet_validate($result){
 	$all_emails = array();
 	$teacher_emails = array();
 	$teacher_class_numbers = array();
+
 	foreach($result[1] as $teacher){
+  	$teacher['Email Address'] = v2_profiles_email_pretreat($teacher['Email Address']);
 		$all_emails[] = $teacher['Email Address'];
 		$teacher_emails[] = $teacher['Email Address'];
 
@@ -319,6 +322,10 @@ function v2_profiles_school_import_spreadsheet_validate($result){
 			drupal_set_message(t('Invalid teacher email address found! (@email)', array('@email' => $teacher['Email Address'])), 'error');
 		}
 
+    //TODO: unfort we have to load teacher object and check if teacher email exists in another or no school. To avoid teachers being 'imported' but not showing up at right school. Mainly fixes test data but could happen in real life.
+    //$teacher_existing = user_load(array('mail'=> $teacher['Email Address']));
+    //print_r($teacher_existing);exit;
+
 		//loop through class numbers
 		$classes = explode(',', $teacher['Class Number']);
 		foreach($classes as $class){
@@ -326,7 +333,7 @@ function v2_profiles_school_import_spreadsheet_validate($result){
 				$teacher_class_numbers[] = $class;
 			}
 		}
-
+    
 	}
 	//check dup teacher emails
 	if(count(array_filter($teacher_emails)) !== count(array_unique(array_filter($teacher_emails)))){
@@ -347,11 +354,13 @@ function v2_profiles_school_import_spreadsheet_validate($result){
 	$parent_emails = array();
 	foreach($children as $child){
 		if(trim($child['Email Address']) != ''){
+  		$child['Email Address'] = v2_profiles_email_pretreat($child['Email Address']);
 			$all_emails[] = $child['Email Address'];
 			$child_emails[] = $child['Email Address'];
 		}
 
 		if(trim($child['Guardian Email Address']) != ''){
+  		$child['Guardian Email Address'] = v2_profiles_email_pretreat($child['Guardian Email Address']);
 			$parent_emails[] = $child['Guardian Email Address'];
 		}
 
@@ -507,10 +516,11 @@ function v2_profiles_school_import_class($school, $class){
 function v2_profiles_school_import_teacher($school, $teacher, $classes_nodes){
 	//absolute unique identifier is always email address. There can only be one drupal
 	//user account per email address.
+
+	$teacher['Email Address'] = v2_profiles_email_pretreat($teacher['Email Address']);
 	$teacher_existing = user_load(array('mail'=> $teacher['Email Address']));
 	if($teacher_existing){//hope this teacher has a profile.
-  	
-  	//let's at least update school nid, save, then return student.
+  	//let's at least update school nid, save, then return teacher.
   	$teacher_profile = node_load(array('uid' => $teacher_existing->uid,'type' => 'teacher_profile'));
 
   	if($teacher_profile){
@@ -523,6 +533,8 @@ function v2_profiles_school_import_teacher($school, $teacher, $classes_nodes){
       }
       // save new teacher profile
 			node_save($teacher_profile);
+			//make sure user is active, not suspended
+		  user_save($teacher_existing, array('status' => 1));
   	}  	
   	
 		return $teacher_existing;
@@ -616,35 +628,41 @@ function v2_profiles_grade_array(){
 
 //TODO: link student profiles to classes.
 function v2_profiles_school_import_student($school, $student, $classes_nodes, $grades){//NOTE, $student also contains guardian info which needs to be dealt with also.
+  $student['Email Address'] = v2_profiles_email_pretreat($student['Email Address']);
 	$student_existing = user_load(array('mail'=> $student['Email Address']));
+  //grade node ref
+	if($student['Grade'] == 'PK') $student['Grade'] = "Pre-Kindergarten";
+	if($student['Grade'] == 'K') $student['Grade'] = "Kindergarten";
+	if($student['Grade'] == 'First Grade') $student['Grade'] = "1";
+	if($student['Grade'] == 'Second Grade') $student['Grade'] = "2";
+	if($student['Grade'] == 'Third Grade') $student['Grade'] = "3";
+	if($student['Grade'] == 'Fourth Grade') $student['Grade'] = "4";
+	if($student['Grade'] == 'Fifth Grade') $student['Grade'] = "5";
+	if($student['Grade'] == 'Sixth Grade') $student['Grade'] = "6";
+	if($student['Grade'] == 'Seventh Grade') $student['Grade'] = "7";
+	if($student['Grade'] == 'Eighth Grade') $student['Grade'] = "8";
+	if($student['Grade'] == 'Ninth Grade') $student['Grade'] = "9";
+	if($student['Grade'] == 'Tenth Grade') $student['Grade'] = "10";
+	if($student['Grade'] == 'Eleventh Grade') $student['Grade'] = "11";
+	if($student['Grade'] == 'Twelfth Grade') $student['Grade'] = "12";
 
 	if($student_existing){//hope this student has a profile.
   	//let's at least update school nid, save, then return student.
   	$child_profile = node_load(array('uid' => $student_existing->uid,'type' => 'child_profile'));
-    
+    $base_profile = node_load(array('uid' => $student_existing->uid,'type' => 'base_profile'));
   	if($child_profile){
-			$child_profile->field_school[0]['nid'] = $school->nid;
-  			  			
-  		//grade node ref
-  		if($student['Grade'] == 'PK') $student['Grade'] = "Pre-Kindergarten";
-  		if($student['Grade'] == 'K') $student['Grade'] = "Kindergarten";
-  		if($student['Grade'] == 'First Grade') $student['Grade'] = "1";
-  		if($student['Grade'] == 'Second Grade') $student['Grade'] = "2";
-  		if($student['Grade'] == 'Third Grade') $student['Grade'] = "3";
-  		if($student['Grade'] == 'Fourth Grade') $student['Grade'] = "4";
-  		if($student['Grade'] == 'Fifth Grade') $student['Grade'] = "5";
-  		if($student['Grade'] == 'Sixth Grade') $student['Grade'] = "6";
-  		if($student['Grade'] == 'Seventh Grade') $student['Grade'] = "7";
-  		if($student['Grade'] == 'Eighth Grade') $student['Grade'] = "8";
-  		if($student['Grade'] == 'Ninth Grade') $student['Grade'] = "9";
-  		if($student['Grade'] == 'Tenth Grade') $student['Grade'] = "10";
-  		if($student['Grade'] == 'Eleventh Grade') $student['Grade'] = "11";
-  		if($student['Grade'] == 'Twelfth Grade') $student['Grade'] = "12";
-  		
-  		
- 
-  		$child_profile->field_student_grade[0]['nid'] = $grades[trim($student['Grade'])];
 
+			$child_profile->field_school[0]['nid'] = $school->nid;
+  		$child_profile->field_student_grade[0]['nid'] = $grades[trim($student['Grade'])];
+  
+  		//birthday
+  		$dob = explode('/',$student['DOB MM/DD/YYYY']);
+  		$child_profile->field_dob[0] = array(
+  			'value'=>$dob[2] . '-' . $dob[0] . '-' . $dob[1] . 'T00:00:00',
+  			'timezone' => 'America/New_York',
+  			'timezone_db' => 'America/New_York',
+  			'date_type' => 'date',
+  		);
   
   		//add all classes!
   		unset($child_profile->field_student_classes);
@@ -652,8 +670,25 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
   		for($i = 0; $i < count($classes); $i++){
   			$child_profile->field_student_classes[]['nid'] = $classes_nodes[$classes[$i]]->nid;
   		}
-
+      
+      //save child profile
 			node_save($child_profile);
+  		
+  	}
+  	
+  	//make sure user is active, not suspended
+		user_save($student_existing, array('status' => 1));
+  	
+  	
+  	if($base_profile){
+      //update base profile info.
+      // add CCK field data
+      $base_profile->field_first_name[0]['value'] = $student['First Name'];
+      $base_profile->field_last_name[0]['value'] = $student['Last Name'];
+      $base_profile->field_gender[0]['value'] = $student['Gender'];
+      
+      // save new profile
+      node_save($base_profile);          	
   	}
   	
     //Import Parent
@@ -661,6 +696,78 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
 
 		//Add Parent!
 		v2_profiles_children_link_imported($parent->uid, $student_existing->uid);  	
+  	
+  	//load all child relationships and see if there is an old parent that
+    //needs to be deactivated, since we are dealing w/ existing child.
+    $relationships = user_relationships_load(array('user' => $student_existing->uid));
+    $deactivate_parents = array();
+    foreach($relationships as $relationship){
+      switch($relationship->rtid){
+        case '2':
+          if($relationship->requestee_id == $student_existing->uid && $relationship->requester_id != $parent->uid){
+            //this is a relationship with a different parent.
+            //we break the relationship no matter what.
+            //delete this relationship
+            user_relationships_delete_relationship($relationship, $student_existing, $op = 'new_parent_imported');
+            
+            //note we won't actually deactivate parent until we ensure parent has no other relationships that would 
+            //jusitfy keeping account active
+            $deactivate_parents[] = $relationship->requester_id;
+            
+          }
+          break;
+          
+        case '3':
+          if($relationship->requester_id == $student_existing->uid && $relationship->requestee_id != $parent->uid){
+            //delete this relationship
+            user_relationships_delete_relationship($relationship, $student_existing, $op = 'new_parent_imported');            
+            
+            //note we won't actually deactivate parent until we ensure parent has no other relationships that would 
+            //jusitfy keeping account active
+            $deactivate_parents[] = $relationship->requestee_id;
+            
+
+          }
+          break;
+      }
+    }
+
+    $deactivate_parents = array_unique($deactivate_parents);
+    print_r($deactivate_parents);
+    foreach($deactivate_parents as $deactivate_parent_uid){
+      //does parent have other relationships as parent
+      //that would justify keeping account open?
+
+      $deactivate = true;
+      $relationships = user_relationships_load(array('user' => $deactivate_parent_uid));
+      foreach($relationships as $relationship){
+        switch($relationship->rtid){
+        case '2':
+          if($relationship->requestee_id != $student_existing->uid && $relationship->requester_id == $deactivate_parent_uid){
+            //parent has relationship with other student, don't deactivate
+            $deactivate = false;
+          }
+          break;
+        
+        case '3':
+          if($relationship->requester_id !== $student_existing->uid && $relationship->requestee_id == $deactivate_parent_uid){
+            //parent has relationship with other student, don't deactivate            
+            $deactivate = false;
+          }
+          break;
+        }
+      }
+      print $deactivate.'....';
+      if($deactivate){
+        print 'updated user ' . $deactivate_parent_uid;
+        $deactivate_parent = user_load($deactivate_parent_uid);
+        $deactivate_parent->status = 0;
+        user_save($deactivate_parent, array('status' => 0));     
+
+      }
+    }
+
+
   	
 		return $student_existing;
 	}else{//create new student account.
@@ -762,14 +869,27 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
 
 		//Add Parent, note this will link existing parent to new child if parent already exists (keyed on email)
 		v2_profiles_children_link_imported($parent->uid, $new_student->uid);
-
+    
 		return $new_student;
 	}
 }
 
 function v2_profiles_school_import_parent($school, $student){//NOTE, $student also contains guardian info which needs to be dealt with also.
+  $student['Guardian Email Address'] = v2_profiles_email_pretreat($student['Guardian Email Address']);
 	$parent_existing = user_load(array('mail'=> $student['Guardian Email Address']));
 	if($parent_existing){
+  	//update fields....
+    //base profile only, there is not really much info in parent profile to update
+    $base_profile = node_load(array('uid' => $parent_existing->uid,'type' => 'base_profile'));
+  	if($base_profile){
+      // add CCK field data
+      $base_profile->field_first_name[0]['value'] = $student['Guardian First Name'];
+      $base_profile->field_last_name[0]['value'] = $student['Guardian Last Name'];
+      $base_profile->field_gender[0]['value'] = $student['Guardian Gender'];    	
+      node_save($base_profile);
+  	}
+  	//make sure user is active, not suspended
+		user_save($parent_existing, array('status' => 1));
 		return $parent_existing;
 	}else{//create new teacher account.
 		//find unique username
@@ -979,4 +1099,11 @@ function v2_profiles_unique_username($name, $uid = 0) {
    $i++;
   } while (!empty($found));
   return $new_name;
+}
+
+function v2_profiles_email_pretreat($email){
+  if(strstr($email,'=HYPERLINK')){
+    $email = explode(',', $email)[1];
+  }
+  return str_replace(array('"',')','('),'',strip_tags(trim($email)));
 }

@@ -265,7 +265,7 @@
       global $user;
       //change this text for all users per comp from Joni
       $form['account']['status']['#options'][0] = 'Suspended';
-      if(in_array('School Administrator', array_values($user->roles))){
+      if(in_array('School Administrator', array_values($user->roles)) && $user->uid != '1'){
         $edit_user = user_load($form['#uid']);
         
 //        dsm($edit_user);
