@@ -1103,7 +1103,8 @@ function v2_profiles_unique_username($name, $uid = 0) {
 
 function v2_profiles_email_pretreat($email){
   if(strstr($email,'=HYPERLINK')){
-    $email = explode(',', $email)[1];
+    $email = explode(',', $email);
+    $email = $email[1];
   }
   return str_replace(array('"',')','('),'',strip_tags(trim($email)));
 }
