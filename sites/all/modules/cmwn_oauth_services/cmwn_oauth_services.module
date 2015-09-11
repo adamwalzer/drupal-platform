@@ -78,11 +78,20 @@ function cmwn_oauth_services_menu() {
   $items['services_get_header_js_css'] = array(
     'page callback' => 'cmwn_oatuth_services_get_header_js_css',
     'access arguments' => array('access content'),    
-    
   );
+  
+  $items['services_test_js_api'] = array(
+    'page callback' => 'cmwn_oauth_services_test_js_api',
+    'access arguments' => array('access content'),        
+  );
+  
   return $items;
 }
 
+function cmwn_oauth_services_test_js_api(){
+  drupal_add_js(drupal_get_path('module', 'cmwn_oauth_services') .'/js/jquery.cmwn_oauth.js');
+  return '';
+}
 
 function cmwn_oatuth_services_get_header_js_css(){
   $current_js = drupal_get_js();  
@@ -285,7 +294,7 @@ function _cmwn_oauth_action_webform_object(){//$key is consumer key from set up 
     $node= node_load($_GET['webform_nid']);
   }
 
-  if(!cmwn_oauth_services_consumer_key_has_context($_GET['oauth_consumer_key'], 'whiteboard')){
+  if(!cmwn_oauth_services_consumer_key_has_context($_GET['oauth_consumer_key'], 'flips')){
     header("HTTP/1.1 401 Unauthorized");
   }else{
 
@@ -551,9 +560,8 @@ function _cmwn_oauth_services_post_whiteboard(){
 }
 
 function _cmwn_oauth_services_post_action(){
-  $uid = $_POST['uid'];
+  $uid = $_GET['uid'];
   @$account = user_load($uid);
-
   _cmwn_oauth_services_oauth_validate_request();//this will return unauthorized if it does not validate.
 
   //check consumer context
@@ -563,15 +571,14 @@ function _cmwn_oauth_services_post_action(){
     //programmatically submit webform.
     module_load_include('inc', 'webform', 'webform.module');
     module_load_include('inc', 'webform', 'includes/webform.submissions');
-
-    $nid = $_POST['nid'];
+    $nid = $_GET['nid'];
     if(is_numeric($nid)){
       $node = node_load($nid);
       if($node->type == 'action'){
         $i=1;
         $data = array();
         foreach($node->webform['components'] as $key => $component){
-          $data[$i] = array($_POST[$component['form_key']]);
+          $data[$i] = array($_GET[$component['form_key']]);
           $i++;
         }
 
