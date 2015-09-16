@@ -33,6 +33,8 @@ switch ($_SERVER['HTTP_HOST']) {
     break;
 }
 
+//9/4/2015 - we should be using instant verify
+
 function cmwn_ivia_menu() {
   $items = array();
   $items['user/%user/confirm-identity'] = array(

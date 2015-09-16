@@ -1,0 +1,209 @@
+<?php 
+
+function cmwn_games_menu() {
+
+
+  $items['cmwn_games/object'] = array(
+    'page callback' => 'cmwn_games_object',
+    'access arguments' => array('access content'),
+  );
+
+  $items['cmwn_games/post'] = array(
+    'page callback' => 'cmwn_games_post',
+    'access arguments' => array('access content'),
+  );
+  
+  $items['cmwn_games/current_step'] = array(
+    'page callback' => 'cmwn_games_current_step',
+    'access arguments' => array('access content'),
+  );
+
+
+  $items['cmwn_games/flip'] = array(
+    'page callback' => 'cmwn_games_flip',
+    'access arguments' => array('access content'),
+  );
+  
+  $items['cmwn_games/test'] = array(
+    'page callback' => 'cmwn_games_test',
+    'access arguments' => array('access content'),        
+  );  
+
+  return $items;
+}
+
+function cmwn_games_test(){
+  drupal_add_js(drupal_get_path('module', 'cmwn_games') .'/js/cmwn_games.js');
+  return '';
+}
+
+
+function cmwn_games_admin() {
+  $form = array();
+
+  $form['cmwn_games_container'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Configure Each Game'),
+  );
+  
+  $dir = dirname(__FILE__) . "/games/*";
+
+	// Open a known directory, and proceed to read its contents
+	foreach(glob($dir) as $file) 
+	{
+		echo "filename: $file : filetype: " . filetype($file) . "<br />";
+    $form['cmwn_games_container']['game_' . $file] = array(
+      '#type' => 'textfield',
+      '#title' => t($file),
+    );
+	}
+
+  return system_settings_form($form);
+}
+
+function cmwn_games_post(){
+  global $user;
+  
+  $uid = $user->uid;
+  @$account = user_load($uid);
+  
+  if($user->uid > 0){
+    module_load_include('inc', 'webform', 'webform.module');
+    module_load_include('inc', 'webform', 'includes/webform.submissions');
+    $nid = $_GET['nid'];
+    if(is_numeric($nid)){
+      $node = node_load($nid);
+      if($node->type == 'action'){
+        $i=1;
+        $data = array();
+        foreach($node->webform['components'] as $key => $component){
+          @$data[$i] = array($_GET[$component['form_key']]);
+          $i++;
+        }
+
+        $submission = (object)array(
+          'nid' => $nid,
+          'uid' => $uid,
+          'submitted' => time(),
+          'remote_addr' => ip_address(),
+          'is_draft' => 0,
+          'data' => $data,
+        );
+        $sid = webform_submission_insert($node, $submission);
+
+        if($sid){
+          $flip_nid = $_POST['flip_nid'];
+          $next_action_nid = false;
+          if($flip_nid){
+            $flip_node = node_load($flip_nid);
+            for($i=0; $i < count($flip_node->field_actions); $i++) {
+              if($flip_node->field_actions[$i]['nid'] == $nid && isset($flip_node->field_actions[$i+1])){
+                $next_action_nid = $flip_node->field_actions[$i+1]['nid'];
+              }
+            }
+          }
+   
+          $post_result = (object)array(
+            'result' => 'success',
+            'sid' => $sid,
+            'nid' => $nid,
+            'next_action_nid' => $next_action_nid,
+          );
+    
+          header('Content-Type: application/json; charset=utf8');
+          $json = json_encode($post_result);
+    
+          if( ! isset($_GET['callback']))
+            exit($json);
+    
+          if(cmwn_json_is_valid_callback($_GET['callback']))
+            exit("{$_GET['callback']}($json)");
+        }else{
+          header('status: 400 Bad Request', true, 400);
+        }
+      }
+    }
+  }
+  
+}
+
+
+function cmwn_games_object(){
+  global $user;
+  if($user->uid > 0){
+    $node = new stdClass();
+    if(is_numeric($_GET['nid'])){
+      $node= node_load($_GET['nid']);
+    }
+    
+    header('Content-Type: application/json; charset=utf8');
+    $json = json_encode($node);
+    
+    if( ! isset($_GET['callback'])){
+      exit($json);      
+    }
+    
+    if(cmwn_json_is_valid_callback($_GET['callback'])){
+      exit("{$_GET['callback']}($json)"); 
+    }
+  }
+  header('status: 400 Bad Request', true, 400);
+}
+
+function cmwn_games_flip(){
+  global $user;
+  $actions = array();
+  if($user->uid > 0){
+    @$node = node_load($_GET['flip_nid']);
+    if($node){
+      for($i=0; $i < count($node->field_actions); $i++) {
+        $actions[] = $node->field_actions[$i]['nid'];
+      }
+    }
+  }
+  header('Content-Type: application/json; charset=utf8');
+  $json = json_encode($actions);
+  
+  if( ! isset($_GET['callback'])){
+    exit($json);      
+  }
+  
+  if(cmwn_json_is_valid_callback($_GET['callback'])){
+    exit("{$_GET['callback']}($json)"); 
+  }
+}
+
+function cmwn_games_current_step(){
+  global $user;
+  if($user->uid > 0){
+    $flip_nid = $_GET['flip_nid'];
+    $flip = node_load($flip_nid);
+
+    $completed_first = db_result(db_query("select sid from {webform_submissions} where nid = %d and uid = %d and is_draft = 0", $flip->field_actions[0]['nid'],$user->uid));
+
+    $next = !$completed_first?$flip->field_actions[0]['nid']:false;
+    for($i=0; $i < count($flip->field_actions); $i++) {
+      $complete = db_result(db_query("select sid from {webform_submissions} where nid = %d and uid = %d and is_draft = 0", $flip->field_actions[$i]['nid'],$user->uid));
+
+      if($complete){
+        if($flip->field_actions[$i+1]['nid']){
+          $next = $flip->field_actions[$i+1]['nid'];
+        }else{
+          $next = 'completed_flip';
+        }
+      }
+    }
+    
+    header('Content-Type: application/json; charset=utf8');
+    $json = json_encode($next);
+    
+    if( ! isset($_GET['callback'])){
+      exit($json);      
+    }
+    
+    if(cmwn_json_is_valid_callback($_GET['callback'])){
+      exit("{$_GET['callback']}($json)"); 
+    }    
+  }
+  header('status: 400 Bad Request', true, 400);
+}

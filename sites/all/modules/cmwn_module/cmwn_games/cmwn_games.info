@@ -1,0 +1,6 @@
+name = "CMWN Games"
+description = "Integrates CMWN Games HTML5 Files into Drupal Platform"
+package = "CMWN"
+core = "6.x"
+dependencies[] = "cmwn_module"
+dependencies[] = "cmwn_oauth_services"
