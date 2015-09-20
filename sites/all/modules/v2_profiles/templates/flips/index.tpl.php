@@ -101,13 +101,13 @@
 				<?php if ($data->user->uid == $user->uid && sizeof($data->items->new) > 0) { ?>
 					<div class="items games">
 						<?php foreach ($data->items->new as $item) {?>
-								<div class="item-game">
-									<?php if($item->thumbnail != '/'):?>
-										<div class="flip-thumbnail"><img src="<?php print $item->thumbnail; ?>" alt="<?php print $item->title; ?>" /></div>
-										<div class="flip-hover"><div class="text"><?php print $item->title;?></div></div>
-									<?php //render_description($item); ?>
-								<?php endif;?>
-							</div>
+								<?php if($item->thumbnail != '/'):?>
+									<div class="item-game">
+											<div class="flip-thumbnail"><img src="<?php print $item->thumbnail; ?>" alt="<?php print $item->title; ?>" /></div>
+											<div class="flip-hover"><div class="text"><?php print $item->title;?></div></div>
+										<?php //render_description($item); ?>
+								</div>
+							<?php endif;?>
 						<?php } ?>
 					
 				<?php } ?>
