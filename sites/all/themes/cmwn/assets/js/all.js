@@ -312,7 +312,7 @@ $(function(){
 		);
 	}
 
-	$('#v2 .column.content .block.flips.browse .content .section .items').isotope({
+	$('#v2 .column.content .block.flips.browse .content .section .items').not('.games').isotope({
 		animationEngine:'jquery',
 		itemSelector:'.item'
 	});

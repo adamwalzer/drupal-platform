@@ -20,6 +20,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <?php print $styles; ?>
   <?php print $scripts; ?>
+  
+  <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/jquery.slick/1.5.7/slick.css"/>
+  <script type="text/javascript" src="//cdn.jsdelivr.net/jquery.slick/1.5.7/slick.min.js"></script>
+
 </head>
 <body>
   <div class="skin-wrap <?php print $skin_class; ?>">

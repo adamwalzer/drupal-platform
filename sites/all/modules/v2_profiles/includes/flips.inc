@@ -159,7 +159,8 @@
 				`f3`.`filepath` AS `large_icon`,
 				`f4`.`filepath` AS `large_icon_color`,
 				COUNT(`ws`.`sid`) AS `submitted`,
-				(SELECT COUNT(*) FROM `content_field_actions` AS `cfa` WHERE `cfa`.`nid` = `n`.`nid`) AS `total`
+				(SELECT COUNT(*) FROM `content_field_actions` AS `cfa` WHERE `cfa`.`nid` = `n`.`nid`) AS `total`,
+				f5.filepath as thumbnail
 			FROM
 				`node` AS `n` LEFT JOIN
 				`node_revisions` AS `nr` ON `n`.`vid` = `nr`.`vid` JOIN
@@ -169,12 +170,13 @@
 				`files` AS `f2` ON `ctf`.`field_icon_color_fid` = `f2`.`fid` LEFT JOIN
 				`files` AS `f3` ON `ctf`.`field_large_icon_fid` = `f3`.`fid` LEFT JOIN
 				`files` AS `f4` ON `ctf`.`field_large_icon_color_fid` = `f4`.`fid` LEFT JOIN
+				files as f5 ON ctf.field_thumbnail_fid = f5.fid LEFT JOIN
 				`webform_submissions` AS `ws` ON `ws`.`nid` IN (SELECT `cfa`.`field_actions_nid` FROM `content_field_actions` AS `cfa` WHERE `cfa`.`nid` = `n`.`nid`) AND `ws`.`uid` = ".$u->uid."
 			WHERE
 				`n`.`type` = 'flip' AND
 				`n`.`status` = 1
 			GROUP BY
-				`n`.`nid`;
+				`n`.`nid` order by n.changed desc;
 		";
 
 		$results = db_query($query);
@@ -197,6 +199,7 @@
 				'src2' => '/'.$result->icon_color,
 				'large_src1' => '/'.$result->large_icon,
 				'large_src2' => '/'.$result->large_icon_color,
+				'thumbnail' => '/'.$result->thumbnail,
 				'title' => $result->title,
 			);
 			$items[] = (object)$item;

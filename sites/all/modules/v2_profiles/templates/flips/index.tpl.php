@@ -90,6 +90,31 @@
 			</div>
 		<?php } ?>
 
+		<div class="header">
+			<div class="section">
+				<h2>Take Action</h2>
+			</div>
+		</div>
+
+		<?php if (sizeof($data->items->new) > 0) { ?>
+			<div class="section">
+				<?php if ($data->user->uid == $user->uid && sizeof($data->items->new) > 0) { ?>
+					<div class="items games">
+						<?php foreach ($data->items->new as $item) {?>
+								<div class="item-game">
+									<?php if($item->thumbnail != '/'):?>
+										<div class="flip-thumbnail"><img src="<?php print $item->thumbnail; ?>" alt="<?php print $item->title; ?>" /></div>
+										<div class="flip-hover"><div class="text"><?php print $item->title;?></div></div>
+									<?php //render_description($item); ?>
+								<?php endif;?>
+							</div>
+						<?php } ?>
+					
+				<?php } ?>
+				</div>
+			</div>
+		<?php } ?>
+
 	</div>
 
 </div>
