@@ -1,9 +1,9 @@
 <div class="block shadow whiteboard teacher-class index friends browse" id="whiteboard-profile-tabs">
 
   <ul class="header">
-    <li class="section">
+    <?php /*<li class="section">
       <a href="#whiteboard-tab"><h2>Whiteboard</h2></a>
-    </li>
+    </li>*/?>
 
     <li class="section">
       <a href="#class-tab" class="tab-class"><h2>My Class</h2></a>
@@ -12,12 +12,12 @@
       <?php endif; ?>
     </li>
   </ul>
-
+<?php /*
   <div id="whiteboard-tab">
     <?php 
       print theme('v2_profiles_whiteboard_tab', $data);
     ?>
-  </div>
+  </div>*/?>
 
   <div id="class-tab">
     <?php if(false):?>
