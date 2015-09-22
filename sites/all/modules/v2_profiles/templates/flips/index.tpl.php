@@ -103,8 +103,10 @@
 						<?php foreach ($data->items->new as $item) {?>
 								<?php if($item->thumbnail != '/'):?>
 									<div class="item-game">
+											<a href="/user/<?php print $data->user->uid;?>/flips/<?php print $item->id;?>">
 											<div class="flip-thumbnail"><img src="<?php print $item->thumbnail; ?>" alt="<?php print $item->title; ?>" /></div>
 											<div class="flip-hover"><div class="text"><?php print $item->title;?></div></div>
+											</a>
 										<?php //render_description($item); ?>
 								</div>
 							<?php endif;?>
