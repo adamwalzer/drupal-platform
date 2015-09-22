@@ -102,4 +102,10 @@
     //i.e.
     //$.fn.cmwn_games_getAllSteps({flip_nid:15441});
 
+    //this function should be called to close the iframe/modal/whatever after the game is done.
+    $.fn.cmwn_games_close = function(options) {
+      window.location.href='/user';
+    };
+    //i.e. $.fn.cmwn_games_close();
+
 }( jQuery ));
