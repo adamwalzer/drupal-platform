@@ -207,3 +207,31 @@ function cmwn_games_current_step(){
   }
   header('status: 400 Bad Request', true, 400);
 }
+
+function cmwn_games_form_alter(&$form, &$form_state, $form_id){
+  switch($form_id){
+    case 'flip_node_form':
+      //$form['#after_build'][] = 'cmwn_games_form_alter_cck';
+
+      break;
+  }
+}
+
+
+function cmwn_games_form_alter_cck(&$form, &$form_state){
+  //dsm($form_state);
+  /*
+  //this code snippet goes in php values of new field on flip content type
+  $folder = drupal_get_path('module', 'cmwn_games');
+  $files = file_scan_directory($folder,'index.html');
+  $form['field_game_filepath']['#type'] = 'select';
+  $games = array();
+  foreach($files as $file){
+    $names = explode('/', $file->filename);   
+    $games[$file->filename] = ucwords(str_replace('-',' ',$names[count($names)-2]));
+  }*/      
+  //$form['field_game_filepath']['#options'] = $games;
+  //$form['field_game_filepath']['#default_value'] = $form_state['values']['field_game_filepath'][0]['value'];
+
+  return $form; 
+}
