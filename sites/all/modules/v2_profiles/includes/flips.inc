@@ -176,7 +176,7 @@
 				`n`.`type` = 'flip' AND
 				`n`.`status` = 1
 			GROUP BY
-				`n`.`nid` order by n.changed desc;
+				`n`.`nid` order by RAND();
 		";
 
 		$results = db_query($query);

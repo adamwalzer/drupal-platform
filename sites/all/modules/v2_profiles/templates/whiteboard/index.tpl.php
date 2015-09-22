@@ -2,6 +2,7 @@
 if($user->user_type =='parent' && arg(2) != 'friends' && arg(2) !='children' && arg(2) != 'class'){
 //  print theme('v2_profiles_resource_center_index', $data->user);
 }
+/*
 ?>
 <div class="block shadow whiteboard index" id="whiteboard-profile-tabs">
 	<ul class="header">
@@ -107,3 +108,5 @@ if($user->user_type =='parent' && arg(2) != 'friends' && arg(2) !='children' && 
     </div>
   </div>
 </div>
+
+<?php */

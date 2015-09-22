@@ -42,7 +42,7 @@
 						</div>
 					<?php } ?>
 				</div>
-				<?php if ($data->user->uid == $user->uid && sizeof($data->items->new) > 0) { ?>
+				<?php if (false){//$data->user->uid == $user->uid && sizeof($data->items->new) > 0) { ?>
 					<div class="column">
 						<div class="title">
 							<h3>Start a New Project</h3>
@@ -69,7 +69,7 @@
 				<?php if ($data->user->uid == $user->uid) { ?>
 					<div class="title">
 						<h3>Your In-Progress Action Items: <em><?php print sizeof($data->items->started); ?></em></h3>
-						<a href="/user/<?php print $user->uid; ?>/flips/browse">Find More Action Items</a>
+						<?php /*<a href="/user/<?php print $user->uid; ?>/flips/browse">Find More Action Items</a>*/?>
 					</div>
 				<?php } else { ?>
 					<div class="title">
@@ -114,13 +114,8 @@
 				</div>
 			</div>
 		<?php } ?>
-
 	</div>
-
 </div>
-
-
-
 <?php if(false):?>
   <style>
   #loadImg{position:absolute;z-index:999;text-align: center;left: 480px;}

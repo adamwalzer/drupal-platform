@@ -248,6 +248,6 @@ function cmwn_friend_feed($uid = 0, $page = 0) {
       	</div>
     <?php } ?>		
     <?php
-      print theme('pager', NULL, 10, 0);
+      print theme('pager', NULL, 5, 0);
       exit;
 }

@@ -150,7 +150,7 @@
 			$school = v2_profiles_school_query($uid);
 
 			if ($school) {
-				$items[] = l('My School',  'user/'.$user->uid.'/school');
+				//$items[] = l('My School',  'user/'.$user->uid.'/school');
 			}
 			
       v2_profiles_links_myclasses($user, $items);
@@ -158,7 +158,7 @@
 			//$items[] = (object)array('title' => 'My News', 'href' => '/user/'.$user->uid.'/news');
 
 			if (in_array('can_upload_media', $user->roles)) {
-				$items[] = l('My Media', 'user/'.$user->uid.'/videos');
+				//$items[] = l('My Media', 'user/'.$user->uid.'/videos');
 			}
 
 			if (in_array('can_make_friends', $user->roles)) {
@@ -190,7 +190,7 @@
       $items[] =l('Arcade', 'user/' . $user->uid . '/arcade');
 
 		} else if ($user->user_type == 'parent') {
-			$items[] = l('My Profile & Whiteboard', 'user');
+			$items[] = l('My Profile', 'user');
 			$items[] = l('My Child\'s Profiles', 'user/'.$user->uid.'/children');
 			$items[] = l('My Child\'s Permissions', 'user/'.$user->uid.'/children/permissions');
 
@@ -238,7 +238,7 @@
       $school = v2_profiles_school_query($uid);
       
 			if ($school) {
-				$items[] = l('My School',  'user/'.$user->uid.'/school');
+				//$items[] = l('My School',  'user/'.$user->uid.'/school');
 			}
 
       

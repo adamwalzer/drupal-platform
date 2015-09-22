@@ -138,6 +138,6 @@ function cmwn_flip_feed() {
       	</div>
     <?php } ?>		
     <?php
-      print theme('pager', NULL, 10, 0);
+      print theme('pager', NULL, 5, 0);
       exit;
 }

@@ -632,10 +632,10 @@ body {
 
 #v2 .block.feed.index {
 	background:#cbecfb;
-	position:absolute;
+	/*position:absolute;
 	right:-240px;
 	top:0px;
-	width:240px;
+	width:240px;*/
 }
 
 	#v2 .block.feed.index .content {}
@@ -847,7 +847,7 @@ body {
 
 			#v2 .column.content .block.flips.index .content .section .column:first-child {
 				border:none;
-				width:312px;
+				width:100%;
 			}
 
 .block.flips.modal {
