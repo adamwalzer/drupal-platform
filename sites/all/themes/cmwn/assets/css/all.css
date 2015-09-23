@@ -3685,8 +3685,9 @@ div.parent-resource-center img{
   top: 50%;
   transform: translateY(-50%);
   font-size: 14px;
+  line-height: 16px;
   font-family: 'CMWNJadeRegular';
-  font-size: 30px;
+  
 }
 
 iframe.gameframe{
