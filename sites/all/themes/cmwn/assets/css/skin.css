@@ -271,7 +271,7 @@ ul li li li {
 }
 
 .skin-wrap .footer {
-	background:url(../img/footer-bg.png) center no-repeat;
+	/*background:url(../img/footer-bg.png) center no-repeat;*/
 	clear:both;
 	height:69px;
 }
@@ -461,7 +461,7 @@ ul li li li {
 .home-wrap .section-wrap .left {
 	float:left;
 	position:relative;
-	width:680px;
+	width:100%;
 	margin-top:84px;
 }
 
@@ -541,7 +541,7 @@ ul li li li {
 
 .campaign-wrap {
 	position:absolute;
-	top:0;
+	top:49;
 	right:314px;
 	height:472px;
 	overflow:hidden;

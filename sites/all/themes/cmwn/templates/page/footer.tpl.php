@@ -32,7 +32,7 @@
         <?php endif;?>
       </div>
       <div class="footer_utilities">
-      <?php print $footer_utilities; ?>
+      <?php //print $footer_utilities; ?>
       </div>
     </div>
     <div class="footer">
