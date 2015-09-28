@@ -292,6 +292,7 @@ switch ($_SERVER['HTTP_HOST']) {
     }
 		break;
   case 'local.cmwn.com:8888':
+  case 'drupal-platform.localhost':
     $db_url = 'mysql://root:root@localhost/ginasink_drp_broken';
     break;
 	case 'localhost.site-name':

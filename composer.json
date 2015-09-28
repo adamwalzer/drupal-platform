@@ -1,0 +1,28 @@
+{
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "ginasink/action-items",
+                "version": "dev-master",
+                "source": {
+                    "url": "https://github.com/ginasink/action-items",
+                    "type": "git",
+                    "reference": "master"
+                },
+                "require": {
+                    "composer/installers": "~1.0"
+                }
+            }
+        }
+    ],
+    "require": {
+        "ginasink/action-items": "dev-master"
+    },
+    "extra": {
+        "installer-paths": {
+            "action-items-2/{$name}": ["ginasink/action-items"]
+        }
+    },
+    "minimum-stability": "dev"
+}
