@@ -327,26 +327,26 @@ function v2_profiles_school_import_spreadsheet_validate($result){
     //print_r($teacher_existing);exit;
 
 		//loop through class numbers
-		$classes = explode(',', $teacher['Class Number']);
+		/*$classes = explode(',', $teacher['Class Number']);
 		foreach($classes as $class){
 			if($class != ''){
 				$teacher_class_numbers[] = $class;
 			}
-		}
+		}*/
     
 	}
 	//check dup teacher emails
-	if(count(array_filter($teacher_emails)) !== count(array_unique(array_filter($teacher_emails)))){
+	/*if(count(array_filter($teacher_emails)) !== count(array_unique(array_filter($teacher_emails)))){
 		$dryrun['pass'] = false;
 		drupal_set_message(t('Duplicate teacher email addresses found!'), 'error');
-	}
+	}*/
 
 	//check dup class number assignment
-	if(count($teacher_class_numbers) !== count(array_unique($teacher_class_numbers))){
+	/*if(count($teacher_class_numbers) !== count(array_unique($teacher_class_numbers))){
 		$dryrun['pass'] = false;
 		$diff = implode(', ',array_filter(array_diff_assoc($teacher_class_numbers, array_unique($teacher_class_numbers))));
 		drupal_set_message(t('Duplicate teacher Class Number assignment found - @class_numbers', array('@class_numbers' => implode(', ', $diff))), 'error');
-	}
+	}*/
 
 	//check children's data - if one is certainly in wrong format, reject spreadsheet as others are in question
 	$children = $result[2];
