@@ -222,10 +222,10 @@
 
       $items[] = l('Resource Center', 'user/'.$user->uid.'/resources');
 
-			$items[] = array(
+			/*$items[] = array(
 				'data'=>l('Add a Child', 'user/'.$user->uid.'/children/add'),
 				'class'=>'add-a-child'
-			);
+			);*/
 
 		} else {//teacher
 			$items[] = l('My Profile', 'user');
