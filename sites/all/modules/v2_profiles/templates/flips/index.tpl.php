@@ -89,7 +89,7 @@
 				</div>
 			</div>
 		<?php } ?>
-		<?php if(arg(2) !='children'):?>
+		<?php if(arg(2) !='children' && arg(2) !='friends'):?>
 			<div class="header">
 				<div class="section">
 					<h2>Take Action</h2>
