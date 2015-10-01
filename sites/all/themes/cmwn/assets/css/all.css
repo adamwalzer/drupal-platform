@@ -3694,6 +3694,6 @@ iframe.gameframe{
 	overflow: hidden !important;
 	float: left;
 	clear: both;
-	margin-left: -25px !important;
-	margin-top: -25px !important;
+/*	margin-left: -25px !important;
+	margin-top: -25px !important;*/
 }
