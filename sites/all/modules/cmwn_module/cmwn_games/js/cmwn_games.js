@@ -1,7 +1,7 @@
 (function ( $ ) {
-    var cmwn_games_url = 'http://local.cmwn.com:8888/';
+
+    var cmwn_games_url = location.protocol + "//" + location.host + "/";
     
-       
     //GET WEBFORM (action item step) object from drupal platform.
     $.fn.cmwn_games_object = function(options) {
       var settings = $.extend({
