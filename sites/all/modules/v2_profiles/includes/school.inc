@@ -352,6 +352,7 @@ function v2_profiles_school_import_spreadsheet_validate($result){
 	$children = $result[2];
 	$child_emails = array();
 	$parent_emails = array();
+  $parent_names = array();
 	foreach($children as $child){
 		if(trim($child['Email Address']) != ''){
   		$child['Email Address'] = v2_profiles_email_pretreat($child['Email Address']);
@@ -362,6 +363,7 @@ function v2_profiles_school_import_spreadsheet_validate($result){
 		if(trim($child['Guardian Email Address']) != ''){
   		$child['Guardian Email Address'] = v2_profiles_email_pretreat($child['Guardian Email Address']);
 			$parent_emails[] = $child['Guardian Email Address'];
+      $parent_names[$child['Guardian First Name'] . ' ' . $child['Guardian Last Name']][] = $child['Guardian Email Address'];
 		}
 
 		$month = explode('/',$child['DOB MM/DD/YYYY']);//THIS INDEX MAY CHANGE TO MM/DD/YYYY
@@ -386,6 +388,14 @@ function v2_profiles_school_import_spreadsheet_validate($result){
 		drupal_set_message(t('Duplicate email addresses found between parent and child records. Child cannot have the same email address as a parent - @emails', array('@emails' => implode(', ', $child_parent_email_overlap))), 'error');
 	}
 
+  //check for same parent name, different email
+  foreach($parent_names as $parent_name => $parent_emails){
+    if(count($parent_emails) > 1){
+     $dryrun['pass'] = false;
+
+      drupal_set_message(t('Parent first/last name duplicated across separate emails - @name -> @emails', array('@name' =>$parent_name,'@emails' => implode(', ', $parent_emails))), 'error');   
+    }
+  }
 	//TODO checks:
 	//Check for teacher email address already in system as non teacher role
 

@@ -88,7 +88,7 @@
 
 	}
 
-	function v2_profiles_flips_index($uid) {
+	function v2_profiles_flips_index($uid, $limit_completed = false, $limit_progress = false) {
 
 		$data = new stdClass();
     $data->user->uid = $uid;
@@ -106,12 +106,14 @@
 				else if ($value->progress > 0) $started[] = $value;
 			}
 		}
-
 		$data->items->all = $all;
 		$data->items->completed = $completed;
 		$data->items->new = $new;
 		$data->items->started = $started;
 		$data->user = $user;
+		$data->limit_completed = $limit_completed;
+		$data->limit_progress = $limit_progress;
+		
 		
 
 		return theme('v2_profiles_flips_index', $data);

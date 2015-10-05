@@ -85,7 +85,7 @@
       </div>
       <div class="right">
        <img src="<?php print $theme_path; ?>/assets/img/new-hp/contact-us.png" />
-          <p style="margin:10px 0 0 0"><a style="font-weight:bold;color:#848077;" href="mailto:info@changemyworldnow.com">Email Us</a><br />600 Third Ave<br />2 Floor, Suite 242<br />New York, NY 10016<br />646.861.0571</p>
+          <p style="margin:10px 0 0 0"><a style="font-weight:bold;color:#848077;" href="mailto:info@changemyworldnow.com">Email Us</a><br />600 Third Ave<br />2 Floor<br />New York, NY 10016</p>
       </div>
     </div>
     <script type="text/javascript">

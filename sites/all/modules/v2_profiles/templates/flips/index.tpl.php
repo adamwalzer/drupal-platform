@@ -16,7 +16,7 @@
 				<div<?php print ($data->user->uid == $user->uid && sizeof($data->items->new) > 0)? ' class="column"' : ''; ?>>
 					<?php if ($data->user->uid == $user->uid) { ?>
 						<div class="title">
-							<h3>Your Earned Flips: <em><?php print sizeof($data->items->completed); ?></em> out of <em><?php print sizeof($data->items->all); ?></em></h3>
+							<h3>Your Earned Flips:23 <em><?php print sizeof($data->items->completed); ?></em> out of <em><?php print sizeof($data->items->all); ?></em></h3>
 							<a href="/user/<?php print $user->uid; ?>/flips/browse">View All</a>
 						</div>
 					<?php } else { ?>
@@ -26,7 +26,9 @@
 					<?php } ?>
 					<?php if (sizeof($data->items->completed) > 0) { ?>
 						<div class="items">
-							<?php foreach ($data->items->completed as $item) { ?>
+							<?php 
+								$i=1;
+								foreach ($data->items->completed as $item) { ?>
 								<div class="item">
 									<?php if ($data->user->uid == $user->uid) { ?><a href="<?php print $item->href; ?>"><?php } ?>
 										<span class="n1"><img src="<?php print $item->src1; ?>" alt="<?php print $item->title; ?>" /></span>
@@ -34,7 +36,13 @@
 									<?php if ($data->user->uid == $user->uid) { ?></a><?php } ?>
 									<?php render_description($item); ?>
 								</div>
-							<?php } ?>
+							<?php 
+								$i++;
+								if($data->limit_completed && $i > $data->limit_completed){
+									break;
+								}
+								
+								} ?>
 						</div>
 					<?php } else { ?>
 						<div class="empty">
@@ -77,7 +85,9 @@
 					</div>
 				<?php } ?>
 				<div class="items">
-					<?php foreach ($data->items->started as $item) { ?>
+					<?php 
+						$i=1;
+						foreach ($data->items->started as $item) { ?>
 						<div class="item">
 							<?php if ($data->user->uid == $user->uid) { ?><a href="<?php print $item->href; ?>"><?php } ?>
 								<span class="n1"><img src="<?php print $item->src1; ?>" alt="<?php print $item->title; ?>" /></span>
@@ -85,7 +95,12 @@
 							<?php if ($data->user->uid == $user->uid) { ?></a><?php } ?>
 							<?php render_description($item); ?>
 						</div>
-					<?php } ?>
+					<?php 
+							$i++;
+							if($data->limit_progress && $i > $data->limit_progress){
+								break;
+							}
+						} ?>
 				</div>
 			</div>
 		<?php } ?>

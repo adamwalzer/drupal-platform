@@ -6,7 +6,7 @@
 
 		<?php print v2_profiles_avatars_index($item->uid); ?>
 
-		<?php print v2_profiles_flips_index($item->uid); ?>
+		<?php print v2_profiles_flips_index($item->uid, 5, 5); ?>
     <?php $arg3 = arg(3);print (strlen($arg3)>0)?v2_profiles_friends_browse($item->uid, 11):''; ?>
 	</div>
 
