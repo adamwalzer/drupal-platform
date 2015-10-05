@@ -32,6 +32,7 @@
         <div class="inner-wrap">
           <div class="logo"><a href="/"></a></div>
           <div class="top-tabs">
+            <?php if(false):?>
             <div class="graphic-tab-wrapper">
               <?php if ($user->uid == 0) : ?>
                 <?php if ($allow_registrations) : ?>
@@ -40,13 +41,16 @@
                 <?php endif; ?>
     			   <?php endif; ?>
             </div>
+          <?php endif;?>
 
-          <div class="right-nav-wrap">
-            <div class="utility-nav">
-              <?php print $secondary_links; ?>
+          <?php if(false):?>
+            <div class="right-nav-wrap">
+              <div class="utility-nav">
+                <?php print $secondary_links; ?>
+              </div>
+              <?php echo theme('cmwn_module_social'); ?>
             </div>
-            <?php echo theme('cmwn_module_social'); ?>
-          </div>
+          <?php endif; ?>
 
           <?php if ($user->uid == 0) : ?>
             <a class="pt" href="/node/11"><img rel="rollover" src="<?php print $theme_path; ?>/assets/img/new-hp/pt_off.png" /></a>
