@@ -389,13 +389,13 @@ function v2_profiles_school_import_spreadsheet_validate($result){
 	}
 
   //check for same parent name, different email
-  foreach($parent_names as $parent_name => $parent_emails){
+  /*foreach($parent_names as $parent_name => $parent_emails){
     if(count($parent_emails) > 1){
      $dryrun['pass'] = false;
 
       drupal_set_message(t('Parent first/last name duplicated across separate emails - @name -> @emails', array('@name' =>$parent_name,'@emails' => implode(', ', $parent_emails))), 'error');   
     }
-  }
+  }*/
 	//TODO checks:
 	//Check for teacher email address already in system as non teacher role
 
