@@ -395,3 +395,13 @@ function v2_profiles_get_teachers_by_student_uid($uid){
   
   return $teachers;
 }
+
+function v2_profiles_get_children_by_parent_uid($uid){
+  $children = db_query('select u.uid, u.name from {user_relationships} ur join {users} u on u.uid = ur.requestee_id where requester_id = %d and approved = 1 and rtid = 2', array($uid));
+      $children_links = array();
+      while($child = db_fetch_object($children)){
+        $children_links[] = l($child->name, 'user/'.$child->uid);
+      }
+  
+  return $children_links;
+}
