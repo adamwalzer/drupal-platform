@@ -3,101 +3,88 @@
     var cmwn_games_url = location.protocol + "//" + location.host + "/";
     
     //GET WEBFORM (action item step) object from drupal platform.
-    $.fn.cmwn_games_object = function(options) {
+    $.fn.cmwn_games_object = function(options, callback) {
       var settings = $.extend({
           nid: '',
           
       }, options );      
       
       var spath = 'cmwn_games/object';
-      var return_data;
       
       $.ajax(
         {
-         async: false,
          url: cmwn_games_url + spath + '?nid=' + settings.nid,
          dataType: "json",
          success:function(data){
-          return_data = data;
+          callback(data);
          }
         }
       );  
-      return return_data;
     };
-
     
     //Post new action item step to platform.
-    $.fn.cmwn_games_logStep = function(options) {
+    $.fn.cmwn_games_logStep = function(options, callback) {
       var settings = $.extend({
           data: {},
       }, options );      
       
       var spath = 'cmwn_games/post';
-      var return_data;
       
       $.ajax(
         {
-         async: false,
          url: cmwn_games_url + spath + '?nid=' + settings.nid,
          method:'GET',
          dataType: "json",
          data:settings.data,
          success:function(data){
-          return_data = data;
+          callback(data);
          }
         }
       );  
-      return return_data;
     };
    
     
     //get current step
-    $.fn.cmwn_games_getCurrentStep = function(options) {
+    $.fn.cmwn_games_getCurrentStep = function(options, callback) {
       var settings = $.extend({
           data: {},
       }, options );      
       
       var spath = 'cmwn_games/current_step';
-      var return_data;
       
       $.ajax(
         {
-         async: false,
          url: cmwn_games_url + spath + '?flip_nid=' + settings.flip_nid,
          method:'GET',
          dataType: "json",
          data:settings.data,
          success:function(data){
-          return_data = data;
+          callback(data);
          }
         }
       );  
-      return return_data;
     };    
     
     
     //get all steps
-    $.fn.cmwn_games_getAllSteps = function(options) {
+    $.fn.cmwn_games_getAllSteps = function(options, callback) {
       var settings = $.extend({
           data: {},
       }, options );      
       
       var spath = 'cmwn_games/flip';
-      var return_data;
       
       $.ajax(
         {
-         async: false,
          url: cmwn_games_url + spath + '?flip_nid=' + settings.flip_nid,
          method:'GET',
          dataType: "json",
          data:settings.data,
          success:function(data){
-          return_data = data;
+          callback(data);
          }
         }
       );  
-      return return_data;
     };        
     //i.e.
     //$.fn.cmwn_games_getAllSteps({flip_nid:15441});
@@ -109,3 +96,16 @@
     //i.e. $.fn.cmwn_games_close();
 
 }( jQuery ));
+
+function completeFlip(flip_nid) { 
+  $.fn.cmwn_games_getCurrentStep({flip_nid:flip_nid}, function(current_step) {
+      
+    if(current_step == 'completed_flip') {
+      alert('You have already completed tihs flip!');
+    } else {
+        $.fn.cmwn_games_logStep({nid:current_step}, function(return_data) {
+          alert('Good Job! You have earned a fip');
+      });
+    }
+  });
+}
