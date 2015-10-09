@@ -3,7 +3,6 @@
 /sites/*/private
 /files/*
 /cache
-/vendor
 
 # ** Only works in OSs that support newer versions of fnmatch (Bash 4+)
 /sites/default/**/files
