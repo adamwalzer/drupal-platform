@@ -220,7 +220,7 @@
 
     //if(!$is_child){// if it's not a child, check to see if they have overriden a selected avatar with an uploaded one.
     
-  		$query = "
+  		$query = db_rewrite_sql("
   			SELECT
   				`f`.`filepath`
   			FROM
@@ -229,7 +229,7 @@
   				`files` AS `f` ON `ctca`.`field_custom_avatar_fid` = `f`.`fid`
   			WHERE
   				`n`.`uid` = " . $cur_user->uid . "
-  				".($user->uid!=$uid?" AND `n`.`status` = 1":"")."
+  				".($user->uid!=$uid?" AND `n`.`status` = 1":""))."
   			ORDER BY
   				`n`.`nid` DESC
   			LIMIT
