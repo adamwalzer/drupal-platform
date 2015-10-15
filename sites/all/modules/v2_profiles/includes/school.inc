@@ -251,6 +251,8 @@ function v2_profiles_school_import_submit($form, &$form_state) {
   				$teacher['Email Address'] = v2_profiles_email_pretreat($teacher['Email Address']);
 					$teachers_users[$teacher['Email Address']] = v2_profiles_school_import_teacher($school, $teacher, $classes_nodes);
 				}
+        drupal_set_message(count($teachers_users) . ' teachers imported');
+        //print_r(array_keys($teachers_users));exit;
 
 
 				//Import Students - if existing, skip. Otherwise insert, base profile, child profile.
@@ -260,8 +262,14 @@ function v2_profiles_school_import_submit($form, &$form_state) {
 				$students_users = array();
 				foreach($students as $student){
   				$student['Email Address'] = v2_profiles_email_pretreat($student['Email Address']);
-					$students_users[$student['Email Address']] = v2_profiles_school_import_student($school, $student, $classes_nodes, $grades);
+          if($student['Email Address'] != ''){
+            $students_users[$student['Email Address']] = v2_profiles_school_import_student($school, $student, $classes_nodes, $grades);  
+          }
+					
 				}
+        drupal_set_message(print_r(array_keys($students_users), true));
+        drupal_set_message(count($students_users) . ' students imported');
+        print_r(array_keys($students_users));
 			}
 
 			//erase the spreadsheet from the server!
@@ -743,7 +751,7 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
     }
 
     $deactivate_parents = array_unique($deactivate_parents);
-    print_r($deactivate_parents);
+    //print_r($deactivate_parents);
     foreach($deactivate_parents as $deactivate_parent_uid){
       //does parent have other relationships as parent
       //that would justify keeping account open?
@@ -767,9 +775,9 @@ function v2_profiles_school_import_student($school, $student, $classes_nodes, $g
           break;
         }
       }
-      print $deactivate.'....';
+      //print $deactivate.'....';
       if($deactivate){
-        print 'updated user ' . $deactivate_parent_uid;
+        drupal_set_message('inactivated parent user ' . $deactivate_parent_uid);
         $deactivate_parent = user_load($deactivate_parent_uid);
         $deactivate_parent->status = 0;
         user_save($deactivate_parent, array('status' => 0));     
