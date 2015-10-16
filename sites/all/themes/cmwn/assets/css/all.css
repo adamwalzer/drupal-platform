@@ -3698,8 +3698,6 @@ iframe.gameframe{
 	margin-top: -25px !important;*/
 }
 
-
-
 #v2 div.arcade-error{
 	color: gray;
 	font-family:'CMWNJadeRegular';
@@ -3708,4 +3706,9 @@ iframe.gameframe{
 	font-weight:normal;
 	text-align: center;
 	text-transform:uppercase;	
+}
+
+.mod-ajax .imagefield img{
+	width:100% !important;
+	height: 100% !important;
 }
