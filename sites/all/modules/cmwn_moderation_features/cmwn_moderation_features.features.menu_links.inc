@@ -16,27 +16,27 @@ function cmwn_moderation_features_menu_default_menu_links() {
       'attributes' => array(),
     ),
     'module' => 'menu',
-    'hidden' => '0',
+    'hidden' => '1',
     'external' => '1',
     'has_children' => '0',
     'expanded' => '0',
-    'weight' => '2',
+    'weight' => '-47',
   );
   // Exported menu link: menu-moderation:mod
   $menu_links['menu-moderation:mod'] = array(
     'menu_name' => 'menu-moderation',
     'link_path' => 'mod',
     'router_path' => 'mod',
-    'link_title' => 'Moderation Feed',
+    'link_title' => 'Moderate Avatars',
     'options' => array(
       'attributes' => array(),
     ),
     'module' => 'menu',
     'hidden' => '0',
     'external' => '0',
-    'has_children' => '1',
+    'has_children' => '0',
     'expanded' => '0',
-    'weight' => '0',
+    'weight' => '-49',
   );
   // Exported menu link: menu-moderation:mod/approved
   $menu_links['menu-moderation:mod/approved'] = array(
@@ -48,11 +48,11 @@ function cmwn_moderation_features_menu_default_menu_links() {
       'attributes' => array(),
     ),
     'module' => 'menu',
-    'hidden' => '0',
+    'hidden' => '1',
     'external' => '0',
     'has_children' => '0',
     'expanded' => '0',
-    'weight' => '1',
+    'weight' => '-47',
     'parent_path' => 'mod',
   );
   // Exported menu link: menu-moderation:mod/comments
@@ -65,11 +65,11 @@ function cmwn_moderation_features_menu_default_menu_links() {
       'attributes' => array(),
     ),
     'module' => 'menu',
-    'hidden' => '0',
+    'hidden' => '1',
     'external' => '0',
     'has_children' => '0',
     'expanded' => '0',
-    'weight' => '0',
+    'weight' => '-48',
     'parent_path' => 'mod',
   );
   // Exported menu link: menu-moderation:mod/denied
@@ -82,11 +82,11 @@ function cmwn_moderation_features_menu_default_menu_links() {
       'attributes' => array(),
     ),
     'module' => 'menu',
-    'hidden' => '0',
+    'hidden' => '1',
     'external' => '0',
     'has_children' => '0',
     'expanded' => '0',
-    'weight' => '2',
+    'weight' => '-46',
     'parent_path' => 'mod',
   );
   // Exported menu link: menu-moderation:user
@@ -99,17 +99,17 @@ function cmwn_moderation_features_menu_default_menu_links() {
       'attributes' => array(),
     ),
     'module' => 'menu',
-    'hidden' => '0',
+    'hidden' => '1',
     'external' => '0',
     'has_children' => '0',
     'expanded' => '0',
-    'weight' => '1',
+    'weight' => '-48',
   );
   // Translatables
   // Included for use with string extractors like potx.
   t('Approved Posts');
   t('Denied Posts');
-  t('Moderation Feed');
+  t('Moderate Avatars');
   t('My Profile');
   t('My Timecards');
   t('Unmoderated Comments');
