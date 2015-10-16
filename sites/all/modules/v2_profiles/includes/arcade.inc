@@ -9,7 +9,6 @@
 		"type" => MENU_CALLBACK,
 	);
 
-
 	$v2_profiles_theme_items['v2_profiles_arcade_index'] = array(
 		'arguments' => array('data' => array()),
 		'template' => 'templates/arcade/index'
