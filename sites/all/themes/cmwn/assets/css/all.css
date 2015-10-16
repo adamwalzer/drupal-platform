@@ -3708,7 +3708,7 @@ iframe.gameframe{
 	text-transform:uppercase;	
 }
 
-.mod-ajax .imagefield img{
+.mod-ajax img.imagefield{
 	width:100% !important;
 	height: 100% !important;
 }
