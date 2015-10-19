@@ -500,7 +500,7 @@ function cmwn_notificiations_get_all($uid, $subect = array()){
 }
 
 function cmwn_notifications_posting_notices_subjects(){
-  return array('Inappropriate Content', 'File Error', 'Bullying Warning', 'Services Notification');  
+  return array('Inappropriate Content', 'File Error', 'Bullying Warning');//, 'Services Notification');  
 }
 
 function cmwn_notifications_award_notices_subjects(){
