@@ -145,13 +145,20 @@ function cmwn_notifications_messaging_get($account,$subject,$sender = null) {
     $rows = array();
     foreach ($messages as $message) {
       $message = (array)$message;
-      $rows[] = array(
-        '<h4>' . l($message['subject'], 'user/'. $account->uid .'/messages/view/'. $message['mqid'],array('query' => array('destination'=>$_GET['q']))) . '</h4>',
-        //'<h4>' . $message['subject'] . '</h4>',
-        //!empty($message['sender_account']) ? theme('username', $message['sender_account']) : t('System'),
-        format_date($message['created'], 'custom', 'F j, Y, g:i a'),
-        l(t('Review'), 'user/'. $account->uid .'/messages/view/'. $message['mqid'],array('attributes'=>array('class'=>'button'),'query' => array('destination'=>$_GET['q']))),
-      );
+      
+      if($account->user_type == 'parent' && arg(2) == 'notices' && arg(3) == 'account' && strstr($message['body'], 'your child')){//a little hokey, don't want child notices in parent account window
+
+      }else{
+        $rows[] = array(
+          '<h4>' . l($message['subject'], 'user/'. $account->uid .'/messages/view/'. $message['mqid'],array('query' => array('destination'=>$_GET['q']))) . '</h4>',
+          //'<h4>' . $message['subject'] . '</h4>',
+          //!empty($message['sender_account']) ? theme('username', $message['sender_account']) : t('System'),
+          format_date($message['created'], 'custom', 'F j, Y, g:i a'),
+          l(t('Review'), 'user/'. $account->uid .'/messages/view/'. $message['mqid'],array('attributes'=>array('class'=>'button'),'query' => array('destination'=>$_GET['q']))),
+        );
+      }
+
+      
     }    
     $output .= '<div class="notices-table">' . theme('table', $header, $rows) . '</div>';
     $output .= theme('pager', array(), MESSAGING_SIMPLE_PAGER);
